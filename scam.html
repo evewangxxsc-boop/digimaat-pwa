@@ -62,7 +62,35 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .tvb.listening{background:var(--g);animation:pulse 1s infinite}
 .tvb.listening svg{stroke:#fff}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.input-hint{font-size:11px;color:var(--mu);line-height:1.5;margin-bottom:12px}
+.input-hint{font-size:11px;color:var(--mu);line-height:1.5;margin-bottom:10px}
+/* UPLOAD ROW */
+.urow{display:flex;gap:8px;margin-bottom:12px}
+.ubtn{flex:1;background:#fff;border:1.5px dashed var(--br);border-radius:var(--rads);padding:11px 8px;font-size:12px;font-weight:700;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:border-color .15s}
+.ubtn:hover{border-color:var(--g);color:var(--g)}
+.ubtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ubtn.v2{opacity:.55;cursor:default}
+.ubtn.v2:hover{border-color:var(--br);color:var(--mu)}
+/* OCR PROGRESS */
+.ocr-progress{display:none;background:var(--gl);border:1px solid var(--gm);border-radius:var(--rads);padding:10px 13px;margin-bottom:10px;align-items:center;gap:8px}
+.ocr-progress.show{display:flex}
+.ocr-progress .spin{width:14px;height:14px;border:2px solid var(--gm);border-top-color:var(--g);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+.ocr-progress span{font-size:12px;font-weight:700;color:var(--gd)}
+/* MODAL OVERLAY */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal-sheet{background:#fff;border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:390px}
+.modal-handle{width:36px;height:4px;background:var(--br);border-radius:2px;margin:0 auto 18px}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--mu);line-height:1.6;margin-bottom:18px}
+.modal-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.modal-step{display:flex;gap:10px;align-items:flex-start}
+.modal-num{width:24px;height:24px;border-radius:50%;background:var(--g);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.modal-step-txt{font-size:14px;line-height:1.5;padding-top:3px}
+.modal-close{background:var(--bg);border:1.5px solid var(--br);border-radius:var(--rads);padding:13px;font-size:15px;font-weight:800;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer;width:100%}
+/* TESSERACT NOTICE */
+.ocr-notice{background:#E6F1FB;border:1px solid #B5D4F4;border-radius:var(--rads);padding:10px 13px;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ocr-notice svg{width:15px;height:15px;stroke:#185FA5;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ocr-notice span{font-size:12px;color:#0C447C;font-weight:600;line-height:1.4}
 .ferr{font-size:11px;color:var(--r);font-weight:700;margin-bottom:8px;display:none}
 .ferr.show{display:block}
 
@@ -202,6 +230,27 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
       </button>
     </div>
     <div class="input-hint" data-en="You can also speak the message aloud by tapping the mic button." data-nl="U kunt het bericht ook hardop spreken via de microfoonknop.">You can also speak the message aloud by tapping the mic button.</div>
+
+    <!-- UPLOAD ROW -->
+    <div class="urow">
+      <button class="ubtn" onclick="triggerImageUpload()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span data-en="Upload screenshot" data-nl="Screenshot uploaden">Upload screenshot</span>
+      </button>
+      <button class="ubtn v2" onclick="showForwardModal()">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span data-en="Forward email" data-nl="E-mail doorsturen">Forward email</span>
+      </button>
+    </div>
+
+    <!-- HIDDEN FILE INPUT -->
+    <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImageUpload(event)"/>
+
+    <!-- OCR PROGRESS -->
+    <div class="ocr-progress" id="ocr-progress">
+      <div class="spin"></div>
+      <span id="ocr-text" data-en="Reading screenshot…" data-nl="Screenshot lezen…">Reading screenshot…</span>
+    </div>
     <div class="vind" id="vind">
       <div class="waves"><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div></div>
       <span data-en="Listening…" data-nl="Aan het luisteren…">Listening…</span>
@@ -673,6 +722,146 @@ function renderResult(r){
   setTimeout(function(){
     document.getElementById('result-area').scrollIntoView({behavior:'smooth',block:'start'});
   },100);
+}
+</script>
+<!-- FORWARD EMAIL MODAL -->
+<div class="modal-overlay" id="forward-modal" onclick="closeForwardModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" data-en="Forward a suspicious email" data-nl="Verdachte e-mail doorsturen">Forward a suspicious email</div>
+    <div class="modal-sub" data-en="Direct email forwarding is coming in a future update. For now, copy and paste the email content into the text box above." data-nl="E-mail doorsturen komt in een toekomstige update. Kopieer nu de inhoud van de e-mail en plak deze in het tekstvak hierboven.">Direct email forwarding is coming in a future update. For now, copy and paste the email content into the text box above.</div>
+    <div class="modal-steps">
+      <div class="modal-step">
+        <div class="modal-num">1</div>
+        <div class="modal-step-txt" data-en="Open the suspicious email in your email app" data-nl="Open de verdachte e-mail in uw e-mailapp">Open the suspicious email in your email app</div>
+      </div>
+      <div class="modal-step">
+        <div class="modal-num">2</div>
+        <div class="modal-step-txt" data-en="Select all the text and copy it" data-nl="Selecteer alle tekst en kopieer deze">Select all the text and copy it</div>
+      </div>
+      <div class="modal-step">
+        <div class="modal-num">3</div>
+        <div class="modal-step-txt" data-en="Come back here and paste it into the text box" data-nl="Kom hier terug en plak het in het tekstvak">Come back here and paste it into the text box</div>
+      </div>
+    </div>
+    <button class="modal-close" onclick="closeForwardModal()"
+      data-en="Got it, I'll copy-paste" data-nl="Begrepen, ik kopieer het">Got it, I'll copy-paste</button>
+  </div>
+</div>
+
+<!-- TESSERACT.JS for OCR -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script>
+// ── FORWARD EMAIL MODAL ──────────────────────────────────
+function showForwardModal(){
+  document.getElementById('forward-modal').classList.add('show');
+}
+function closeForwardModal(e){
+  if(!e||e.target===document.getElementById('forward-modal')){
+    document.getElementById('forward-modal').classList.remove('show');
+  }
+}
+
+// ── SCREENSHOT UPLOAD + TESSERACT OCR ───────────────────
+function triggerImageUpload(){
+  document.getElementById('img-input').click();
+}
+
+function handleImageUpload(event){
+  var file=event.target.files[0];
+  if(!file)return;
+  // Reset file input so same file can be re-uploaded
+  event.target.value='';
+
+  // Validate it's an image
+  if(!file.type.startsWith('image/')){
+    alert(lang==='nl'?'Kies een afbeeldingsbestand.':'Please choose an image file.');
+    return;
+  }
+
+  // Show OCR progress
+  var prog=document.getElementById('ocr-progress');
+  var ocrTxt=document.getElementById('ocr-text');
+  prog.classList.add('show');
+  ocrTxt.textContent=lang==='nl'?'Screenshot lezen… (dit kan even duren)':'Reading screenshot… (this may take a moment)';
+
+  // Clear textarea while OCR runs
+  document.getElementById('msg-input').value='';
+  document.getElementById('result-area').innerHTML='';
+
+  // Run Tesseract OCR
+  // Language: nld (Dutch) + eng (English) for best coverage
+  Tesseract.recognize(file, 'nld+eng', {
+    logger: function(m){
+      if(m.status==='recognizing text'){
+        var pct=Math.round((m.progress||0)*100);
+        ocrTxt.textContent=(lang==='nl'?'Tekst herkennen… ':'Recognising text… ')+pct+'%';
+      }
+    }
+  })
+  .then(function(result){
+    prog.classList.remove('show');
+    var text=(result.data.text||'').trim();
+
+    if(!text||text.length<10){
+      // OCR got nothing useful
+      showOcrNotice(
+        lang==='nl'
+          ?'Tekst kon niet worden gelezen uit de afbeelding. Probeer een scherpere screenshot of typ het bericht handmatig.'
+          :'Could not read text from the image. Try a clearer screenshot or type the message manually.',
+        'warn'
+      );
+      return;
+    }
+
+    // Put extracted text into textarea
+    document.getElementById('msg-input').value=text;
+
+    // Show blue notice
+    showOcrNotice(
+      lang==='nl'
+        ?'Tekst succesvol uitgelezen uit de screenshot (Tesseract OCR). Controleer of de tekst klopt en klik daarna op Analyseren.'
+        :'Text successfully extracted from screenshot (Tesseract OCR). Check the text looks correct, then click Analyse.',
+      'info'
+    );
+
+    // Scroll textarea into view
+    document.getElementById('msg-input').scrollIntoView({behavior:'smooth',block:'center'});
+  })
+  .catch(function(err){
+    prog.classList.remove('show');
+    console.error('OCR error:',err);
+    showOcrNotice(
+      lang==='nl'
+        ?'Fout bij lezen van afbeelding. Probeer een andere screenshot of typ het bericht handmatig.'
+        :'Error reading image. Try a different screenshot or type the message manually.',
+      'warn'
+    );
+  });
+}
+
+function showOcrNotice(msg, type){
+  // Remove existing notice if any
+  var existing=document.getElementById('ocr-notice-el');
+  if(existing)existing.remove();
+
+  var div=document.createElement('div');
+  div.id='ocr-notice-el';
+  div.className='ocr-notice';
+  if(type==='warn'){
+    div.style.background='var(--al)';
+    div.style.borderColor='#FAC775';
+    div.innerHTML='<svg viewBox="0 0 24 24" style="stroke:var(--am)"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+      +'<span style="color:#633806">'+msg+'</span>';
+  }else{
+    div.innerHTML='<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
+      +'<span>'+msg+'</span>';
+  }
+
+  // Insert before the textarea
+  var ta=document.getElementById('msg-input').parentElement;
+  ta.parentElement.insertBefore(div,ta);
 }
 </script>
 </body>
