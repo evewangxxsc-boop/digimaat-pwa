@@ -161,10 +161,32 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .btn2{background:#fff;color:var(--g);border:2px solid var(--g);border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;transition:background .15s}
 .btn2:hover{background:var(--gl)}
 
-/* ADD EXCLUSION MODAL */
+/* MODALS */
 .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;display:none;align-items:flex-end;justify-content:center}
 .modal-ov.show{display:flex}
 .modal-sheet{background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 36px;width:100%;max-width:390px}
+/* DETAIL MODAL */
+.detail-sheet{background:#fff;border-radius:20px 20px 0 0;padding:0;width:100%;max-width:390px;max-height:85vh;display:flex;flex-direction:column}
+.detail-topbar{padding:16px 18px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.detail-verdict{display:flex;align-items:center;gap:8px}
+.detail-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.detail-verdict-label{font-size:14px;font-weight:800}
+.detail-close{background:var(--bg);border:1.5px solid var(--br);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.detail-close svg{width:16px;height:16px;stroke:var(--mu);fill:none;stroke-width:2.5;stroke-linecap:round}
+.detail-scroll{flex:1;overflow-y:auto;padding:16px 18px}
+.detail-meta{background:var(--bg);border-radius:var(--rads);border:1px solid var(--br);padding:12px 14px;margin-bottom:14px}
+.detail-meta-row{display:flex;gap:8px;margin-bottom:5px;font-size:13px}
+.detail-meta-row:last-child{margin-bottom:0}
+.detail-meta-key{font-weight:800;color:var(--mu);flex-shrink:0;width:52px}
+.detail-meta-val{color:var(--tx);word-break:break-all}
+.detail-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.detail-body-label{font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px}
+.detail-body-text{font-size:14px;line-height:1.7;color:var(--tx);font-family:'Literata',serif;white-space:pre-wrap;background:var(--bg);border-radius:var(--rads);border:1px solid var(--br);padding:13px 14px}
+.detail-actions{padding:14px 18px;border-top:1px solid var(--br);display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.detail-btn-scam{background:var(--g);color:#fff;border:none;border-radius:var(--rads);padding:13px;font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.detail-btn-scam svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.detail-btn-gmail{background:#fff;color:#185FA5;border:2px solid #B5D4F4;border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.detail-btn-gmail svg{width:15px;height:15px;fill:none;stroke:#185FA5;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .modal-handle{width:36px;height:4px;background:var(--br);border-radius:2px;margin:0 auto 16px}
 .modal-title{font-size:17px;font-weight:800;margin-bottom:14px}
 .modal-field{margin-bottom:12px}
@@ -403,6 +425,29 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
       <span data-en="Profile" data-nl="Profiel">Profile</span>
     </button>
   </nav>
+</div>
+
+<!-- MESSAGE DETAIL MODAL -->
+<div class="modal-ov" id="detail-modal" onclick="closeDetailModal(event)">
+  <div class="detail-sheet">
+    <div class="detail-topbar">
+      <div class="detail-verdict"><div class="detail-dot" id="detail-dot"></div><div class="detail-verdict-label" id="detail-verdict-label"></div></div>
+      <button class="detail-close" onclick="closeDetailModal()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="detail-scroll">
+      <div class="detail-meta">
+        <div class="detail-meta-row"><span class="detail-meta-key" data-en="From" data-nl="Van">From</span><span class="detail-meta-val" id="detail-from"></span></div>
+        <div class="detail-meta-row"><span class="detail-meta-key" data-en="Date" data-nl="Datum">Date</span><span class="detail-meta-val" id="detail-date"></span></div>
+      </div>
+      <div class="detail-tags" id="detail-tags"></div>
+      <div class="detail-body-label" data-en="Message content" data-nl="Berichtinhoud">Message content</div>
+      <div class="detail-body-text" id="detail-body"></div>
+    </div>
+    <div class="detail-actions">
+      <button class="detail-btn-scam" onclick="openCurrentInScam()"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><span data-en="Analyse with Scam Checker" data-nl="Analyseren met Scam Checker">Analyse with Scam Checker</span></button>
+      <button class="detail-btn-gmail" onclick="openInGmail()"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span data-en="Open in Gmail" data-nl="Openen in Gmail">Open in Gmail</span></button>
+    </div>
+  </div>
 </div>
 
 <!-- ADD EXCLUSION MODAL -->
@@ -795,13 +840,23 @@ function renderWAResults(){
 // ── DEMO RESULTS (Gmail / fallback) ───────────────────────
 function renderDemoResults(){
   var suspicious=[
-    {title:'Uw ING account is geblokkeerd — actie vereist',from:'no-reply@ing-secure-login.net',tags_en:['Fake domain','Bank impersonation'],tags_nl:['Nep domein','Bankimitatie']},
-    {title:'Belastingdienst: openstaande schuld €347',from:'belasting@gov-nl-pay.com',tags_en:['Fake tax authority','Payment pressure'],tags_nl:['Nep Belastingdienst','Betalingsdruk']},
-    {title:'Uw DigiD verloopt morgen — verifieer nu',from:'digid-support@login-verify.nl',tags_en:['Fake DigiD','Urgency tactic'],tags_nl:['Nep DigiD','Urgentietactiek']},
+    {title:'Uw ING account is geblokkeerd — actie verei…',from:'no-reply@ing-secure-login.net',
+     fullText:'Geachte klant,\n\nUw ING-rekening is tijdelijk geblokkeerd wegens verdachte activiteit.\n\nU moet binnen 24 uur actie ondernemen om uw account te ontgrendelen.\n\nKlik op de onderstaande link om uw gegevens te verifiëren:\nhttps://ing-secure-login.net/verify?id=8472\n\nAls u niet reageert, wordt uw rekening permanent gesloten.\n\nMet vriendelijke groet,\nING Beveiligingsteam',
+     tags_en:['Fake domain','Bank impersonation'],tags_nl:['Nep domein','Bankimitatie']},
+    {title:'Belastingdienst: openstaande schuld €347',from:'belasting@gov-nl-pay.com',
+     fullText:'Geachte heer/mevrouw,\n\nDe Belastingdienst heeft vastgesteld dat u een openstaande schuld heeft van €347,00.\n\nOm verdere incassokosten en een dwangbevel te voorkomen, verzoeken wij u dit bedrag uiterlijk 3 april 2025 te voldoen via:\nhttps://belasting-betalen.nl/spoed\n\nNegeert u dit bericht, dan worden er extra kosten in rekening gebracht.\n\nBelastingdienst Nederland',
+     tags_en:['Fake tax authority','Payment pressure'],tags_nl:['Nep Belastingdienst','Betalingsdruk']},
+    {title:'Uw DigiD verloopt morgen — verifieer nu',from:'digid-support@login-verify.nl',
+     fullText:'Beste gebruiker,\n\nUw DigiD-account verloopt morgen om 23:59 uur.\n\nAls u uw DigiD niet verlengt, heeft u geen toegang meer tot overheidswebsites zoals Mijn Overheid, UWV en de Belastingdienst.\n\nVerlenging duurt slechts 2 minuten:\nhttps://digid-verify.nl/verlengen\n\nHandel nu — na verloop kunt u uw account niet meer herstellen.\n\nDigiD Klantenservice',
+     tags_en:['Fake DigiD','Urgency tactic'],tags_nl:['Nep DigiD','Urgentietactiek']},
   ];
   var warnings=[
-    {title:'Pakket bezorging mislukt — herplan',from:'postnl-info@delivery-track.com',tags_en:['Unverified sender'],tags_nl:['Onbekende afzender']},
-    {title:'Gefeliciteerd — u heeft een prijs gewonnen',from:'winners@eu-lottery-claim.net',tags_en:['Prize scam'],tags_nl:['Prijsoplichting']},
+    {title:'Pakket bezorging mislukt — herplan',from:'postnl-info@delivery-track.com',
+     fullText:'Geachte ontvanger,\n\nWe hebben geprobeerd uw pakket te bezorgen maar niemand was thuis.\n\nPlan een nieuwe bezorgdag in via:\nhttp://delivery-track.com/herplannen?ref=NL8812\n\nUw pakket wordt 3 dagen bewaard. Daarna wordt het retour gestuurd.\n\nPostNL Klantenservice',
+     tags_en:['Unverified sender'],tags_nl:['Onbekende afzender']},
+    {title:'Gefeliciteerd — u heeft een prijs gewonnen',from:'winners@eu-lottery-claim.net',
+     fullText:'GEFELICITEERD!\n\nU bent geselecteerd als winnaar van de Europese Online Loterij 2025.\n\nUw prijs: €85.000,00\n\nOm uw prijs te claimen heeft u nodig:\n- Uw volledige naam\n- Uw bankrekeningnummer\n- Een kopie van uw paspoort\n\nReageer binnen 48 uur op: winners@eu-lottery-claim.net\n\nEU Lottery Commission',
+     tags_en:['Prize scam'],tags_nl:['Prijsoplichting']},
   ];
   saveAndShowResults(suspicious,warnings,41);
 }
@@ -846,10 +901,11 @@ function renderResults(suspicious,warnings,safeCount){
   document.getElementById('suspicious-label').style.display=suspicious.length?'block':'none';
   document.getElementById('warnings-label').style.display=warnings.length?'block':'none';
 
-  function renderItems(items,color,tagCls,containerId){
-    document.getElementById(containerId).innerHTML=items.map(function(item){
+  function renderItems(items,color,tagCls,containerId,severity){
+    document.getElementById(containerId).innerHTML=items.map(function(item,idx){
       var tags=lang==='nl'?item.tags_nl:item.tags_en;
-      return '<div class="result-item" onclick="openInScam(\''+encodeURIComponent(item.title)+'\')">'
+      var key=containerId+'_'+idx;
+      return '<div class="result-item" onclick="openDetail(\''+key+'\')">'
         +'<div class="ri-dot" style="background:'+color+'"></div>'
         +'<div class="ri-info"><div class="ri-title">'+item.title+'</div>'
         +'<div class="ri-from">'+(lang==='nl'?'Van: ':'From: ')+item.from+'</div>'
@@ -858,9 +914,78 @@ function renderResults(suspicious,warnings,safeCount){
         +'<svg class="ri-arr" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>'
         +'</div>';
     }).join('');
+    // Store items in window for detail access
+    items.forEach(function(item,idx){
+      window._inboxItems=window._inboxItems||{};
+      window._inboxItems[containerId+'_'+idx]={item:item,color:color,tagCls:tagCls,severity:severity};
+    });
   }
-  renderItems(suspicious,'var(--r)','tag-r','flagged-list');
-  renderItems(warnings,'var(--am)','tag-a','warnings-list');
+  renderItems(suspicious,'var(--r)','tag-r','flagged-list','suspicious');
+  renderItems(warnings,'var(--am)','tag-a','warnings-list','warning');
+}
+
+// ── DETAIL MODAL ─────────────────────────────────────────
+var _currentItemKey=null;
+
+function openDetail(key){
+  var data=(window._inboxItems||{})[key];
+  if(!data)return;
+  _currentItemKey=key;
+  var item=data.item;
+  var isScam=data.severity==='suspicious';
+
+  // Verdict
+  var dotEl=document.getElementById('detail-dot');
+  var labelEl=document.getElementById('detail-verdict-label');
+  dotEl.style.background=data.color;
+  labelEl.textContent=isScam?(lang==='nl'?'Waarschijnlijk oplichting':'Likely scam'):(lang==='nl'?'Verdacht':'Suspicious');
+  labelEl.style.color=data.color;
+
+  // From
+  document.getElementById('detail-from').textContent=item.from;
+
+  // Date — use current time as approximation
+  var d=new Date();
+  document.getElementById('detail-date').textContent=
+    d.toLocaleDateString(lang==='nl'?'nl-NL':'en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+  // Tags
+  var tags=lang==='nl'?item.tags_nl:item.tags_en;
+  var tagCls=data.tagCls;
+  document.getElementById('detail-tags').innerHTML=
+    tags.map(function(t){return'<span class="ri-tag '+tagCls+'" style="font-size:12px;padding:4px 10px">'+t+'</span>';}).join('');
+
+  // Full body — item.fullText if available, else title
+  document.getElementById('detail-body').textContent=item.fullText||item.title;
+
+  // Show modal
+  document.getElementById('detail-modal').classList.add('show');
+}
+
+function closeDetailModal(e){
+  if(!e||e.target===document.getElementById('detail-modal')){
+    document.getElementById('detail-modal').classList.remove('show');
+    _currentItemKey=null;
+  }
+}
+
+function openCurrentInScam(){
+  var data=(window._inboxItems||{})[_currentItemKey];
+  if(!data)return;
+  var text=data.item.fullText||data.item.title;
+  localStorage.setItem('dm_scam_prefill',text);
+  window.location.href='scam.html';
+}
+
+function openInGmail(){
+  var data=(window._inboxItems||{})[_currentItemKey];
+  if(!data)return;
+  // Deep link to Gmail search for this sender
+  var from=data.item.from;
+  var query='from:'+encodeURIComponent(from);
+  // Gmail deep link — works on mobile (opens Gmail app) and desktop
+  var url='https://mail.google.com/mail/u/0/#search/'+encodeURIComponent('from:'+from);
+  window.open(url,'_blank');
 }
 
 function openInScam(encodedText){
