@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#0F6E56"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>DigiMaat — Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Literata:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1D9E75;--gd:#0F6E56;--gl:#E1F5EE;--gm:#9FE1CB;
+  --am:#BA7517;--al:#FAEEDA;--r:#A32D2D;--rl:#FCEBEB;
+  --bg:#F5F3EE;--card:#fff;--tx:#1a1a18;--mu:#6b6b65;--br:#E0DDD6;
+  --rads:10px;--rad:16px;--sh:0 2px 12px rgba(0,0,0,.07);
+}
+html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--tx)}
+.app{max-width:390px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{background:var(--gd);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tl{display:flex;align-items:center;gap:9px}
+.logo{width:30px;height:30px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo svg{width:17px;height:17px;stroke:var(--g);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.appname{font-size:16px;font-weight:800;color:#fff}
+.tr{display:flex;align-items:center;gap:8px}
+.lang-pill{display:flex;background:rgba(255,255,255,.15);border-radius:20px;overflow:hidden}
+.lbtn{background:none;border:none;color:rgba(255,255,255,.65);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s}
+.lbtn.on{background:rgba(255,255,255,.3);color:#fff}
+.ava-btn{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;overflow:hidden;flex-shrink:0}
+.ava-btn img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+
+/* SCROLL BODY */
+.body{flex:1;overflow-y:auto;padding:0 0 90px;-webkit-overflow-scrolling:touch}
+
+/* GREETING */
+.greeting{padding:16px 18px 4px}
+.g-name{font-size:22px;font-weight:800}
+.g-date{font-size:12px;color:var(--mu);margin-top:2px}
+
+/* STATUS BANNER */
+.status-banner{margin:12px 18px 0;background:var(--g);border-radius:var(--rad);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.s-icon{width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.s-icon svg{width:21px;height:21px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.s-title{font-size:15px;font-weight:800;color:#fff}
+.s-sub{font-size:11px;color:rgba(255,255,255,.8);margin-top:2px}
+
+/* SECTION LABEL */
+.sec-label{font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;margin:16px 18px 8px}
+
+/* ACTION GRID */
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:0 18px}
+.ac{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:13px;cursor:pointer;display:flex;flex-direction:column;gap:6px;box-shadow:var(--sh);transition:transform .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent}
+.ac:active{transform:scale(.97);box-shadow:none}
+.ac-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.ac-icon svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ac-title{font-size:13px;font-weight:800}
+.ac-sub{font-size:11px;color:var(--mu);line-height:1.3}
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;display:inline-block}
+.badge-r{background:var(--rl);color:var(--r)}
+.badge-g{background:var(--gl);color:var(--gd)}
+.badge-a{background:var(--al);color:var(--am)}
+
+/* RECENT */
+.recent-list{display:flex;flex-direction:column;gap:7px;margin:0 18px}
+.rrow{background:var(--card);border-radius:var(--rads);border:1px solid var(--br);padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:var(--sh);-webkit-tap-highlight-color:transparent}
+.rrow:active{opacity:.8}
+.rdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ri{flex:1;min-width:0}
+.rt{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs{font-size:11px;color:var(--mu);margin-top:1px}
+.rarr{width:14px;height:14px;stroke:var(--br);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.empty-recent{text-align:center;padding:20px;color:var(--mu);font-size:13px;line-height:1.6}
+.empty-recent svg{width:32px;height:32px;stroke:var(--br);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 8px;display:block}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;-webkit-tap-highlight-color:transparent}
+.nb svg{width:21px;height:21px;stroke:var(--mu);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .15s}
+.nb span{font-size:9px;color:var(--mu);font-weight:700;transition:color .15s}
+.nb.on svg{stroke:var(--g)}.nb.on span{color:var(--g)}
+
+/* LOADING */
+.page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px}
+.page-loader .spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app" id="app" style="display:none">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tl">
+      <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <span class="appname">DigiMaat</span>
+    </div>
+    <div class="tr">
+      <div class="lang-pill">
+        <button class="lbtn on" id="btn-en" onclick="setLang('en')">EN</button>
+        <button class="lbtn" id="btn-nl" onclick="setLang('nl')">NL</button>
+      </div>
+      <button class="ava-btn" id="ava-btn" onclick="goTo('profile.html')" title="Profile">
+        <span id="ava-initials">?</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- SCROLL BODY -->
+  <div class="body">
+
+    <!-- GREETING -->
+    <div class="greeting">
+      <div class="g-name" id="greeting-text">Good morning</div>
+      <div class="g-date" id="greeting-date"></div>
+    </div>
+
+    <!-- STATUS BANNER -->
+    <div class="status-banner">
+      <div class="s-icon"><svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div>
+        <div class="s-title" data-en="You are protected" data-nl="U bent beschermd">You are protected</div>
+        <div class="s-sub" id="last-check-text"></div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="sec-label" data-en="Quick actions" data-nl="Snelle acties">Quick actions</div>
+    <div class="ag">
+
+      <div class="ac" onclick="goTo('breach.html')">
+        <div class="ac-icon" style="background:var(--rl)">
+          <svg viewBox="0 0 24 24" style="stroke:var(--r)"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M12 8v4M12 16h.01"/></svg>
+        </div>
+        <div class="ac-title" data-en="Breach alerts" data-nl="Lek-alerts">Breach alerts</div>
+        <span class="badge badge-r" data-en="Check now" data-nl="Nu checken">Check now</span>
+      </div>
+
+      <div class="ac" onclick="goTo('scam.html')">
+        <div class="ac-icon" style="background:var(--al)">
+          <svg viewBox="0 0 24 24" style="stroke:var(--am)"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </div>
+        <div class="ac-title" data-en="Check message" data-nl="Bericht checken">Check message</div>
+        <div class="ac-sub" data-en="Is this a scam?" data-nl="Is dit oplichting?">Is this a scam?</div>
+      </div>
+
+      <div class="ac" onclick="goTo('inbox.html')">
+        <div class="ac-icon" style="background:#E6F1FB">
+          <svg viewBox="0 0 24 24" style="stroke:#185FA5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="ac-title" data-en="Inbox scan" data-nl="Inbox scan">Inbox scan</div>
+        <span class="badge badge-g" data-en="New" data-nl="Nieuw">New</span>
+      </div>
+
+      <div class="ac" onclick="goTo('family.html')">
+        <div class="ac-icon" style="background:var(--gl)">
+          <svg viewBox="0 0 24 24" style="stroke:var(--g)"><circle cx="8" cy="7" r="4"/><path d="M2 20c0-4 2.686-6 6-6s6 2 6 6"/><circle cx="18" cy="9" r="3"/></svg>
+        </div>
+        <div class="ac-title" data-en="Family" data-nl="Familie">Family</div>
+        <div class="ac-sub" id="family-sub" data-en="Not connected" data-nl="Niet verbonden">Not connected</div>
+      </div>
+
+    </div>
+
+    <!-- RECENT -->
+    <div class="sec-label" data-en="Recent activity" data-nl="Recente activiteit">Recent activity</div>
+    <div class="recent-list" id="recent-list"></div>
+
+  </div><!-- /body -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bnav">
+    <button class="nb on" onclick="goTo('home.html')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span data-en="Home" data-nl="Home">Home</span>
+    </button>
+    <button class="nb" onclick="goTo('inbox.html')">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span data-en="Inbox" data-nl="Inbox">Inbox</span>
+    </button>
+    <button class="nb" onclick="goTo('scam.html')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span data-en="Check" data-nl="Check">Check</span>
+    </button>
+    <button class="nb" onclick="goTo('family.html')">
+      <svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="4"/><path d="M2 20c0-4 2.686-6 6-6s6 2 6 6"/><circle cx="18" cy="9" r="3"/></svg>
+      <span data-en="Family" data-nl="Familie">Family</span>
+    </button>
+    <button class="nb" onclick="goTo('profile.html')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>
+      <span data-en="Profile" data-nl="Profiel">Profile</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- PAGE LOADER shown until Firebase confirms auth -->
+<div class="page-loader" id="page-loader">
+  <div class="spin"></div>
+</div>
+
+<script>
+// FIREBASE
+var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth();
+
+// LANGUAGE
+var lang=localStorage.getItem('dm_lang')||'en';
+function setLang(l){
+  lang=l;localStorage.setItem('dm_lang',l);
+  document.getElementById('html-root').setAttribute('lang',l);
+  document.getElementById('btn-en').classList.toggle('on',l==='en');
+  document.getElementById('btn-nl').classList.toggle('on',l==='nl');
+  document.querySelectorAll('[data-en]').forEach(function(el){
+    var v=el.getAttribute('data-'+l);if(!v)return;
+    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=v;
+    else el.textContent=v;
+  });
+  // Re-render dynamic content in correct language
+  updateGreeting();
+  renderRecent();
+}
+
+// NAVIGATE
+function goTo(page){window.location.href=page;}
+
+// GREETING
+var DAYS_EN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var DAYS_NL=['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+var MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var MONTHS_NL=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+
+function updateGreeting(){
+  var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
+  var name=user.name?user.name.split(' ')[0]:'';
+  var h=new Date().getHours();
+  var greet;
+  if(lang==='nl'){
+    greet=h<12?'Goedemorgen':h<17?'Goedemiddag':'Goedenavond';
+    if(name)greet+=', '+name;
+  }else{
+    greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+    if(name)greet+=', '+name;
+  }
+  document.getElementById('greeting-text').textContent=greet;
+
+  var now=new Date();
+  var dateStr=lang==='nl'
+    ?DAYS_NL[now.getDay()]+' '+now.getDate()+' '+MONTHS_NL[now.getMonth()]
+    :DAYS_EN[now.getDay()]+', '+MONTHS_EN[now.getMonth()]+' '+now.getDate();
+  document.getElementById('greeting-date').textContent=dateStr;
+
+  // Last check text
+  var lastCheck=localStorage.getItem('dm_last_check');
+  var checkStr;
+  if(lastCheck){
+    var diff=Math.floor((Date.now()-parseInt(lastCheck))/60000);
+    if(diff<60){
+      checkStr=lang==='nl'?'Laatste controle '+diff+' minuten geleden':'Last checked '+diff+' minutes ago';
+    }else{
+      var hrs=Math.floor(diff/60);
+      checkStr=lang==='nl'?'Laatste controle '+hrs+' uur geleden':'Last checked '+hrs+' hours ago';
+    }
+  }else{
+    checkStr=lang==='nl'?'Nog niet gecontroleerd — check nu':'Not yet checked — check now';
+  }
+  document.getElementById('last-check-text').textContent=checkStr;
+}
+
+// AVATAR
+function setAvatar(user){
+  var btn=document.getElementById('ava-btn');
+  var initEl=document.getElementById('ava-initials');
+  if(user.photo){
+    btn.innerHTML='<img src="'+user.photo+'" alt="avatar"/>';
+  }else{
+    var initials=(user.name||'?').split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+    initEl.textContent=initials;
+  }
+}
+
+// RECENT ACTIVITY
+// Each item: {type, title_en, title_nl, time, severity}
+// severity: 'r'=red, 'a'=amber, 'g'=green
+function getRecent(){
+  try{return JSON.parse(localStorage.getItem('dm_recent')||'[]');}catch(e){return[];}
+}
+
+function timeAgo(ts){
+  var diff=Math.floor((Date.now()-ts)/60000);
+  if(diff<1)return lang==='nl'?'Zojuist':'Just now';
+  if(diff<60)return lang==='nl'?diff+' min geleden':diff+' min ago';
+  var h=Math.floor(diff/60);
+  if(h<24)return lang==='nl'?h+' uur geleden':h+' hour'+(h>1?'s':'')+' ago';
+  var d=Math.floor(h/24);
+  return lang==='nl'?d+' dag'+(d>1?'en':'')+' geleden':d+' day'+(d>1?'s':'')+' ago';
+}
+
+var DEST={breach:'breach.html',scam:'scam.html',inbox:'inbox.html',family:'family.html'};
+var DOT_COLORS={r:'var(--r)',a:'var(--am)',g:'#3B6D11'};
+
+function renderRecent(){
+  var list=document.getElementById('recent-list');
+  var items=getRecent().slice(0,5); // show last 5
+  if(items.length===0){
+    list.innerHTML='<div class="empty-recent"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>'+(lang==='nl'?'Nog geen recente activiteit.<br>Gebruik een functie om te beginnen.':'No recent activity yet.<br>Use a feature to get started.')+'</div>';
+    return;
+  }
+  list.innerHTML=items.map(function(item){
+    var title=lang==='nl'?item.title_nl:item.title_en;
+    var dest=DEST[item.type]||'home.html';
+    var color=DOT_COLORS[item.severity]||DOT_COLORS.g;
+    return '<div class="rrow" onclick="goTo(\''+dest+'\')">'
+      +'<div class="rdot" style="background:'+color+'"></div>'
+      +'<div class="ri"><div class="rt">'+title+'</div><div class="rs">'+timeAgo(item.time)+'</div></div>'
+      +'<svg class="rarr" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>'
+      +'</div>';
+  }).join('');
+}
+
+// WRITE A RECENT ITEM (called by other pages)
+function addRecent(type,title_en,title_nl,severity){
+  var items=getRecent();
+  items.unshift({type:type,title_en:title_en,title_nl:title_nl,time:Date.now(),severity:severity||'g'});
+  if(items.length>20)items=items.slice(0,20);
+  localStorage.setItem('dm_recent',JSON.stringify(items));
+}
+
+// FAMILY CONNECTION STATUS
+function updateFamilySub(){
+  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
+  var subEl=document.getElementById('family-sub');
+  if(family&&family.name){
+    subEl.textContent=family.name+(lang==='nl'?' verbonden':' connected');
+    subEl.style.color='var(--gd)';
+  }else{
+    subEl.textContent=lang==='nl'?'Niet verbonden':'Not connected';
+    subEl.style.color='';
+  }
+}
+
+// INIT — wait for Firebase auth
+auth.onAuthStateChanged(function(user){
+  if(!user){
+    // Not logged in — send to register
+    window.location.href='register.html';
+    return;
+  }
+  // Merge Firebase user into localStorage
+  var stored=JSON.parse(localStorage.getItem('dm_user')||'{}');
+  if(!stored.name||stored.uid!==user.uid){
+    stored={name:user.displayName||user.email.split('@')[0],email:user.email,photo:user.photoURL||'',uid:user.uid};
+    localStorage.setItem('dm_user',stored);
+  }
+  // Record last visit
+  localStorage.setItem('dm_last_check',Date.now().toString());
+
+  // Reveal app
+  document.getElementById('page-loader').style.display='none';
+  document.getElementById('app').style.display='flex';
+
+  // Populate UI
+  setAvatar(stored);
+  setLang(lang);
+  updateFamilySub();
+
+  // Demo recent items if empty (first-time user experience)
+  if(getRecent().length===0){
+    addRecent('breach','LinkedIn breach detected','LinkedIn-lek gedetecteerd','r');
+    addRecent('inbox','3 suspicious emails found','3 verdachte e-mails gevonden','a');
+    addRecent('scam','Message checked — safe','Bericht gecontroleerd — veilig','g');
+  }
+  renderRecent();
+});
+</script>
+</body>
+</html>
