@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#0F6E56"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>DigiMaat — Family</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Literata:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1D9E75;--gd:#0F6E56;--gl:#E1F5EE;--gm:#9FE1CB;
+  --r:#A32D2D;--rl:#FCEBEB;--am:#BA7517;--al:#FAEEDA;
+  --bg:#F5F3EE;--card:#fff;--tx:#1a1a18;--mu:#6b6b65;--br:#E0DDD6;
+  --rads:10px;--rad:16px;--sh:0 2px 12px rgba(0,0,0,.07);
+}
+html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--tx)}
+.app{max-width:390px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{background:var(--gd);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tl{display:flex;align-items:center;gap:9px}
+.back-btn{background:none;border:none;cursor:pointer;padding:0}
+.back-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;display:block}
+.page-title{font-size:17px;font-weight:800;color:#fff}
+.lang-pill{display:flex;background:rgba(255,255,255,.15);border-radius:20px;overflow:hidden}
+.lbtn{background:none;border:none;color:rgba(255,255,255,.65);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s}
+.lbtn.on{background:rgba(255,255,255,.3);color:#fff}
+
+/* BODY */
+.body{flex:1;overflow-y:auto;padding:18px 18px 100px;display:flex;flex-direction:column;gap:14px}
+
+/* SECTION LABEL */
+.sec-lbl{font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.5px;text-transform:uppercase}
+
+/* CONTACT CARD */
+.contact-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:16px;box-shadow:var(--sh)}
+.contact-top{display:flex;align-items:center;gap:13px;margin-bottom:14px}
+.contact-ava{width:52px;height:52px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--gd);flex-shrink:0}
+.contact-name{font-size:18px;font-weight:800}
+.contact-sub{font-size:12px;color:var(--mu);margin-top:2px}
+.contact-pill{background:var(--gl);color:var(--gd);font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;margin-top:4px}
+/* ACTION BUTTONS */
+.contact-actions{display:flex;gap:8px}
+.action-btn{flex:1;border:none;border-radius:var(--rads);padding:11px 8px;font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s}
+.action-btn:active{opacity:.75}
+.action-btn svg{width:15px;height:15px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.btn-call{background:var(--g);color:#fff}
+.btn-call svg{stroke:#fff}
+.btn-sms{background:#E6F1FB;color:#185FA5}
+.btn-sms svg{stroke:#185FA5}
+.btn-whatsapp{background:#f0fdf4;color:#15803d}
+.btn-whatsapp svg{stroke:#15803d}
+/* NO CONTACT STATE */
+.no-contact{background:var(--bg);border:1.5px dashed var(--br);border-radius:var(--rad);padding:24px;text-align:center}
+.no-contact p{font-size:13px;color:var(--mu);line-height:1.6;margin-bottom:14px}
+.add-contact-btn{background:var(--g);color:#fff;border:none;border-radius:var(--rads);padding:12px 20px;font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.add-contact-btn svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* TIMELINE */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:11px}
+.tl-left{display:flex;flex-direction:column;align-items:center;width:18px;flex-shrink:0}
+.tl-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:5px;border:2px solid #fff;box-shadow:0 0 0 1.5px currentColor}
+.tl-dot.high{color:var(--r);background:var(--r)}
+.tl-dot.medium{color:var(--am);background:var(--am)}
+.tl-dot.low{color:#3B6D11;background:#3B6D11}
+.tl-line{width:2px;flex:1;background:var(--br);margin:4px 0;min-height:12px}
+.tl-content{flex:1;background:var(--card);border-radius:var(--rads);border:1px solid var(--br);padding:11px 13px;margin-bottom:8px;box-shadow:var(--sh)}
+.tl-event{font-size:13px;font-weight:700}
+.tl-time{font-size:10px;color:var(--mu);margin-top:2px}
+.tl-pill{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:5px}
+.tl-pill.high{background:var(--rl);color:var(--r)}
+.tl-pill.medium{background:var(--al);color:var(--am)}
+.tl-pill.low{background:#EAF3DE;color:#3B6D11}
+.timeline-empty{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:20px;text-align:center;font-size:13px;color:var(--mu);line-height:1.6;box-shadow:var(--sh)}
+
+/* CTA CARD */
+.cta-card{background:var(--gl);border:1px solid var(--gm);border-radius:var(--rads);padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cta-card.urgent{background:var(--rl);border-color:#F09595}
+.cta-text{font-size:13px;color:var(--gd);font-weight:600;line-height:1.4;flex:1}
+.cta-card.urgent .cta-text{color:var(--r)}
+.cta-arr{font-size:20px;color:var(--g);font-weight:700;font-style:normal;flex-shrink:0}
+.cta-card.urgent .cta-arr{color:var(--r)}
+
+/* QUICK MESSAGE CARD */
+.quick-msg-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh)}
+.qm-header{padding:13px 16px;border-bottom:1px solid var(--br)}
+.qm-title{font-size:15px;font-weight:800}
+.qm-sub{font-size:12px;color:var(--mu);margin-top:2px}
+.qm-messages{padding:10px 16px;display:flex;flex-direction:column;gap:7px}
+.qm-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg);border-radius:var(--rads);border:1px solid var(--br)}
+.qm-text{flex:1;font-size:13px;color:var(--tx);line-height:1.4}
+.qm-actions{display:flex;gap:6px;flex-shrink:0}
+.qm-btn{border:none;border-radius:7px;padding:5px 9px;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.qm-btn svg{width:12px;height:12px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.qm-sms{background:#E6F1FB;color:#185FA5}.qm-sms svg{stroke:#185FA5}
+.qm-wa{background:#f0fdf4;color:#15803d}.qm-wa svg{stroke:#15803d}
+
+/* SHARE SETTINGS */
+.settings-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh)}
+.settings-hd{padding:13px 16px;border-bottom:1px solid var(--br)}
+.settings-title{font-size:15px;font-weight:800}
+.settings-sub{font-size:12px;color:var(--mu);margin-top:2px;line-height:1.4}
+.str{background:var(--card);border-bottom:1px solid var(--br);padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
+.str:last-child{border-bottom:none}
+.strt{font-size:14px;font-weight:700}
+.strs{font-size:11px;color:var(--mu);margin-top:1px}
+.tog{width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;flex-shrink:0;border:none;background:var(--g);transition:background .2s}
+.tok{width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;transition:right .2s}
+.tog.off{background:var(--br)}.tog.off .tok{right:22px}
+
+/* PRIVACY NOTE */
+.privacy-note{text-align:center;font-size:11px;color:var(--mu);line-height:1.6;padding:4px 0}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+.nb svg{width:21px;height:21px;stroke:var(--mu);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nb span{font-size:9px;color:var(--mu);font-weight:700}
+.nb.on svg{stroke:var(--g)}.nb.on span{color:var(--g)}
+
+/* MODALS */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;display:none;align-items:flex-end;justify-content:center}
+.modal-ov.show{display:flex}
+.modal-sheet{background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 36px;width:100%;max-width:390px}
+.modal-handle{width:36px;height:4px;background:var(--br);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:14px}
+.modal-field{margin-bottom:12px}
+.modal-label{font-size:14px;font-weight:800;margin-bottom:5px;display:block}
+.modal-inp{width:100%;background:#fff;border:2px solid var(--br);border-radius:var(--rads);padding:12px 14px;font-size:15px;font-family:'Nunito',sans-serif;color:var(--tx);outline:none;transition:border .2s}
+.modal-inp:focus{border-color:var(--g)}
+.modal-actions{display:flex;gap:8px;margin-top:4px}
+.modal-cancel{flex:1;background:var(--bg);border:1.5px solid var(--br);border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer}
+.modal-save{flex:1;background:var(--g);border:none;border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;color:#fff;font-family:'Nunito',sans-serif;cursor:pointer}
+
+/* PAGE LOADER */
+.page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.pl-spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app" id="app" style="display:none">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tl">
+      <button class="back-btn" onclick="goTo('home.html')">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
+      <span class="page-title" data-en="Family view" data-nl="Familieweergave">Family view</span>
+    </div>
+    <div class="lang-pill">
+      <button class="lbtn on" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lbtn" id="btn-nl" onclick="setLang('nl')">NL</button>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- CONTACT CARD -->
+    <div id="contact-section"></div>
+
+    <!-- ACTIVITY TIMELINE -->
+    <div class="sec-lbl" data-en="Recent activity" data-nl="Recente activiteit">Recent activity</div>
+    <div id="timeline-section"></div>
+
+    <!-- CTA CARD -->
+    <div id="cta-section"></div>
+
+    <!-- QUICK MESSAGE -->
+    <div id="quick-msg-section"></div>
+
+    <!-- SHARE SETTINGS (senior only) -->
+    <div id="settings-section"></div>
+
+    <!-- PRIVACY NOTE -->
+    <div class="privacy-note" data-en="Read-only view · Jan controls all sharing permissions" data-nl="Alleen-lezen weergave · Jan beheert alle deelmachtigingen">Read-only view · Jan controls all sharing permissions</div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bnav">
+    <button class="nb" onclick="goTo('home.html')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span data-en="Home" data-nl="Home">Home</span>
+    </button>
+    <button class="nb" onclick="goTo('inbox.html')">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span data-en="Inbox" data-nl="Inbox">Inbox</span>
+    </button>
+    <button class="nb" onclick="goTo('scam.html')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span data-en="Check" data-nl="Check">Check</span>
+    </button>
+    <button class="nb on">
+      <svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="4"/><path d="M2 20c0-4 2.686-6 6-6s6 2 6 6"/><circle cx="18" cy="9" r="3"/></svg>
+      <span data-en="Family" data-nl="Familie">Family</span>
+    </button>
+    <button class="nb" onclick="goTo('profile.html')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>
+      <span data-en="Profile" data-nl="Profiel">Profile</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ADD CONTACT MODAL -->
+<div class="modal-ov" id="add-modal" onclick="closeModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" data-en="Add family contact" data-nl="Familiecontact toevoegen">Add family contact</div>
+    <div class="modal-field">
+      <label class="modal-label" data-en="Their full name" data-nl="Volledige naam">Their full name</label>
+      <input class="modal-inp" type="text" id="fc-name" placeholder="Anna de Boer"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label" data-en="Relationship" data-nl="Relatie">Relationship</label>
+      <input class="modal-inp" type="text" id="fc-rel"
+        data-ph-en="e.g. Daughter, Son, Neighbour"
+        data-ph-nl="bijv. Dochter, Zoon, Buurman"
+        placeholder="e.g. Daughter, Son, Neighbour"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label" data-en="Phone number" data-nl="Telefoonnummer">Phone number</label>
+      <input class="modal-inp" type="tel" id="fc-phone" placeholder="+31 6 12345678"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label" data-en="City (optional)" data-nl="Stad (optioneel)">City (optional)</label>
+      <input class="modal-inp" type="text" id="fc-city" placeholder="Amsterdam"/>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()" data-en="Cancel" data-nl="Annuleren">Cancel</button>
+      <button class="modal-save" onclick="saveContact()" data-en="Save" data-nl="Opslaan">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="page-loader" id="page-loader"><div class="pl-spin"></div></div>
+
+<script>
+// FIREBASE
+var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth();
+auth.onAuthStateChanged(function(user){
+  if(!user){window.location.href='register.html';return;}
+  document.getElementById('page-loader').style.display='none';
+  document.getElementById('app').style.display='flex';
+  initPage();
+});
+
+// ── LANGUAGE ─────────────────────────────────────────────
+var lang='en';
+function setLang(l){
+  lang=l;localStorage.setItem('dm_lang',l);
+  document.getElementById('html-root').setAttribute('lang',l);
+  document.getElementById('btn-en').classList.toggle('on',l==='en');
+  document.getElementById('btn-nl').classList.toggle('on',l==='nl');
+  document.querySelectorAll('[data-en]').forEach(function(el){
+    var v=el.getAttribute('data-'+l);if(!v)return;
+    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=v;
+    else el.textContent=v;
+  });
+  document.querySelectorAll('[data-ph-'+l+']').forEach(function(el){
+    el.placeholder=el.getAttribute('data-ph-'+l);
+  });
+  renderAll();
+}
+function goTo(p){window.location.href=p;}
+
+// ── DATA HELPERS ─────────────────────────────────────────
+function getFamily(){
+  try{return JSON.parse(localStorage.getItem('dm_family')||'null');}catch(e){return null;}
+}
+function getRecent(){
+  try{return JSON.parse(localStorage.getItem('dm_recent')||'[]');}catch(e){return[];}
+}
+function getShareSettings(){
+  try{return JSON.parse(localStorage.getItem('dm_share_settings')||'{"breaches":true,"scam":true,"inbox":true,"email_notif":false}');}catch(e){return{breaches:true,scam:true,inbox:true,email_notif:false};}
+}
+
+// ── TIME AGO ─────────────────────────────────────────────
+function timeAgo(ts){
+  var diff=Math.floor((Date.now()-ts)/60000);
+  if(diff<1)return lang==='nl'?'Zojuist':'Just now';
+  if(diff<60)return lang==='nl'?diff+' min geleden':diff+' min ago';
+  var h=Math.floor(diff/60);
+  if(h<24)return lang==='nl'?h+' uur geleden':h+(h===1?' hour':' hours')+' ago';
+  var d=Math.floor(h/24);
+  if(d===1)return lang==='nl'?'Gisteren':'Yesterday';
+  return lang==='nl'?d+' dagen geleden':d+' days ago';
+}
+
+// ── SEVERITY MAPPING ─────────────────────────────────────
+function getSeverity(item){
+  if(item.severity==='r'||item.severity==='high')return 'high';
+  if(item.severity==='a'||item.severity==='medium')return 'medium';
+  return 'low';
+}
+function severityLabel(sev){
+  if(sev==='high')return lang==='nl'?'Hoge ernst':'High severity';
+  if(sev==='medium')return lang==='nl'?'Gemiddelde ernst':'Medium severity';
+  return lang==='nl'?'Alles in orde':'All clear';
+}
+
+// ── INIT ─────────────────────────────────────────────────
+function initPage(){
+  lang=localStorage.getItem('dm_lang')||'en';
+  // Seed demo recent if empty
+  if(getRecent().length===0){
+    var demo=[
+      {type:'breach',title_en:'Data breach detected — LinkedIn',title_nl:'Datalek gedetecteerd — LinkedIn',time:Date.now()-3600000*2,severity:'r'},
+      {type:'inbox',title_en:'3 suspicious emails found in inbox scan',title_nl:'3 verdachte e-mails gevonden',time:Date.now()-3600000*26,severity:'a'},
+      {type:'scam',title_en:'Message checked — safe',title_nl:'Bericht gecontroleerd — veilig',time:Date.now()-3600000*72,severity:'g'},
+    ];
+    localStorage.setItem('dm_recent',JSON.stringify(demo));
+  }
+  setLang(lang);
+}
+
+// ── RENDER ALL ────────────────────────────────────────────
+function renderAll(){
+  renderContactCard();
+  renderTimeline();
+  renderCTA();
+  renderQuickMsg();
+  renderSettings();
+}
+
+// ── CONTACT CARD ─────────────────────────────────────────
+function renderContactCard(){
+  var family=getFamily();
+  var el=document.getElementById('contact-section');
+  if(!family){
+    el.innerHTML='<div class="no-contact">'
+      +'<p>'+(lang==='nl'
+        ?'U heeft nog geen familiecontact toegevoegd. Voeg iemand toe zodat zij uw veiligheidsactiviteit kunnen volgen.'
+        :'You have not added a family contact yet. Add someone so they can follow your safety activity.')
+      +'</p>'
+      +'<button class="add-contact-btn" onclick="showAddModal()">'
+      +'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+      +(lang==='nl'?'Familiecontact toevoegen':'Add family contact')
+      +'</button></div>';
+    return;
+  }
+  var initials=family.name.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+  var phone=family.phone||'';
+  el.innerHTML='<div class="contact-card">'
+    +'<div class="contact-top">'
+    +'<div class="contact-ava">'+initials+'</div>'
+    +'<div>'
+    +'<div class="contact-name">'+family.name+'</div>'
+    +'<div class="contact-sub">'+(family.rel||'')+(family.city?' · '+family.city:'')+'</div>'
+    +'<span class="contact-pill">'+(lang==='nl'?'Verbonden':'Connected')+'</span>'
+    +'</div></div>'
+    // ACTION BUTTONS
+    +(phone?'<div class="contact-actions">'
+      +'<button class="action-btn btn-call" onclick="callContact()">'
+      +'<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'
+      +(lang==='nl'?'Bellen':'Call')
+      +'</button>'
+      +'<button class="action-btn btn-sms" onclick="sendSMS()">'
+      +'<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>'
+      +'SMS'
+      +'</button>'
+      +'<button class="action-btn btn-whatsapp" onclick="sendWhatsApp()">'
+      +'<svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>'
+      +'WhatsApp'
+      +'</button>'
+      +'</div>':'')
+    // REMOVE LINK
+    +'<div style="text-align:right;margin-top:10px">'
+    +'<span onclick="removeContact()" style="font-size:11px;color:var(--r);font-weight:700;cursor:pointer">'
+    +(lang==='nl'?'Contact verwijderen':'Remove contact')+'</span>'
+    +'</div>'
+    +'</div>';
+}
+
+// ── CALL / SMS / WHATSAPP ────────────────────────────────
+function callContact(){
+  var family=getFamily();
+  if(!family||!family.phone)return;
+  window.location.href='tel:'+family.phone.replace(/\s/g,'');
+}
+
+function sendSMS(){
+  var family=getFamily();
+  if(!family||!family.phone)return;
+  var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
+  var senderName=user.name||'Jan';
+  var msg=lang==='nl'
+    ?'Hoi '+family.name.split(' ')[0]+', dit is '+senderName+'. Alles goed met mij. Wil je even contact opnemen?'
+    :'Hi '+family.name.split(' ')[0]+', this is '+senderName+'. Everything is fine with me. Can you get in touch?';
+  window.location.href='sms:'+family.phone.replace(/\s/g,'')+'?body='+encodeURIComponent(msg);
+}
+
+function sendWhatsApp(){
+  var family=getFamily();
+  if(!family||!family.phone)return;
+  var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
+  var senderName=user.name||'Jan';
+  var msg=lang==='nl'
+    ?'Hoi '+family.name.split(' ')[0]+', dit is '+senderName+'. Alles goed met mij. Wil je even contact opnemen?'
+    :'Hi '+family.name.split(' ')[0]+', this is '+senderName+'. Everything is fine with me. Can you get in touch?';
+  var phone=family.phone.replace(/[\s\+\-\(\)]/g,'');
+  if(phone.startsWith('0'))phone='31'+phone.substring(1);
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ── TIMELINE ─────────────────────────────────────────────
+function renderTimeline(){
+  var items=getRecent().slice(0,8);
+  var el=document.getElementById('timeline-section');
+  if(!items.length){
+    el.innerHTML='<div class="timeline-empty">'
+      +(lang==='nl'?'Nog geen activiteit. Gebruik de app om veiligheidscontroles uit te voeren.':'No activity yet. Use the app to run safety checks.')
+      +'</div>';
+    return;
+  }
+  var html='<div class="timeline">';
+  items.forEach(function(item,i){
+    var sev=getSeverity(item);
+    var title=lang==='nl'?item.title_nl:item.title_en;
+    var isLast=i===items.length-1;
+    html+='<div class="tl-item">'
+      +'<div class="tl-left">'
+      +'<div class="tl-dot '+sev+'"></div>'
+      +(!isLast?'<div class="tl-line"></div>':'')
+      +'</div>'
+      +'<div class="tl-content">'
+      +'<div class="tl-event">'+title+'</div>'
+      +'<div class="tl-time">'+timeAgo(item.time)+'</div>'
+      +'<span class="tl-pill '+sev+'">'+severityLabel(sev)+'</span>'
+      +'</div></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+// ── CTA CARD ─────────────────────────────────────────────
+function renderCTA(){
+  var items=getRecent();
+  var el=document.getElementById('cta-section');
+  var family=getFamily();
+  if(!family){el.innerHTML='';return;}
+  var firstName=family.name.split(' ')[0];
+  // Check for high-severity event in last 24 hours
+  var recentHigh=items.find(function(i){
+    return (i.severity==='r'||i.severity==='high')&&(Date.now()-i.time)<86400000;
+  });
+  if(recentHigh){
+    el.innerHTML='<div class="cta-card urgent">'
+      +'<span class="cta-text">'
+      +(lang==='nl'
+        ?'⚠ Er is vandaag een waarschuwing gedetecteerd. Overweeg '+firstName+' te bellen om in te checken.'
+        :'⚠ A high-severity alert was detected today. Consider calling '+firstName+' to check in.')
+      +'</span>'
+      +'<i class="cta-arr" onclick="callContact()" style="cursor:pointer">›</i>'
+      +'</div>';
+  }else{
+    el.innerHTML='<div class="cta-card">'
+      +'<span class="cta-text">'
+      +(lang==='nl'
+        ?'✓ '+firstName+' heeft de afgelopen 24 uur geen urgente meldingen ontvangen.'
+        :'✓ '+firstName+' has had no urgent alerts in the last 24 hours.')
+      +'</span>'
+      +'<i class="cta-arr">›</i>'
+      +'</div>';
+  }
+}
+
+// ── QUICK MESSAGE ─────────────────────────────────────────
+function renderQuickMsg(){
+  var family=getFamily();
+  var el=document.getElementById('quick-msg-section');
+  if(!family||!family.phone){el.innerHTML='';return;}
+  var firstName=family.name.split(' ')[0];
+  var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
+  var senderName=user.name?user.name.split(' ')[0]:'Jan';
+
+  var messages=[
+    {en:'Hi '+firstName+', this is '+senderName+'. Everything is fine with me, just checking in!',
+     nl:'Hoi '+firstName+', met '+senderName+'. Alles goed, even inchecken!'},
+    {en:'Hi '+firstName+', I saw an alert on DigiMaat. Can you call me when you have a moment?',
+     nl:'Hoi '+firstName+', ik zag een melding op DigiMaat. Kun je me bellen als je tijd hebt?'},
+    {en:'Hi '+firstName+', are you okay? I saw something on the safety app. Let me know.',
+     nl:'Hoi '+firstName+', gaat het goed? Ik zag iets op de veiligheidsapp. Laat me weten.'},
+  ];
+
+  var html='<div class="quick-msg-card">'
+    +'<div class="qm-header">'
+    +'<div class="qm-title" data-en="Quick message to '+firstName+'" data-nl="Snel bericht naar '+firstName+'">'
+    +(lang==='nl'?'Snel bericht naar '+firstName:'Quick message to '+firstName)+'</div>'
+    +'<div class="qm-sub" data-en="Send a pre-written message with one tap" data-nl="Stuur een voorgeschreven bericht met één tik">'
+    +(lang==='nl'?'Stuur een voorgeschreven bericht met één tik':'Send a pre-written message with one tap')
+    +'</div></div>'
+    +'<div class="qm-messages">';
+
+  messages.forEach(function(msg,i){
+    var text=lang==='nl'?msg.nl:msg.en;
+    var phone=family.phone.replace(/[\s\+\-\(\)]/g,'');
+    if(phone.startsWith('0'))phone='31'+phone.substring(1);
+    var smsHref='sms:'+family.phone.replace(/\s/g,'')+'?body='+encodeURIComponent(text);
+    var waHref='https://wa.me/'+phone+'?text='+encodeURIComponent(text);
+    html+='<div class="qm-row">'
+      +'<div class="qm-text">'+text+'</div>'
+      +'<div class="qm-actions">'
+      +'<button class="qm-btn qm-sms" onclick="window.location.href=\''+smsHref+'\'">'
+      +'<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>SMS</button>'
+      +'<button class="qm-btn qm-wa" onclick="window.open(\''+waHref+'\',\'_blank\')">'
+      +'<svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>WA</button>'
+      +'</div></div>';
+  });
+  html+='</div></div>';
+  el.innerHTML=html;
+}
+
+// ── SHARE SETTINGS ────────────────────────────────────────
+function renderSettings(){
+  var s=getShareSettings();
+  var el=document.getElementById('settings-section');
+  el.innerHTML='<div class="sec-lbl" style="margin-bottom:8px" data-en="Sharing settings" data-nl="Deelinstelling">'
+    +(lang==='nl'?'Deelinstelling':'Sharing settings')+'</div>'
+    +'<div class="settings-card">'
+    +'<div class="settings-hd">'
+    +'<div class="settings-title" data-en="What your family contact can see" data-nl="Wat uw familiecontact kan zien">'+(lang==='nl'?'Wat uw familiecontact kan zien':'What your family contact can see')+'</div>'
+    +'<div class="settings-sub" data-en="You control exactly what is shared. Your family contact has read-only access." data-nl="U bepaalt precies wat er gedeeld wordt. Uw familiecontact heeft alleen-leestoegang.">'+(lang==='nl'?'U bepaalt precies wat er gedeeld wordt. Uw familiecontact heeft alleen-leestoegang.':'You control exactly what is shared. Your family contact has read-only access.')+'</div>'
+    +'</div>'
+    +renderSettingRow('breaches',s.breaches,lang==='nl'?'Datalek-meldingen':'Breach alerts',lang==='nl'?'Wanneer uw e-mail in een lek is gevonden':'When your email is found in a breach')
+    +renderSettingRow('scam',s.scam,lang==='nl'?'Scam controles':'Scam checks',lang==='nl'?'Resultaten van berichtanalyses':'Results of message analyses')
+    +renderSettingRow('inbox',s.inbox,lang==='nl'?'Inbox scan resultaten':'Inbox scan results',lang==='nl'?'Samenvatting van inbox scans':'Summary of inbox scans')
+    +renderSettingRow('email_notif',s.email_notif,lang==='nl'?'E-mailmeldingen':'Email notifications',lang==='nl'?'Stuur e-mail bij urgente meldingen (V2)':'Send email for urgent alerts (V2)')
+    +'</div>';
+}
+
+function renderSettingRow(key,val,title,sub){
+  return '<div class="str">'
+    +'<div><div class="strt">'+title+'</div><div class="strs">'+sub+'</div></div>'
+    +'<button class="tog'+(val?'':' off')+'" onclick="toggleShare(\''+key+'\',this)"><div class="tok"></div></button>'
+    +'</div>';
+}
+
+function toggleShare(key,btn){
+  btn.classList.toggle('off');
+  var s=getShareSettings();
+  s[key]=!btn.classList.contains('off');
+  localStorage.setItem('dm_share_settings',JSON.stringify(s));
+}
+
+// ── ADD / REMOVE CONTACT ─────────────────────────────────
+function showAddModal(){document.getElementById('add-modal').classList.add('show');}
+function closeModal(e){
+  if(!e||e.target===document.getElementById('add-modal')){
+    document.getElementById('add-modal').classList.remove('show');
+  }
+}
+function saveContact(){
+  var name=document.getElementById('fc-name').value.trim();
+  var rel=document.getElementById('fc-rel').value.trim();
+  var phone=document.getElementById('fc-phone').value.trim();
+  var city=document.getElementById('fc-city').value.trim();
+  if(!name){alert(lang==='nl'?'Vul een naam in.':'Please enter a name.');return;}
+  if(!phone){alert(lang==='nl'?'Vul een telefoonnummer in.':'Please enter a phone number.');return;}
+  localStorage.setItem('dm_family',JSON.stringify({name:name,rel:rel,phone:phone,city:city}));
+  closeModal();
+  renderAll();
+}
+function removeContact(){
+  var ok=confirm(lang==='nl'?'Weet u zeker dat u dit contact wilt verwijderen?':'Are you sure you want to remove this contact?');
+  if(ok){localStorage.removeItem('dm_family');renderAll();}
+}
+</script>
+</body>
+</html>
