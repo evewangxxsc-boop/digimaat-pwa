@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#0F6E56"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>DigiMaat — Register</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#1D9E75;--gd:#0F6E56;--gl:#E1F5EE;--gm:#9FE1CB;--r:#A32D2D;--rl:#FCEBEB;--bg:#F5F3EE;--card:#fff;--tx:#1a1a18;--mu:#6b6b65;--br:#E0DDD6;--rads:10px;--rad:16px;}
+html,body{min-height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--tx)}
+.wrap{max-width:390px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--gd);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.tl{display:flex;align-items:center;gap:9px}
+.logo{width:30px;height:30px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo svg{width:17px;height:17px;stroke:var(--g);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.appname{font-size:16px;font-weight:800;color:#fff}
+.lang-pill{display:flex;background:rgba(255,255,255,.15);border-radius:20px;overflow:hidden}
+.lbtn{background:none;border:none;color:rgba(255,255,255,.65);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s}
+.lbtn.on{background:rgba(255,255,255,.3);color:#fff}
+.hero{background:var(--gd);padding:26px 22px 22px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.hero-logo{width:52px;height:52px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.hero-logo svg{width:28px;height:28px;stroke:var(--g);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.hero h1{font-size:26px;font-weight:800;color:#fff}
+.hero p{font-size:13px;color:var(--gm);line-height:1.5}
+.body{padding:20px;flex:1;display:flex;flex-direction:column}
+.slabel{font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
+.social-btn{background:#fff;border:1.5px solid var(--br);border-radius:var(--rads);padding:12px 16px;font-size:14px;font-weight:700;color:var(--tx);font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;gap:10px;margin-bottom:10px;transition:border-color .15s}
+.social-btn:hover{border-color:var(--g)}
+.social-btn:disabled{opacity:.6;cursor:not-allowed}
+.divr{display:flex;align-items:center;gap:10px;margin:6px 0 14px}
+.divl{flex:1;height:1px;background:var(--br)}
+.divi{font-size:12px;color:var(--mu);font-weight:600}
+.fl{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+.fl label{font-size:15px;font-weight:800}
+.fw{position:relative}
+.fi{background:#fff;border:2px solid var(--br);border-radius:var(--rads);padding:13px 46px 13px 14px;font-size:16px;font-family:'Nunito',sans-serif;color:var(--tx);width:100%;outline:none;transition:border .2s}
+.fi:focus{border-color:var(--g)}
+.fi.err{border-color:var(--r)}
+.vb{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:var(--gl);border:none;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.vb svg{width:16px;height:16px;stroke:var(--g);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.vb.listening{background:var(--g);animation:pulse 1s infinite}
+.vb.listening svg{stroke:#fff}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.vh{font-size:11px;color:var(--mu);display:flex;align-items:center;gap:4px;margin-top:3px}
+.vh svg{width:11px;height:11px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ferr{font-size:11px;color:var(--r);font-weight:700;margin-top:3px;display:none}
+.ferr.show{display:block}
+.vind{display:none;align-items:center;gap:8px;background:var(--g);border-radius:var(--rads);padding:9px 13px;margin-bottom:12px}
+.vind.show{display:flex}
+.waves{display:flex;gap:3px;align-items:center}
+.wv{width:3px;background:#fff;border-radius:2px;animation:wvv .8s ease-in-out infinite}
+.wv:nth-child(1){height:8px}.wv:nth-child(2){height:16px;animation-delay:.1s}.wv:nth-child(3){height:12px;animation-delay:.2s}.wv:nth-child(4){height:20px;animation-delay:.3s}.wv:nth-child(5){height:10px;animation-delay:.4s}
+@keyframes wvv{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.4)}}
+.vind span{color:#fff;font-size:13px;font-weight:700}
+.btn{background:var(--g);color:#fff;border:none;border-radius:var(--rads);padding:14px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:9px;transition:background .2s;margin-bottom:10px}
+.btn:hover{background:var(--gd)}
+.btn:disabled{background:var(--br);cursor:not-allowed}
+.btn svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.btn2{background:#fff;color:var(--g);border:2px solid var(--g);border-radius:var(--rads);padding:12px;font-size:15px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;margin-bottom:10px}
+.btn2:hover{background:var(--gl)}
+.btn3{background:var(--bg);border:1.5px solid var(--br);border-radius:var(--rads);padding:11px;font-size:13px;font-weight:700;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn3 svg{width:15px;height:15px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:700;padding:10px 20px;border-radius:20px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;z-index:999;font-family:'Nunito',sans-serif;color:#fff;background:var(--gd)}
+.toast.show{opacity:1}
+.toast.err{background:var(--r)}
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.82);display:none;align-items:center;justify-content:center;z-index:500;flex-direction:column;gap:12px}
+.overlay.show{display:flex}
+.big-spin{width:36px;height:36px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
+.ovtxt{font-size:14px;font-weight:700;color:var(--gd);font-family:'Nunito',sans-serif}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="tl">
+      <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <span class="appname">DigiMaat</span>
+    </div>
+    <div class="lang-pill">
+      <button class="lbtn on" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lbtn" id="btn-nl" onclick="setLang('nl')">NL</button>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="hero-logo"><svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M9 12l2 2 4-4"/></svg></div>
+    <h1>DigiMaat</h1>
+    <p data-en="Your digital safety assistant" data-nl="Uw digitale veiligheidsassistent">Your digital safety assistant</p>
+  </div>
+  <div class="body">
+    <div class="slabel" data-en="Quick sign in" data-nl="Snel inloggen">Quick sign in</div>
+    <button class="social-btn" id="btn-google" onclick="signInWithGoogle()">
+      <svg viewBox="0 0 24 24" fill="none" width="19" height="19"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      <span data-en="Continue with Google" data-nl="Doorgaan met Google">Continue with Google</span>
+    </button>
+    <div class="divr"><div class="divl"></div><div class="divi">or</div><div class="divl"></div></div>
+    <div class="slabel" data-en="Create account with email" data-nl="Account aanmaken met e-mail">Create account with email</div>
+    <div class="fl">
+      <label data-en="Your full name" data-nl="Uw volledige naam">Your full name</label>
+      <div class="fw">
+        <input class="fi" type="text" id="inp-name" placeholder="Jan de Boer" autocomplete="name" data-ph-en="Jan de Boer" data-ph-nl="Jan de Boer"/>
+        <button class="vb" id="vb-name" onclick="startVoice('inp-name','vb-name','Jan de Boer','Jan de Boer')">
+          <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0M12 19v3M8 22h8"/></svg>
+        </button>
+      </div>
+      <div class="vh"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0"/></svg><span data-en="Can't type? Tap the mic" data-nl="Kunt u niet typen? Tik op de microfoon">Can't type? Tap the mic</span></div>
+      <div class="ferr" id="err-name"></div>
+    </div>
+    <div class="fl">
+      <label data-en="Email address" data-nl="E-mailadres">Email address</label>
+      <div class="fw">
+        <input class="fi" type="email" id="inp-email" placeholder="jan@gmail.com" autocomplete="email" data-ph-en="jan@gmail.com" data-ph-nl="jan@gmail.com"/>
+        <button class="vb" id="vb-email" onclick="startVoice('inp-email','vb-email','jan@gmail.com','jan@gmail.com')">
+          <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0M12 19v3M8 22h8"/></svg>
+        </button>
+      </div>
+      <div class="ferr" id="err-email"></div>
+    </div>
+    <div class="fl">
+      <label data-en="Password" data-nl="Wachtwoord">Password</label>
+      <input class="fi" type="password" id="inp-password" placeholder="At least 6 characters" autocomplete="new-password" data-ph-en="At least 6 characters" data-ph-nl="Minimaal 6 tekens"/>
+      <div class="ferr" id="err-password"></div>
+    </div>
+    <div class="vind" id="vind">
+      <div class="waves"><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div></div>
+      <span data-en="Listening…" data-nl="Aan het luisteren…">Listening…</span>
+    </div>
+    <button class="btn" id="btn-register" onclick="registerWithEmail()">
+      <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+      <span data-en="Create account" data-nl="Account aanmaken">Create account</span>
+    </button>
+    <div class="divr"><div class="divl"></div><div class="divi">or</div><div class="divl"></div></div>
+    <button class="btn2" id="btn-signin" onclick="signInWithEmail()"><span data-en="Sign in to existing account" data-nl="Inloggen op bestaand account">Sign in to existing account</span></button>
+    <button class="btn3" onclick="goHome('family')">
+      <svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="4"/><path d="M2 20c0-4 2.686-6 6-6s6 2 6 6"/><circle cx="19" cy="8" r="2.5"/><path d="M15 20c0-2.5 1.79-3.5 4-3.5"/></svg>
+      <span data-en="Sign in as family contact" data-nl="Inloggen als familiecontact">Sign in as family contact</span>
+    </button>
+  </div>
+</div>
+<div class="overlay" id="overlay"><div class="big-spin"></div><div class="ovtxt" id="ovtxt">Loading…</div></div>
+<div class="toast" id="toast"></div>
+<script>
+// FIREBASE INIT
+var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth();
+var provider=new firebase.auth.GoogleAuthProvider();
+
+// LANGUAGE
+var lang=localStorage.getItem('dm_lang')||'en';
+function setLang(l){
+  lang=l;localStorage.setItem('dm_lang',l);
+  document.getElementById('html-root').setAttribute('lang',l);
+  document.getElementById('btn-en').classList.toggle('on',l==='en');
+  document.getElementById('btn-nl').classList.toggle('on',l==='nl');
+  document.querySelectorAll('[data-en]').forEach(function(el){
+    var v=el.getAttribute('data-'+l);if(!v)return;
+    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=v;else el.textContent=v;
+  });
+  document.querySelectorAll('[data-ph-'+l+']').forEach(function(el){el.placeholder=el.getAttribute('data-ph-'+l);});
+}
+setLang(lang);
+
+// TOAST
+function toast(msg,isErr){
+  var el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show'+(isErr?' err':'');
+  clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},3500);
+}
+
+// OVERLAY
+function showOv(msg){document.getElementById('ovtxt').textContent=msg;document.getElementById('overlay').classList.add('show');}
+function hideOv(){document.getElementById('overlay').classList.remove('show');}
+
+// FIELD ERRORS
+function clearErr(){
+  ['name','email','password'].forEach(function(f){
+    document.getElementById('inp-'+f).classList.remove('err');
+    var e=document.getElementById('err-'+f);e.textContent='';e.classList.remove('show');
+  });
+}
+function fErr(f,msg){
+  document.getElementById('inp-'+f).classList.add('err');
+  var e=document.getElementById('err-'+f);e.textContent=msg;e.classList.add('show');
+}
+
+// ERROR MAP
+var ERRS={'auth/email-already-in-use':{en:'This email is already registered.',nl:'Dit e-mailadres is al geregistreerd.'},'auth/invalid-email':{en:'Please enter a valid email.',nl:'Voer een geldig e-mailadres in.'},'auth/weak-password':{en:'Password must be at least 6 characters.',nl:'Wachtwoord minimaal 6 tekens.'},'auth/user-not-found':{en:'No account found for this email.',nl:'Geen account gevonden.'},'auth/wrong-password':{en:'Incorrect password.',nl:'Onjuist wachtwoord.'},'auth/invalid-credential':{en:'Email or password is incorrect.',nl:'E-mail of wachtwoord onjuist.'},'auth/popup-closed-by-user':{en:'Sign-in window closed. Please try again.',nl:'Inlogvenster gesloten.'},'auth/popup-blocked':{en:'Pop-up blocked — allow pop-ups for this site.',nl:'Pop-up geblokkeerd.'},'auth/network-request-failed':{en:'Network error. Check your connection.',nl:'Netwerkfout.'},'auth/too-many-requests':{en:'Too many attempts. Please wait.',nl:'Te veel pogingen.'}};
+function eMsg(code){return((ERRS[code]||{en:'Something went wrong.',nl:'Er ging iets mis.'})[lang]);}
+
+// NAVIGATE
+function goHome(role){localStorage.setItem('dm_role',role||'senior');window.location.href='home.html';}
+
+// GOOGLE
+function signInWithGoogle(){
+  clearErr();
+  document.getElementById('btn-google').disabled=true;
+  showOv(lang==='nl'?'Inloggen met Google…':'Signing in with Google…');
+  auth.signInWithPopup(provider).then(function(r){
+    var u=r.user;
+    localStorage.setItem('dm_user',JSON.stringify({name:u.displayName||'User',email:u.email,photo:u.photoURL||'',uid:u.uid}));
+    toast(lang==='nl'?'Welkom, '+u.displayName+'!':'Welcome, '+u.displayName+'!');
+    setTimeout(function(){goHome('senior');},900);
+  }).catch(function(err){hideOv();toast(eMsg(err.code),true);})
+  .finally(function(){document.getElementById('btn-google').disabled=false;hideOv();});
+}
+
+// REGISTER
+function registerWithEmail(){
+  clearErr();
+  var name=document.getElementById('inp-name').value.trim();
+  var email=document.getElementById('inp-email').value.trim();
+  var pw=document.getElementById('inp-password').value;
+  var ok=true;
+  if(!name){fErr('name',lang==='nl'?'Vul uw naam in.':'Please enter your name.');ok=false;}
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){fErr('email',lang==='nl'?'Voer een geldig e-mailadres in.':'Please enter a valid email.');ok=false;}
+  if(pw.length<6){fErr('password',lang==='nl'?'Minimaal 6 tekens.':'At least 6 characters required.');ok=false;}
+  if(!ok)return;
+  document.getElementById('btn-register').disabled=true;
+  showOv(lang==='nl'?'Account aanmaken…':'Creating your account…');
+  auth.createUserWithEmailAndPassword(email,pw).then(function(c){
+    return c.user.updateProfile({displayName:name}).then(function(){
+      localStorage.setItem('dm_user',JSON.stringify({name:name,email:email,photo:'',uid:c.user.uid}));
+      toast(lang==='nl'?'Welkom, '+name+'!':'Welcome, '+name+'!');
+      setTimeout(function(){goHome('senior');},900);
+    });
+  }).catch(function(err){
+    hideOv();
+    if(err.code==='auth/email-already-in-use')fErr('email',eMsg(err.code));
+    else if(err.code==='auth/weak-password')fErr('password',eMsg(err.code));
+    else toast(eMsg(err.code),true);
+  }).finally(function(){document.getElementById('btn-register').disabled=false;hideOv();});
+}
+
+// SIGN IN
+function signInWithEmail(){
+  clearErr();
+  var email=document.getElementById('inp-email').value.trim();
+  var pw=document.getElementById('inp-password').value;
+  var ok=true;
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){fErr('email',lang==='nl'?'Voer uw e-mailadres in.':'Please enter your email.');ok=false;}
+  if(!pw){fErr('password',lang==='nl'?'Voer uw wachtwoord in.':'Please enter your password.');ok=false;}
+  if(!ok)return;
+  document.getElementById('btn-signin').disabled=true;
+  showOv(lang==='nl'?'Inloggen…':'Signing in…');
+  auth.signInWithEmailAndPassword(email,pw).then(function(c){
+    var u=c.user;
+    localStorage.setItem('dm_user',JSON.stringify({name:u.displayName||email.split('@')[0],email:u.email,photo:u.photoURL||'',uid:u.uid}));
+    toast(lang==='nl'?'Welkom terug!':'Welcome back!');
+    setTimeout(function(){goHome('senior');},900);
+  }).catch(function(err){
+    hideOv();
+    if(err.code==='auth/user-not-found'||err.code==='auth/invalid-credential')fErr('email',eMsg('auth/user-not-found'));
+    else if(err.code==='auth/wrong-password')fErr('password',eMsg('auth/wrong-password'));
+    else toast(eMsg(err.code),true);
+  }).finally(function(){document.getElementById('btn-signin').disabled=false;hideOv();});
+}
+
+// VOICE
+var activeRec=null;
+function startVoice(inputId,btnId,demoEn,demoNl){
+  var btn=document.getElementById(btnId);var inp=document.getElementById(inputId);
+  var ind=document.getElementById('vind');var demoVal=lang==='nl'?demoNl:demoEn;
+  if(activeRec){try{activeRec.stop();}catch(e){}activeRec=null;}
+  document.querySelectorAll('.vb').forEach(function(b){b.classList.remove('listening');});
+  ind.classList.remove('show');btn.classList.add('listening');ind.classList.add('show');
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(SR){
+    var rec=new SR();activeRec=rec;rec.lang=lang==='nl'?'nl-NL':'en-GB';rec.interimResults=false;
+    rec.onresult=function(e){inp.value=e.results[0][0].transcript;cleanup();};
+    rec.onerror=function(){inp.value=demoVal;cleanup();};
+    rec.onend=function(){if(btn.classList.contains('listening'))cleanup();};
+    try{rec.start();}catch(e){inp.value=demoVal;cleanup();}
+  }else{setTimeout(function(){inp.value=demoVal;cleanup();},2000);}
+  function cleanup(){btn.classList.remove('listening');ind.classList.remove('show');activeRec=null;}
+}
+
+// AUTO-REDIRECT IF ALREADY LOGGED IN
+auth.onAuthStateChanged(function(user){
+  if(user){
+    localStorage.setItem('dm_user',JSON.stringify({name:user.displayName||user.email.split('@')[0],email:user.email,photo:user.photoURL||'',uid:user.uid}));
+    goHome('senior');
+  }
+});
+</script>
+</body>
+</html>
