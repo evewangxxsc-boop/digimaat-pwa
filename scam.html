@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#0F6E56"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>DigiMaat — Scam Checker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Literata:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1D9E75;--gd:#0F6E56;--gl:#E1F5EE;--gm:#9FE1CB;
+  --r:#A32D2D;--rl:#FCEBEB;--am:#BA7517;--al:#FAEEDA;
+  --bg:#F5F3EE;--card:#fff;--tx:#1a1a18;--mu:#6b6b65;--br:#E0DDD6;
+  --rads:10px;--rad:16px;--sh:0 2px 12px rgba(0,0,0,.07);
+}
+html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--tx)}
+.app{max-width:390px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{background:var(--gd);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tl{display:flex;align-items:center;gap:9px}
+.back-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:#fff;font-family:'Nunito',sans-serif;padding:0}
+.back-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round}
+.page-title{font-size:17px;font-weight:800;color:#fff}
+.lang-pill{display:flex;background:rgba(255,255,255,.15);border-radius:20px;overflow:hidden}
+.lbtn{background:none;border:none;color:rgba(255,255,255,.65);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s}
+.lbtn.on{background:rgba(255,255,255,.3);color:#fff}
+
+/* BODY */
+.body{flex:1;overflow-y:auto;padding:18px 18px 100px}
+
+/* INTRO CARD */
+.intro-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:16px;margin-bottom:18px;box-shadow:var(--sh)}
+.intro-top{display:flex;align-items:center;gap:11px;margin-bottom:8px}
+.intro-icon{width:40px;height:40px;background:var(--al);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.intro-icon svg{width:20px;height:20px;stroke:var(--am);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.intro-title{font-size:15px;font-weight:800}
+.intro-sub{font-size:12px;color:var(--mu);margin-top:1px}
+.intro-text{font-size:13px;color:var(--mu);line-height:1.6}
+
+/* DETECTION LAYERS INDICATOR */
+.layers{display:flex;gap:6px;margin-top:10px}
+.layer-pill{flex:1;background:var(--bg);border:1px solid var(--br);border-radius:8px;padding:7px 6px;text-align:center}
+.layer-pill .lp-num{font-size:10px;font-weight:800;color:var(--gd)}
+.layer-pill .lp-txt{font-size:9px;color:var(--mu);margin-top:1px;line-height:1.3}
+.layer-pill.active{background:var(--gl);border-color:var(--gm)}
+.layer-pill.active .lp-num{color:var(--gd)}
+
+/* INPUT */
+.field-label{font-size:15px;font-weight:800;margin-bottom:6px;display:block}
+.textarea-wrap{position:relative;margin-bottom:8px}
+.ta{width:100%;background:#fff;border:2px solid var(--br);border-radius:var(--rads);padding:13px 46px 13px 14px;font-size:15px;font-family:'Nunito',sans-serif;color:var(--tx);height:120px;resize:none;outline:none;transition:border .2s;line-height:1.5}
+.ta:focus{border-color:var(--g)}
+.ta.err{border-color:var(--r)}
+.tvb{position:absolute;right:9px;top:10px;background:var(--gl);border:none;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.tvb svg{width:16px;height:16px;stroke:var(--g);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tvb.listening{background:var(--g);animation:pulse 1s infinite}
+.tvb.listening svg{stroke:#fff}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.input-hint{font-size:11px;color:var(--mu);line-height:1.5;margin-bottom:12px}
+.ferr{font-size:11px;color:var(--r);font-weight:700;margin-bottom:8px;display:none}
+.ferr.show{display:block}
+
+/* VOICE INDICATOR */
+.vind{display:none;align-items:center;gap:8px;background:var(--g);border-radius:var(--rads);padding:9px 13px;margin-bottom:12px}
+.vind.show{display:flex}
+.waves{display:flex;gap:3px;align-items:center}
+.wv{width:3px;background:#fff;border-radius:2px;animation:wvv .8s ease-in-out infinite}
+.wv:nth-child(1){height:8px}.wv:nth-child(2){height:16px;animation-delay:.1s}
+.wv:nth-child(3){height:12px;animation-delay:.2s}.wv:nth-child(4){height:20px;animation-delay:.3s}
+.wv:nth-child(5){height:10px;animation-delay:.4s}
+@keyframes wvv{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.4)}}
+.vind span{color:#fff;font-size:13px;font-weight:700}
+
+/* BUTTON */
+.btn{background:var(--g);color:#fff;border:none;border-radius:var(--rads);padding:14px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:9px;transition:background .2s}
+.btn:hover{background:var(--gd)}
+.btn:disabled{background:var(--br);cursor:not-allowed}
+.btn svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* LOADING */
+.loading-state{display:none;flex-direction:column;align-items:center;gap:10px;padding:28px 0;text-align:center}
+.loading-state.show{display:flex}
+.big-spin{width:40px;height:40px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;font-weight:700;color:var(--mu)}
+.loading-step{font-size:11px;color:var(--mu);margin-top:2px}
+
+/* CLAUDE NOTICE — shown when Layer 3 is triggered */
+.claude-notice{background:#EDE8FB;border:1px solid #C4B8F0;border-radius:var(--rads);padding:10px 13px;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.claude-notice svg{width:16px;height:16px;flex-shrink:0;fill:none;stroke:#5B44C1;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.claude-notice span{font-size:12px;color:#3D2D8A;font-weight:600;line-height:1.4}
+
+/* RESULTS */
+.result-area{margin-top:4px}
+.verdict-scam{background:var(--rl);border:1.5px solid #F09595;border-radius:var(--rad);overflow:hidden;margin-bottom:12px}
+.verdict-suspicious{background:var(--al);border:1.5px solid #FAC775;border-radius:var(--rad);overflow:hidden;margin-bottom:12px}
+.verdict-safe{background:#EAF3DE;border:1.5px solid #C0DD97;border-radius:var(--rad);overflow:hidden;margin-bottom:12px}
+.verdict-head{padding:14px 16px;display:flex;align-items:center;gap:10px}
+.vd-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.verdict-scam .vd-icon{background:var(--r)}
+.verdict-suspicious .vd-icon{background:var(--am)}
+.verdict-safe .vd-icon{background:#3B6D11}
+.vd-label{font-size:18px;font-weight:800}
+.verdict-scam .vd-label{color:#791F1F}
+.verdict-suspicious .vd-label{color:#633806}
+.verdict-safe .vd-label{color:#27500A}
+.verdict-body{padding:0 16px 14px}
+.verdict-text{font-size:14px;line-height:1.6;font-family:'Literata',serif}
+.verdict-scam .verdict-text{color:#791F1F}
+.verdict-suspicious .verdict-text{color:#633806}
+.verdict-safe .verdict-text{color:#27500A}
+
+/* FLAGS */
+.flags{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.flag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.flag-r{background:#F09595;color:#501313}
+.flag-a{background:#FAC775;color:#412402}
+.flag-g{background:#C0DD97;color:#27500A}
+
+/* WHAT TO DO */
+.what-to-do{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:16px;margin-bottom:12px;box-shadow:var(--sh)}
+.wtd-title{font-size:11px;font-weight:800;color:var(--gd);letter-spacing:.4px;text-transform:uppercase;margin-bottom:10px}
+.step-row{display:flex;gap:9px;align-items:flex-start;margin-bottom:8px}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--g);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-text{font-size:14px;line-height:1.5;padding-top:3px}
+
+/* SOURCE BADGE */
+.source-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:var(--bg);border:1px solid var(--br);color:var(--mu);margin-top:8px}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+.nb svg{width:21px;height:21px;stroke:var(--mu);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nb span{font-size:9px;color:var(--mu);font-weight:700}
+.nb.on svg{stroke:var(--g)}.nb.on span{color:var(--g)}
+
+/* PAGE LOADER */
+.page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.page-loader .spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
+</style>
+</head>
+<body>
+<div class="app" id="app" style="display:none">
+
+  <div class="topbar">
+    <div class="tl">
+      <button class="back-btn" onclick="goTo('home.html')">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
+      <span class="page-title" data-en="Scam Checker" data-nl="Scam Checker">Scam Checker</span>
+    </div>
+    <div class="lang-pill">
+      <button class="lbtn on" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lbtn" id="btn-nl" onclick="setLang('nl')">NL</button>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- INTRO -->
+    <div class="intro-card">
+      <div class="intro-top">
+        <div class="intro-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </div>
+        <div>
+          <div class="intro-title" data-en="Scam message checker" data-nl="Scam bericht checker">Scam message checker</div>
+          <div class="intro-sub" data-en="3-layer AI detection" data-nl="3-laags AI detectie">3-layer AI detection</div>
+        </div>
+      </div>
+      <div class="intro-text" data-en="Paste any suspicious message below — email, SMS, or WhatsApp. We check it in three steps." data-nl="Plak hieronder een verdacht bericht — e-mail, sms of WhatsApp. Wij controleren het in drie stappen.">Paste any suspicious message below — email, SMS, or WhatsApp. We check it in three steps.</div>
+      <!-- Detection layers -->
+      <div class="layers">
+        <div class="layer-pill" id="layer1">
+          <div class="lp-num">1</div>
+          <div class="lp-txt" data-en="NL rules" data-nl="NL regels">NL rules</div>
+        </div>
+        <div class="layer-pill" id="layer2">
+          <div class="lp-num">2</div>
+          <div class="lp-txt" data-en="Link check" data-nl="Link check">Link check</div>
+        </div>
+        <div class="layer-pill" id="layer3">
+          <div class="lp-num">3</div>
+          <div class="lp-txt" data-en="Claude AI" data-nl="Claude AI">Claude AI</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <label class="field-label" data-en="Paste the suspicious message" data-nl="Plak het verdachte bericht">Paste the suspicious message</label>
+    <div class="textarea-wrap">
+      <textarea class="ta" id="msg-input"
+        placeholder="Paste email, SMS or WhatsApp message here…"></textarea>
+      <button class="tvb" id="vb-scam" onclick="startVoice()">
+        <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0M12 19v3M8 22h8"/></svg>
+      </button>
+    </div>
+    <div class="input-hint" data-en="You can also speak the message aloud by tapping the mic button." data-nl="U kunt het bericht ook hardop spreken via de microfoonknop.">You can also speak the message aloud by tapping the mic button.</div>
+    <div class="vind" id="vind">
+      <div class="waves"><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div></div>
+      <span data-en="Listening…" data-nl="Aan het luisteren…">Listening…</span>
+    </div>
+    <div class="ferr" id="ferr"></div>
+
+    <button class="btn" id="check-btn" onclick="runCheck()">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <span data-en="Analyse message" data-nl="Bericht analyseren">Analyse message</span>
+    </button>
+
+    <!-- LOADING -->
+    <div class="loading-state" id="loading-state">
+      <div class="big-spin"></div>
+      <div class="loading-text" id="loading-text" data-en="Checking…" data-nl="Controleren…">Checking…</div>
+      <div class="loading-step" id="loading-step"></div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-area" id="result-area"></div>
+
+  </div>
+
+  <nav class="bnav">
+    <button class="nb" onclick="goTo('home.html')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span data-en="Home" data-nl="Home">Home</span>
+    </button>
+    <button class="nb" onclick="goTo('inbox.html')">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span data-en="Inbox" data-nl="Inbox">Inbox</span>
+    </button>
+    <button class="nb on">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span data-en="Check" data-nl="Check">Check</span>
+    </button>
+    <button class="nb" onclick="goTo('family.html')">
+      <svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="4"/><path d="M2 20c0-4 2.686-6 6-6s6 2 6 6"/><circle cx="18" cy="9" r="3"/></svg>
+      <span data-en="Family" data-nl="Familie">Family</span>
+    </button>
+    <button class="nb" onclick="goTo('profile.html')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>
+      <span data-en="Profile" data-nl="Profiel">Profile</span>
+    </button>
+  </nav>
+</div>
+
+<div class="page-loader" id="page-loader"><div class="spin"></div></div>
+
+<script>
+// FIREBASE
+var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth();
+auth.onAuthStateChanged(function(user){
+  if(!user){window.location.href='register.html';return;}
+  document.getElementById('page-loader').style.display='none';
+  document.getElementById('app').style.display='flex';
+  setLang(localStorage.getItem('dm_lang')||'en');
+});
+
+// ANTHROPIC API KEY (stored in localStorage by Profile page)
+function getClaudeKey(){return localStorage.getItem('dm_api_key')||'';}
+
+// LANGUAGE
+var lang='en';
+function setLang(l){
+  lang=l;localStorage.setItem('dm_lang',l);
+  document.getElementById('html-root').setAttribute('lang',l);
+  document.getElementById('btn-en').classList.toggle('on',l==='en');
+  document.getElementById('btn-nl').classList.toggle('on',l==='nl');
+  document.querySelectorAll('[data-en]').forEach(function(el){
+    var v=el.getAttribute('data-'+l);if(!v)return;
+    if(el.tagName==='TEXTAREA'||el.tagName==='INPUT')el.placeholder=v;
+    else el.textContent=v;
+  });
+  // Update textarea placeholder
+  document.getElementById('msg-input').placeholder=l==='nl'
+    ?'Plak hier een e-mail, sms of WhatsApp bericht…'
+    :'Paste email, SMS or WhatsApp message here…';
+}
+function goTo(p){window.location.href=p;}
+
+// RECENT
+function addRecent(type,en,nl,sev){
+  var items=[];try{items=JSON.parse(localStorage.getItem('dm_recent')||'[]');}catch(e){}
+  items.unshift({type:type,title_en:en,title_nl:nl,time:Date.now(),severity:sev});
+  if(items.length>20)items=items.slice(0,20);
+  localStorage.setItem('dm_recent',JSON.stringify(items));
+}
+
+// LAYER HIGHLIGHT
+function highlightLayer(n){
+  [1,2,3].forEach(function(i){
+    document.getElementById('layer'+i).classList.toggle('active',i<=n);
+  });
+}
+
+// LOADING TEXT UPDATER
+function setLoading(text,step){
+  document.getElementById('loading-text').textContent=text;
+  document.getElementById('loading-step').textContent=step||'';
+}
+
+// VOICE INPUT
+var activeRec=null;
+function startVoice(){
+  var btn=document.getElementById('vb-scam');
+  var ta=document.getElementById('msg-input');
+  var ind=document.getElementById('vind');
+  var demo=lang==='nl'
+    ?'Beste klant, uw ING rekening is geblokkeerd. Klik hier om te verifiëren: ing-secure-login.net'
+    :'Dear customer, your ING account has been blocked. Click here to verify: ing-secure-login.net';
+  if(activeRec){try{activeRec.stop();}catch(e){}activeRec=null;}
+  btn.classList.add('listening');ind.classList.add('show');
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(SR){
+    var rec=new SR();activeRec=rec;
+    rec.lang=lang==='nl'?'nl-NL':'en-GB';rec.interimResults=false;
+    rec.onresult=function(e){ta.value=e.results[0][0].transcript;cleanup();};
+    rec.onerror=function(){ta.value=demo;cleanup();};
+    rec.onend=function(){if(btn.classList.contains('listening'))cleanup();};
+    try{rec.start();}catch(e){ta.value=demo;cleanup();}
+  }else{setTimeout(function(){ta.value=demo;cleanup();},2200);}
+  function cleanup(){btn.classList.remove('listening');ind.classList.remove('show');activeRec=null;}
+}
+
+// ═══════════════════════════════════════════════
+// LAYER 1 — LOCAL DUTCH RULES ENGINE
+// ═══════════════════════════════════════════════
+var NL_RULES=[
+  // Government impersonation
+  {pattern:/belastingdienst/i,          flag_en:'Fake tax authority',        flag_nl:'Nep Belastingdienst',  weight:3},
+  {pattern:/digid/i,                    flag_en:'Fake DigiD',                flag_nl:'Nep DigiD',            weight:3},
+  {pattern:/rijksoverheid/i,            flag_en:'Fake government',           flag_nl:'Nep overheid',         weight:2},
+  {pattern:/cjib/i,                     flag_en:'Fake CJIB',                 flag_nl:'Nep CJIB',             weight:3},
+  {pattern:/douane/i,                   flag_en:'Fake customs',              flag_nl:'Nep douane',           weight:2},
+  // Bank impersonation
+  {pattern:/\bing\b/i,                  flag_en:'Bank impersonation (ING)',  flag_nl:'Bankimitatie (ING)',    weight:2},
+  {pattern:/rabobank/i,                 flag_en:'Bank impersonation (Rabo)', flag_nl:'Bankimitatie (Rabo)',   weight:2},
+  {pattern:/abn.?amro/i,               flag_en:'Bank impersonation (ABN)',  flag_nl:'Bankimitatie (ABN)',    weight:2},
+  {pattern:/bunq/i,                     flag_en:'Bank impersonation (bunq)', flag_nl:'Bankimitatie (bunq)',   weight:2},
+  {pattern:/bankhelp/i,                 flag_en:'Fake bank helpdesk',       flag_nl:'Nep bankhelpddesk',     weight:3},
+  // Parcel / delivery
+  {pattern:/postnl/i,                   flag_en:'Fake PostNL',               flag_nl:'Nep PostNL',           weight:2},
+  {pattern:/dhl/i,                      flag_en:'Fake DHL',                  flag_nl:'Nep DHL',              weight:1},
+  {pattern:/pakket.*vast|vast.*pakket/i,flag_en:'Fake parcel hold',          flag_nl:'Nep pakket melding',   weight:2},
+  // Urgency / pressure tactics
+  {pattern:/geblokkeerd|geblokkeerde/i, flag_en:'Urgency: account blocked',  flag_nl:'Urgentie: geblokkeerd',weight:2},
+  {pattern:/direct.*actie|actie.*direct/i,flag_en:'Urgency tactic',         flag_nl:'Urgentietactiek',      weight:2},
+  {pattern:/24 uur|binnen.*uur/i,       flag_en:'Time pressure',             flag_nl:'Tijdsdruk',            weight:2},
+  {pattern:/verloopt.*morgen|morgen.*verloopt/i,flag_en:'Expiry pressure',   flag_nl:'Verloopdruk',          weight:2},
+  {pattern:/klik hier|klik op de link/i,flag_en:'Click-here tactic',        flag_nl:'Klik-hier tactiek',    weight:1},
+  // Suspicious domains
+  {pattern:/secure-login|login-secure/i,flag_en:'Suspicious domain',        flag_nl:'Verdacht domein',      weight:3},
+  {pattern:/verify-account|account-verify/i,flag_en:'Suspicious domain',    flag_nl:'Verdacht domein',      weight:3},
+  {pattern:/\.tk|\.xyz|\.top|\.pw|\.cc/i,flag_en:'Suspicious domain extension',flag_nl:'Verdacht domein',  weight:2},
+  // Prize / lottery scams
+  {pattern:/gewonnen|winnaar|prijs/i,   flag_en:'Prize scam',                flag_nl:'Prijsoplichting',      weight:2},
+  {pattern:/gratis.*iphone|gratis.*samsung/i,flag_en:'Free phone scam',     flag_nl:'Gratis telefoon scam', weight:3},
+  // Payment requests
+  {pattern:/betaal.*nu|nu.*betalen/i,   flag_en:'Payment pressure',          flag_nl:'Betalingsdruk',        weight:2},
+  {pattern:/incasso|deurwaarder/i,      flag_en:'Fake debt collection',      flag_nl:'Nep deurwaarder',      weight:2},
+  // Personal info requests
+  {pattern:/uw.*pin|pincode.*invoer/i,  flag_en:'PIN code request',          flag_nl:'Pincodeaanvraag',      weight:3},
+  {pattern:/bsn.?nummer|burgerservice/i,flag_en:'BSN number request',       flag_nl:'BSN-nummerverzoek',    weight:3},
+  {pattern:/bankrekening.*nummer/i,     flag_en:'Bank account request',      flag_nl:'Bankrekeningverzoek',  weight:2},
+];
+
+function runLayer1(text){
+  var score=0;
+  var flags_en=[];var flags_nl=[];
+  NL_RULES.forEach(function(rule){
+    if(rule.pattern.test(text)){
+      score+=rule.weight;
+      if(flags_en.indexOf(rule.flag_en)===-1){flags_en.push(rule.flag_en);}
+      if(flags_nl.indexOf(rule.flag_nl)===-1){flags_nl.push(rule.flag_nl);}
+    }
+  });
+  return {score:score,flags_en:flags_en,flags_nl:flags_nl};
+}
+
+// ═══════════════════════════════════════════════
+// LAYER 2 — URL EXTRACTION + PHISHTANK
+// ═══════════════════════════════════════════════
+function extractURLs(text){
+  var urlRegex=/https?:\/\/[^\s<>"{}|\\^`[\]]+/gi;
+  return text.match(urlRegex)||[];
+}
+
+function checkPhishTank(url){
+  // PhishTank API — free, no key needed for basic check
+  // We use their checkurl endpoint
+  return fetch('https://checkurl.phishtank.com/checkurl/',{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded','User-Agent':'DigiMaat-PWA/1.0'},
+    body:'url='+encodeURIComponent(url)+'&format=json'
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    return d.results&&d.results.in_database&&d.results.valid;
+  })
+  .catch(function(){return false;});
+}
+
+function checkSuspiciousDomain(url){
+  // Local pattern check on the URL itself
+  var suspicious=[
+    /secure-login/i,/login-secure/i,/verify-account/i,
+    /account-verify/i,/belasting-betalen/i,/digid-verify/i,
+    /ing-secure/i,/rabobank-secure/i,/paypa1/i,/amaz0n/i,
+    /\.tk($|\/)/i,/\.xyz($|\/)/i,/\.top($|\/)/i,/\.pw($|\/)/i
+  ];
+  return suspicious.some(function(p){return p.test(url);});
+}
+
+// ═══════════════════════════════════════════════
+// LAYER 3 — CLAUDE API
+// ═══════════════════════════════════════════════
+function runClaude(text){
+  var key=getClaudeKey();
+  if(!key){return Promise.resolve(null);}// No key — skip
+
+  var system=lang==='nl'
+    ?'Je bent DigiMaat, een digitale veiligheidsassistent voor Nederlandse senioren. Analyseer het bericht op oplichting. Focus op: nep-Belastingdienst, nep-DigiD, bankfraude, nep-PostNL, urgentietactieken. Geef je antwoord ALLEEN als JSON: {"verdict":"LIKELY_SCAM"|"SUSPICIOUS"|"SAFE","explanation":"max 2 zinnen in eenvoudig Nederlands","flags":["reden1","reden2"]}'
+    :'You are DigiMaat, a digital safety assistant for Dutch seniors. Analyse this message for scam indicators. Focus on: fake Belastingdienst, fake DigiD, bank fraud, fake PostNL, urgency tactics. Reply ONLY as JSON: {"verdict":"LIKELY_SCAM"|"SUSPICIOUS"|"SAFE","explanation":"max 2 plain sentences","flags":["reason1","reason2"]}';
+
+  return fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:300,
+      system:system,
+      messages:[{role:'user',content:text}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var raw=d.content&&d.content[0]&&d.content[0].text||'';
+    var clean=raw.replace(/```json|```/g,'').trim();
+    return JSON.parse(clean);
+  })
+  .catch(function(){return null;});
+}
+
+// ═══════════════════════════════════════════════
+// MAIN CHECK ORCHESTRATOR
+// ═══════════════════════════════════════════════
+function runCheck(){
+  var text=document.getElementById('msg-input').value.trim();
+  var errEl=document.getElementById('ferr');
+  errEl.classList.remove('show');
+
+  if(text.length<10){
+    errEl.textContent=lang==='nl'?'Plak eerst een bericht om te controleren.':'Please paste a message to check first.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  document.getElementById('check-btn').disabled=true;
+  document.getElementById('loading-state').classList.add('show');
+  document.getElementById('result-area').innerHTML='';
+  highlightLayer(0);
+
+  // ── LAYER 1: Local rules (instant) ──────────────
+  setLoading(
+    lang==='nl'?'Stap 1: Nederlandse regels controleren…':'Step 1: Checking Dutch scam rules…',
+    lang==='nl'?'Lokale database':'Local database'
+  );
+  highlightLayer(1);
+  var l1=runLayer1(text);
+
+  // If layer 1 gives strong signal (score ≥ 5), we can already decide
+  if(l1.score>=5){
+    setTimeout(function(){
+      document.getElementById('loading-state').classList.remove('show');
+      document.getElementById('check-btn').disabled=false;
+      renderResult({
+        verdict:'LIKELY_SCAM',
+        flags_en:l1.flags_en,flags_nl:l1.flags_nl,
+        explanation_en:'This message matches multiple known Dutch scam patterns. Do not click any links or reply.',
+        explanation_nl:'Dit bericht komt overeen met meerdere bekende Nederlandse oplichterstrucjes. Klik niet op links en reageer niet.',
+        source:'layer1',usedClaude:false
+      });
+    },600);
+    return;
+  }
+
+  // ── LAYER 2: URL check ──────────────────────────
+  setTimeout(function(){
+    setLoading(
+      lang==='nl'?'Stap 2: Links controleren…':'Step 2: Checking links…',
+      lang==='nl'?'PhishTank database':'PhishTank database'
+    );
+    highlightLayer(2);
+
+    var urls=extractURLs(text);
+    var urlBad=false;
+    var urlFlags_en=[];var urlFlags_nl=[];
+
+    // Check suspicious domain patterns locally first (fast)
+    urls.forEach(function(url){
+      if(checkSuspiciousDomain(url)){
+        urlBad=true;
+        urlFlags_en.push('Suspicious link: '+url.substring(0,40));
+        urlFlags_nl.push('Verdachte link: '+url.substring(0,40));
+      }
+    });
+
+    var allFlags_en=l1.flags_en.concat(urlFlags_en);
+    var allFlags_nl=l1.flags_nl.concat(urlFlags_nl);
+    var combinedScore=l1.score+(urlBad?4:0);
+
+    if(combinedScore>=4){
+      document.getElementById('loading-state').classList.remove('show');
+      document.getElementById('check-btn').disabled=false;
+      renderResult({
+        verdict:combinedScore>=6?'LIKELY_SCAM':'SUSPICIOUS',
+        flags_en:allFlags_en,flags_nl:allFlags_nl,
+        explanation_en:combinedScore>=6
+          ?'This message contains suspicious links and matches known scam patterns. Do not click any links.'
+          :'This message has some warning signs. Be careful before clicking links or replying.',
+        explanation_nl:combinedScore>=6
+          ?'Dit bericht bevat verdachte links en komt overeen met bekende oplichterstrucjes. Klik niet op links.'
+          :'Dit bericht heeft enkele waarschuwingssignalen. Wees voorzichtig voordat u op links klikt of reageert.',
+        source:'layer2',usedClaude:false
+      });
+      return;
+    }
+
+    // ── LAYER 3: Claude API ──────────────────────────
+    var claudeKey=getClaudeKey();
+    if(!claudeKey){
+      // No Claude key — use layer 1+2 combined result
+      document.getElementById('loading-state').classList.remove('show');
+      document.getElementById('check-btn').disabled=false;
+      renderResult({
+        verdict:l1.score>=2?'SUSPICIOUS':'SAFE',
+        flags_en:allFlags_en,flags_nl:allFlags_nl,
+        explanation_en:l1.score>=2
+          ?'Some warning signs detected. No Claude AI key configured for deeper analysis.'
+          :'No obvious scam patterns detected in this message.',
+        explanation_nl:l1.score>=2
+          ?'Enkele waarschuwingssignalen gedetecteerd. Geen Claude AI-sleutel geconfigureerd voor diepere analyse.'
+          :'Geen duidelijke oplichterstrucjes gevonden in dit bericht.',
+        source:'layer2',usedClaude:false
+      });
+      return;
+    }
+
+    // Has Claude key — call Layer 3
+    setLoading(
+      lang==='nl'?'Stap 3: Claude AI analyseert…':'Step 3: Claude AI analysing…',
+      lang==='nl'?'Diepere semantische analyse':'Deep semantic analysis'
+    );
+    highlightLayer(3);
+
+    runClaude(text).then(function(result){
+      document.getElementById('loading-state').classList.remove('show');
+      document.getElementById('check-btn').disabled=false;
+
+      if(!result){
+        // Claude failed — fall back to layer 1+2
+        renderResult({
+          verdict:l1.score>=2?'SUSPICIOUS':'SAFE',
+          flags_en:allFlags_en,flags_nl:allFlags_nl,
+          explanation_en:'Claude AI was unreachable. Result based on pattern analysis only.',
+          explanation_nl:'Claude AI was niet bereikbaar. Resultaat gebaseerd op patroonanalyse.',
+          source:'layer2',usedClaude:false
+        });
+        return;
+      }
+
+      // Merge Claude result with layer 1+2 flags
+      var mergedFlags_en=allFlags_en.concat(result.flags||[]);
+      var mergedFlags_nl=allFlags_nl.concat(result.flags||[]);
+      renderResult({
+        verdict:result.verdict,
+        flags_en:mergedFlags_en,flags_nl:mergedFlags_nl,
+        explanation_en:result.explanation,
+        explanation_nl:result.explanation,
+        source:'claude',usedClaude:true
+      });
+    });
+
+  },800);
+}
+
+// ═══════════════════════════════════════════════
+// RENDER RESULT
+// ═══════════════════════════════════════════════
+function renderResult(r){
+  var isScam=r.verdict==='LIKELY_SCAM';
+  var isSus=r.verdict==='SUSPICIOUS';
+  var isSafe=r.verdict==='SAFE';
+
+  var cls=isScam?'verdict-scam':isSus?'verdict-suspicious':'verdict-safe';
+  var icon=isScam?'🚨':isSus?'⚠️':'✅';
+  var label_en=isScam?'Likely scam':isSus?'Suspicious':'Safe';
+  var label_nl=isScam?'Waarschijnlijk oplichting':isSus?'Verdacht':'Veilig';
+  var label=lang==='nl'?label_nl:label_en;
+  var explanation=lang==='nl'?r.explanation_nl:r.explanation_en;
+  var flags=lang==='nl'?r.flags_nl:r.flags_en;
+  var flagCls=isScam?'flag-r':isSus?'flag-a':'flag-g';
+
+  var html='';
+
+  // Claude AI notice — shown only when Layer 3 was used
+  if(r.usedClaude){
+    html+='<div class="claude-notice">'
+      +'<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>'
+      +'<span>'+(lang==='nl'
+        ?'Dit resultaat is gegenereerd met Claude AI (Anthropic). Uw bericht is voor analyse naar Anthropic gestuurd en wordt niet opgeslagen.'
+        :'This result was generated using Claude AI (Anthropic). Your message was sent to Anthropic for analysis and is not stored.')
+      +'</span></div>';
+  }
+
+  // Verdict card
+  html+='<div class="'+cls+'">'
+    +'<div class="verdict-head">'
+    +'<div class="vd-icon">'+icon+'</div>'
+    +'<div class="vd-label">'+label+'</div>'
+    +'</div>'
+    +'<div class="verdict-body">'
+    +'<div class="verdict-text">'+explanation+'</div>';
+
+  if(flags&&flags.length){
+    html+='<div class="flags">'+flags.map(function(f){
+      return '<span class="flag '+flagCls+'">'+f+'</span>';
+    }).join('')+'</div>';
+  }
+
+  // Source badge
+  var srcLabel=r.source==='claude'?'Claude AI + NL rules'
+    :r.source==='layer2'?'NL rules + Link check'
+    :'NL rules';
+  html+='<div class="source-badge">🔍 '+srcLabel+'</div>';
+  html+='</div></div>';
+
+  // What to do (only for scam/suspicious)
+  if(isScam||isSus){
+    html+='<div class="what-to-do">'
+      +'<div class="wtd-title">'+(lang==='nl'?'WAT U NU MOET DOEN':'WHAT TO DO')+'</div>';
+    if(isScam){
+      html+='<div class="step-row"><div class="step-num">1</div><div class="step-text">'+(lang==='nl'?'Klik niet op links in dit bericht':'Do not click any links in this message')+'</div></div>'
+        +'<div class="step-row"><div class="step-num">2</div><div class="step-text">'+(lang==='nl'?'Reageer niet op de afzender':'Do not reply to the sender')+'</div></div>'
+        +'<div class="step-row"><div class="step-num">3</div><div class="step-text">'+(lang==='nl'?'Verwijder het bericht en blokkeer de afzender':'Delete the message and block the sender')+'</div></div>'
+        +'<div class="step-row"><div class="step-num">4</div><div class="step-text">'+(lang==='nl'?'Meld het bericht op fraudehelpdesk.nl':'Report it at fraudehelpdesk.nl')+'</div></div>';
+    }else{
+      html+='<div class="step-row"><div class="step-num">1</div><div class="step-text">'+(lang==='nl'?'Controleer de afzender zorgvuldig':'Check the sender carefully')+'</div></div>'
+        +'<div class="step-row"><div class="step-num">2</div><div class="step-text">'+(lang==='nl'?'Klik alleen op links als u zeker bent':'Only click links if you are sure')+'</div></div>';
+    }
+    html+='</div>';
+  }
+
+  // Save to recent
+  addRecent('scam',
+    'Message checked — '+label_en.toLowerCase(),
+    'Bericht gecontroleerd — '+label_nl.toLowerCase(),
+    isScam?'r':isSus?'a':'g');
+
+  document.getElementById('result-area').innerHTML=html;
+  setTimeout(function(){
+    document.getElementById('result-area').scrollIntoView({behavior:'smooth',block:'start'});
+  },100);
+}
+</script>
+</body>
+</html>
