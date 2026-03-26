@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#0F6E56"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>DigiMaat — Inbox Scan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Literata:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1D9E75;--gd:#0F6E56;--gl:#E1F5EE;--gm:#9FE1CB;
+  --r:#A32D2D;--rl:#FCEBEB;--am:#BA7517;--al:#FAEEDA;
+  --bg:#F5F3EE;--card:#fff;--tx:#1a1a18;--mu:#6b6b65;--br:#E0DDD6;
+  --rads:10px;--rad:16px;--sh:0 2px 12px rgba(0,0,0,.07);
+}
+html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--tx)}
+.app{max-width:390px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{background:var(--gd);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tl{display:flex;align-items:center;gap:9px}
+.back-btn{background:none;border:none;cursor:pointer;padding:0}
+.back-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;display:block}
+.page-title{font-size:17px;font-weight:800;color:#fff}
+.lang-pill{display:flex;background:rgba(255,255,255,.15);border-radius:20px;overflow:hidden}
+.lbtn{background:none;border:none;color:rgba(255,255,255,.65);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s}
+.lbtn.on{background:rgba(255,255,255,.3);color:#fff}
+
+/* VIEWS */
+.view{display:none;flex:1;overflow-y:auto;padding:18px 18px 100px;flex-direction:column;gap:14px}
+.view.active{display:flex}
+
+/* SECTION LABEL */
+.sec-lbl{font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;margin-bottom:-4px}
+
+/* CONNECT CARD */
+.connect-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh)}
+.cc-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.cc-left{display:flex;align-items:center;gap:11px}
+.cc-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cc-name{font-size:15px;font-weight:800}
+.cc-sub{font-size:11px;color:var(--mu);margin-top:1px}
+.conn-btn{border:none;border-radius:var(--rads);padding:8px 14px;font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s}
+.conn-btn svg{width:13px;height:13px;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.conn-btn.off{background:var(--g);color:#fff}.conn-btn.off svg{stroke:#fff}
+.conn-btn.on{background:var(--gl);color:var(--gd);border:1.5px solid var(--gm)}.conn-btn.on svg{stroke:var(--gd)}
+
+/* SCAN OPTIONS PANEL */
+.cc-body{padding:14px 16px;border-top:1px solid var(--br);display:none;flex-direction:column;gap:10px}
+.cc-body.show{display:flex}
+.scan-opt{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:var(--rads);border:1px solid var(--br)}
+.scan-opt-left{display:flex;align-items:center;gap:9px}
+.scan-opt-left svg{width:15px;height:15px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sot{font-size:13px;font-weight:700}
+.sos{font-size:10px;color:var(--mu);margin-top:1px}
+
+/* DATE RANGE */
+.date-range{display:flex;align-items:center;gap:6px}
+.date-inp{background:#fff;border:1.5px solid var(--br);border-radius:8px;padding:5px 8px;font-size:12px;font-weight:700;font-family:'Nunito',sans-serif;color:var(--tx);outline:none;cursor:pointer;transition:border .15s}
+.date-inp:focus{border-color:var(--g)}
+.date-sep{font-size:11px;color:var(--mu);font-weight:700}
+
+/* TOGGLE */
+.tog{width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;flex-shrink:0;border:none;background:var(--g);transition:background .2s}
+.tok{width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;transition:right .2s}
+.tog.off{background:var(--br)}.tog.off .tok{right:22px}
+
+/* WHATSAPP EXPORT */
+.wa-export{background:var(--bg);border-radius:var(--rads);border:1px solid var(--br);padding:12px 14px}
+.wa-export-title{font-size:12px;font-weight:800;color:var(--tx);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.wa-export-title svg{width:13px;height:13px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wa-step{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px}
+.wa-num{width:18px;height:18px;border-radius:50%;background:var(--g);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.wa-step span{font-size:12px;color:var(--mu);line-height:1.5;padding-top:1px}
+.wa-upload{background:#fff;border:1.5px dashed var(--br);border-radius:var(--rads);padding:10px;font-size:12px;font-weight:700;color:var(--g);font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;transition:border-color .15s}
+.wa-upload:hover{border-color:var(--g)}
+.wa-upload svg{width:14px;height:14px;stroke:var(--g);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wa-file-name{font-size:11px;color:var(--gd);font-weight:700;margin-top:5px;text-align:center;display:none}
+.wa-file-name.show{display:block}
+
+/* SCAN BUTTON */
+.btn{background:var(--g);color:#fff;border:none;border-radius:var(--rads);padding:13px;font-size:15px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:9px;transition:background .2s}
+.btn:hover{background:var(--gd)}
+.btn:disabled{background:var(--br);cursor:not-allowed}
+.btn svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* NOTIFICATION CARD */
+.notif-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:14px 16px;box-shadow:var(--sh);display:flex;align-items:center;gap:12px}
+.notif-ico{width:36px;height:36px;border-radius:9px;background:var(--gl);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notif-ico svg{width:18px;height:18px;stroke:var(--gd);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.notif-info{flex:1}
+.notif-title{font-size:14px;font-weight:800}
+.notif-sub{font-size:11px;color:var(--mu);margin-top:2px;line-height:1.4}
+.notif-status{font-size:10px;font-weight:700;margin-top:3px}
+.notif-status.on{color:var(--gd)}.notif-status.off{color:var(--mu)}
+
+/* PRIVACY / EXCLUSION */
+.privacy-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh)}
+.privacy-hd{padding:13px 16px;border-bottom:1px solid var(--br)}
+.privacy-title{font-size:15px;font-weight:800}
+.privacy-sub{font-size:12px;color:var(--mu);margin-top:3px;line-height:1.4}
+.excl-list{padding:10px 16px;display:flex;flex-direction:column;gap:7px}
+.excl-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg);border-radius:var(--rads);border:1px solid var(--br)}
+.excl-info{flex:1;min-width:0}
+.excl-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.excl-addr{font-size:11px;color:var(--mu);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.excl-rm{background:var(--rl);border:none;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;color:var(--r);cursor:pointer;font-family:'Nunito',sans-serif;flex-shrink:0;margin-left:8px}
+.add-excl-btn{margin:0 16px 14px;background:#fff;border:1.5px dashed var(--br);border-radius:var(--rads);padding:10px;font-size:13px;font-weight:700;color:var(--g);font-family:'Nunito',sans-serif;cursor:pointer;width:calc(100% - 32px);display:flex;align-items:center;justify-content:center;gap:6px;transition:border-color .15s}
+.add-excl-btn:hover{border-color:var(--g)}
+.add-excl-btn svg{width:14px;height:14px;stroke:var(--g);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* SCAN HISTORY */
+.hist-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh)}
+.hist-hd{padding:13px 16px;border-bottom:1px solid var(--br)}
+.hist-title{font-size:15px;font-weight:800}
+.hist-empty{padding:18px;text-align:center;font-size:13px;color:var(--mu)}
+.hist-row{padding:11px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--br);cursor:pointer}
+.hist-row:last-child{border-bottom:none}
+.hdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hinfo{flex:1}
+.hdate{font-size:13px;font-weight:700}
+.hcounts{font-size:11px;color:var(--mu);margin-top:2px}
+.harr{width:14px;height:14px;stroke:var(--br);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* SCANNING VIEW */
+.progress-wrap{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:24px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;box-shadow:var(--sh)}
+.progress-ring{position:relative;width:88px;height:88px}
+.pr-bg{fill:none;stroke:var(--br);stroke-width:7}
+.pr-fill{fill:none;stroke:var(--g);stroke-width:7;stroke-linecap:round;stroke-dasharray:251;stroke-dashoffset:251;transition:stroke-dashoffset .3s}
+.pr-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:20px;font-weight:800;color:var(--g)}
+.scan-prog-title{font-size:16px;font-weight:800}
+.scan-prog-sub{font-size:12px;color:var(--mu);line-height:1.5}
+.step-list{width:100%;display:flex;flex-direction:column;gap:7px}
+.sl-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mu);padding:6px 8px;border-radius:8px}
+.sl-row svg{width:14px;height:14px;flex-shrink:0;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.sl-row.done{color:var(--gd);background:var(--gl)}.sl-row.done svg{stroke:var(--gd)}
+.sl-row.cur{color:var(--am);background:var(--al)}.sl-row.cur svg{stroke:var(--am)}
+.privacy-note{background:var(--bg);border:1px solid var(--br);border-radius:var(--rads);padding:10px 13px;font-size:11px;color:var(--mu);text-align:center;line-height:1.6}
+
+/* RESULTS VIEW */
+.result-summary{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:16px;display:flex;justify-content:space-around;text-align:center;box-shadow:var(--sh)}
+.rs-num{font-size:26px;font-weight:800}
+.rs-label{font-size:11px;color:var(--mu);margin-top:3px}
+.rs-div{width:1px;background:var(--br)}
+.result-item{background:var(--card);border-radius:var(--rads);border:1px solid var(--br);padding:12px 14px;display:flex;align-items:flex-start;gap:10px;cursor:pointer;box-shadow:var(--sh);transition:transform .15s}
+.result-item:active{transform:scale(.98)}
+.ri-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.ri-info{flex:1;min-width:0}
+.ri-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri-from{font-size:11px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.ri-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.tag-r{background:var(--rl);color:var(--r)}
+.tag-a{background:var(--al);color:var(--am)}
+.ri-arr{width:14px;height:14px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:3px}
+.btn2{background:#fff;color:var(--g);border:2px solid var(--g);border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;transition:background .15s}
+.btn2:hover{background:var(--gl)}
+
+/* ADD EXCLUSION MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;display:none;align-items:flex-end;justify-content:center}
+.modal-ov.show{display:flex}
+.modal-sheet{background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 36px;width:100%;max-width:390px}
+.modal-handle{width:36px;height:4px;background:var(--br);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:14px}
+.modal-field{margin-bottom:12px}
+.modal-label{font-size:14px;font-weight:800;margin-bottom:5px;display:block}
+.modal-inp{width:100%;background:#fff;border:2px solid var(--br);border-radius:var(--rads);padding:12px 14px;font-size:15px;font-family:'Nunito',sans-serif;color:var(--tx);outline:none;transition:border .2s}
+.modal-inp:focus{border-color:var(--g)}
+.modal-actions{display:flex;gap:8px;margin-top:4px}
+.modal-cancel{flex:1;background:var(--bg);border:1.5px solid var(--br);border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer}
+.modal-save{flex:1;background:var(--g);border:none;border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;color:#fff;font-family:'Nunito',sans-serif;cursor:pointer}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+.nb svg{width:21px;height:21px;stroke:var(--mu);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nb span{font-size:9px;color:var(--mu);font-weight:700}
+.nb.on svg{stroke:var(--g)}.nb.on span{color:var(--g)}
+
+/* PAGE LOADER */
+.page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.pl-spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app" id="app" style="display:none">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tl">
+      <button class="back-btn" onclick="goTo('home.html')">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
+      <span class="page-title" data-en="Inbox Scan" data-nl="Inbox Scan">Inbox Scan</span>
+    </div>
+    <div class="lang-pill">
+      <button class="lbtn on" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lbtn" id="btn-nl" onclick="setLang('nl')">NL</button>
+    </div>
+  </div>
+
+  <!-- ══ VIEW: SETTINGS ══ -->
+  <div class="view active" id="view-settings">
+
+    <!-- GMAIL -->
+    <div class="sec-lbl" data-en="Connect accounts" data-nl="Accounts verbinden">Connect accounts</div>
+
+    <div class="connect-card">
+      <div class="cc-header">
+        <div class="cc-left">
+          <div class="cc-ico" style="background:#fef2f2">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA4335" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div>
+            <div class="cc-name">Gmail</div>
+            <div class="cc-sub" id="gmail-sub" data-en="Not connected" data-nl="Niet verbonden">Not connected</div>
+          </div>
+        </div>
+        <button class="conn-btn off" id="gmail-btn" onclick="toggleGmail()">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <span data-en="Connect" data-nl="Verbinden">Connect</span>
+        </button>
+      </div>
+      <div class="cc-body" id="gmail-body">
+        <!-- Date range -->
+        <div class="scan-opt">
+          <div class="scan-opt-left">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <div>
+              <div class="sot" data-en="Scan period" data-nl="Scanperiode">Scan period</div>
+              <div class="sos" data-en="Set start and end date" data-nl="Stel begin- en einddatum in">Set start and end date</div>
+            </div>
+          </div>
+          <div class="date-range">
+            <input class="date-inp" type="date" id="gmail-from"/>
+            <span class="date-sep">→</span>
+            <input class="date-inp" type="date" id="gmail-to"/>
+          </div>
+        </div>
+        <!-- Auto-scan -->
+        <div class="scan-opt">
+          <div class="scan-opt-left">
+            <svg viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+            <div>
+              <div class="sot" data-en="Auto-scan new mail" data-nl="Nieuwe mail automatisch scannen">Auto-scan new mail</div>
+              <div class="sos" data-en="Scan incoming messages daily" data-nl="Inkomende berichten dagelijks scannen">Scan incoming messages daily</div>
+            </div>
+          </div>
+          <button class="tog" id="tog-autoscan" onclick="toggleSetting('autoscan',this)"><div class="tok"></div></button>
+        </div>
+        <!-- Unknown senders only -->
+        <div class="scan-opt">
+          <div class="scan-opt-left">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>
+            <div>
+              <div class="sot" data-en="Unknown senders only" data-nl="Alleen onbekende afzenders">Unknown senders only</div>
+              <div class="sos" data-en="Skip messages from your contacts" data-nl="Berichten van contacten overslaan">Skip messages from your contacts</div>
+            </div>
+          </div>
+          <button class="tog off" id="tog-unknown" onclick="toggleSetting('unknown',this)"><div class="tok"></div></button>
+        </div>
+        <button class="btn" onclick="startScan('gmail')">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <span data-en="Start inbox scan" data-nl="Inbox scan starten">Start inbox scan</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- WHATSAPP -->
+    <div class="connect-card">
+      <div class="cc-header">
+        <div class="cc-left">
+          <div class="cc-ico" style="background:#f0fdf4">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+          </div>
+          <div>
+            <div class="cc-name">WhatsApp</div>
+            <div class="cc-sub" id="wa-sub" data-en="Export chat to scan" data-nl="Chat exporteren om te scannen">Export chat to scan</div>
+          </div>
+        </div>
+        <button class="conn-btn off" id="wa-btn" onclick="toggleWA()">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <span data-en="Upload" data-nl="Uploaden">Upload</span>
+        </button>
+      </div>
+      <div class="cc-body" id="wa-body">
+        <div class="wa-export">
+          <div class="wa-export-title">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span data-en="How to export a WhatsApp chat" data-nl="Hoe u een WhatsApp-chat exporteert">How to export a WhatsApp chat</span>
+          </div>
+          <div class="wa-step"><div class="wa-num">1</div><span data-en="Open WhatsApp and go to the suspicious chat" data-nl="Open WhatsApp en ga naar het verdachte gesprek">Open WhatsApp and go to the suspicious chat</span></div>
+          <div class="wa-step"><div class="wa-num">2</div><span data-en="Tap the three dots (⋮) → More → Export chat → Without media" data-nl="Tik op de drie puntjes (⋮) → Meer → Chat exporteren → Zonder media">Tap the three dots (⋮) → More → Export chat → Without media</span></div>
+          <div class="wa-step"><div class="wa-num">3</div><span data-en="Save the .txt file and upload it below" data-nl="Sla het .txt-bestand op en upload het hieronder">Save the .txt file and upload it below</span></div>
+          <input type="file" id="wa-file" accept=".txt" style="display:none" onchange="handleWAFile(event)"/>
+          <button class="wa-upload" onclick="document.getElementById('wa-file').click()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span data-en="Upload WhatsApp .txt export" data-nl="WhatsApp .txt export uploaden">Upload WhatsApp .txt export</span>
+          </button>
+          <div class="wa-file-name" id="wa-file-name"></div>
+        </div>
+        <button class="btn" id="wa-scan-btn" disabled onclick="startScan('whatsapp')">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <span data-en="Scan WhatsApp messages" data-nl="WhatsApp-berichten scannen">Scan WhatsApp messages</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- NOTIFICATION SETTING -->
+    <div class="sec-lbl" data-en="Notifications" data-nl="Meldingen">Notifications</div>
+    <div class="notif-card">
+      <div class="notif-ico">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <div class="notif-info">
+        <div class="notif-title" data-en="Suspicious message alerts" data-nl="Meldingen voor verdachte berichten">Suspicious message alerts</div>
+        <div class="notif-sub" data-en="Get a push notification when auto-scan finds a suspicious message" data-nl="Ontvang een melding als de automatische scan een verdacht bericht vindt">Get a push notification when auto-scan finds a suspicious message</div>
+        <div class="notif-status off" id="notif-status" data-en-off="Notifications off" data-nl-off="Meldingen uit" data-en-on="Notifications on" data-nl-on="Meldingen aan">Notifications off</div>
+      </div>
+      <button class="tog off" id="tog-notif" onclick="toggleNotif(this)"><div class="tok"></div></button>
+    </div>
+
+    <!-- PRIVACY / EXCLUSION LIST -->
+    <div class="sec-lbl" data-en="Privacy controls" data-nl="Privacy-instellingen">Privacy controls</div>
+    <div class="privacy-card">
+      <div class="privacy-hd">
+        <div class="privacy-title" data-en="Senders we never read" data-nl="Afzenders die wij nooit lezen">Senders we never read</div>
+        <div class="privacy-sub" data-en="Messages from these senders are always skipped — even during auto-scan." data-nl="Berichten van deze afzenders worden altijd overgeslagen — ook bij automatisch scannen.">Messages from these senders are always skipped — even during auto-scan.</div>
+      </div>
+      <div class="excl-list" id="excl-list"></div>
+      <button class="add-excl-btn" onclick="showAddModal()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span data-en="Add sender" data-nl="Afzender toevoegen">Add sender</span>
+      </button>
+    </div>
+
+    <!-- SCAN HISTORY -->
+    <div class="sec-lbl" data-en="Scan history" data-nl="Scangeschiedenis">Scan history</div>
+    <div class="hist-card">
+      <div class="hist-hd"><div class="hist-title" data-en="Previous scans" data-nl="Vorige scans">Previous scans</div></div>
+      <div id="hist-list"></div>
+    </div>
+
+  </div><!-- /view-settings -->
+
+  <!-- ══ VIEW: SCANNING ══ -->
+  <div class="view" id="view-scanning">
+    <div class="progress-wrap">
+      <div class="progress-ring">
+        <svg width="88" height="88" viewBox="0 0 88 88">
+          <circle class="pr-bg" cx="44" cy="44" r="40"/>
+          <circle class="pr-fill" id="pr-fill" cx="44" cy="44" r="40" transform="rotate(-90 44 44)"/>
+        </svg>
+        <div class="pr-num" id="pr-num">0%</div>
+      </div>
+      <div class="scan-prog-title" id="scan-prog-title" data-en="Connecting…" data-nl="Verbinden…">Connecting…</div>
+      <div class="scan-prog-sub" id="scan-prog-sub"></div>
+      <div class="step-list" id="step-list"></div>
+    </div>
+    <div class="privacy-note" data-en="Messages from your exclusion list are never read. No message content is stored after scanning." data-nl="Berichten van uw uitsluitingslijst worden nooit gelezen. Berichtinhoud wordt na het scannen niet opgeslagen.">Messages from your exclusion list are never read. No message content is stored after scanning.</div>
+  </div>
+
+  <!-- ══ VIEW: RESULTS ══ -->
+  <div class="view" id="view-results">
+    <div class="result-summary" id="result-summary"></div>
+    <div class="sec-lbl" id="suspicious-label" data-en="Suspicious messages" data-nl="Verdachte berichten">Suspicious messages</div>
+    <div id="flagged-list"></div>
+    <div class="sec-lbl" id="warnings-label" data-en="Warnings" data-nl="Waarschuwingen">Warnings</div>
+    <div id="warnings-list"></div>
+    <button class="btn" onclick="showView('settings')" style="margin-top:4px">
+      <svg viewBox="0 0 24 24"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+      <span data-en="Scan again" data-nl="Opnieuw scannen">Scan again</span>
+    </button>
+    <button class="btn2" onclick="showView('settings')" data-en="Back to settings" data-nl="Terug naar instellingen">Back to settings</button>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bnav">
+    <button class="nb" onclick="goTo('home.html')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span data-en="Home" data-nl="Home">Home</span>
+    </button>
+    <button class="nb on">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span data-en="Inbox" data-nl="Inbox">Inbox</span>
+    </button>
+    <button class="nb" onclick="goTo('scam.html')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span data-en="Check" data-nl="Check">Check</span>
+    </button>
+    <button class="nb" onclick="goTo('family.html')">
+      <svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="4"/><path d="M2 20c0-4 2.686-6 6-6s6 2 6 6"/><circle cx="18" cy="9" r="3"/></svg>
+      <span data-en="Family" data-nl="Familie">Family</span>
+    </button>
+    <button class="nb" onclick="goTo('profile.html')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>
+      <span data-en="Profile" data-nl="Profiel">Profile</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ADD EXCLUSION MODAL -->
+<div class="modal-ov" id="add-modal" onclick="closeModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" data-en="Add sender to exclusion list" data-nl="Afzender toevoegen aan uitsluitingslijst">Add sender to exclusion list</div>
+    <div class="modal-field">
+      <label class="modal-label" data-en="Sender name" data-nl="Naam afzender">Sender name</label>
+      <input class="modal-inp" type="text" id="excl-name-inp" placeholder="Anna de Boer"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label" data-en="Email address" data-nl="E-mailadres">Email address</label>
+      <input class="modal-inp" type="email" id="excl-addr-inp" placeholder="anna@gmail.com"/>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()" data-en="Cancel" data-nl="Annuleren">Cancel</button>
+      <button class="modal-save" onclick="saveExclusion()" data-en="Add" data-nl="Toevoegen">Add</button>
+    </div>
+  </div>
+</div>
+
+<div class="page-loader" id="page-loader"><div class="pl-spin"></div></div>
+
+<script>
+// FIREBASE
+var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth();
+auth.onAuthStateChanged(function(user){
+  if(!user){window.location.href='register.html';return;}
+  document.getElementById('page-loader').style.display='none';
+  document.getElementById('app').style.display='flex';
+  initPage();
+});
+
+var lang='en';
+function setLang(l){
+  lang=l;localStorage.setItem('dm_lang',l);
+  document.getElementById('html-root').setAttribute('lang',l);
+  document.getElementById('btn-en').classList.toggle('on',l==='en');
+  document.getElementById('btn-nl').classList.toggle('on',l==='nl');
+  document.querySelectorAll('[data-en]').forEach(function(el){
+    var v=el.getAttribute('data-'+l);if(!v)return;
+    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=v;
+    else el.textContent=v;
+  });
+  updateNotifStatus();
+  renderExclList();
+  renderHistory();
+}
+function goTo(p){window.location.href=p;}
+function showView(name){
+  ['settings','scanning','results'].forEach(function(v){
+    document.getElementById('view-'+v).classList.toggle('active',v===name);
+  });
+}
+
+// ── INIT ────────────────────────────────────────────────
+function initPage(){
+  lang=localStorage.getItem('dm_lang')||'en';
+  // Set default date range: last 30 days
+  var today=new Date();
+  var past=new Date(today);past.setDate(past.getDate()-30);
+  document.getElementById('gmail-to').value=today.toISOString().split('T')[0];
+  document.getElementById('gmail-from').value=past.toISOString().split('T')[0];
+  // Load saved settings
+  var settings=JSON.parse(localStorage.getItem('dm_inbox_settings')||'{}');
+  if(settings.autoscan===false)document.getElementById('tog-autoscan').classList.add('off');
+  if(settings.unknown)document.getElementById('tog-unknown').classList.remove('off');
+  if(settings.notif){
+    document.getElementById('tog-notif').classList.remove('off');
+  }
+  // Load gmail connection
+  var gmailUser=localStorage.getItem('dm_gmail_user');
+  if(gmailUser){setGmailConnected(gmailUser);}
+  // Load WA file
+  var waFile=localStorage.getItem('dm_wa_file');
+  if(waFile){setWAReady(waFile);}
+  setLang(lang);
+}
+
+// ── SETTINGS TOGGLES ─────────────────────────────────────
+function toggleSetting(key,btn){
+  btn.classList.toggle('off');
+  var settings=JSON.parse(localStorage.getItem('dm_inbox_settings')||'{}');
+  settings[key]=!btn.classList.contains('off');
+  localStorage.setItem('dm_inbox_settings',JSON.stringify(settings));
+}
+
+// ── NOTIFICATION TOGGLE ──────────────────────────────────
+function toggleNotif(btn){
+  btn.classList.toggle('off');
+  var on=!btn.classList.contains('off');
+  var settings=JSON.parse(localStorage.getItem('dm_inbox_settings')||'{}');
+  settings.notif=on;
+  localStorage.setItem('dm_inbox_settings',JSON.stringify(settings));
+  if(on){requestNotifPermission();}
+  updateNotifStatus();
+}
+function updateNotifStatus(){
+  var btn=document.getElementById('tog-notif');
+  var st=document.getElementById('notif-status');
+  var on=!btn.classList.contains('off');
+  st.className='notif-status '+(on?'on':'off');
+  var key=on?'data-'+lang+'-on':'data-'+lang+'-off';
+  st.textContent=st.getAttribute(key)||'';
+}
+function requestNotifPermission(){
+  if('Notification' in window&&Notification.permission==='default'){
+    Notification.requestPermission().then(function(p){
+      if(p==='denied'){
+        document.getElementById('tog-notif').classList.add('off');
+        var settings=JSON.parse(localStorage.getItem('dm_inbox_settings')||'{}');
+        settings.notif=false;
+        localStorage.setItem('dm_inbox_settings',JSON.stringify(settings));
+        updateNotifStatus();
+        alert(lang==='nl'?'Meldingen zijn geblokkeerd. Sta meldingen toe in uw browserinstellingen.':'Notifications are blocked. Please allow notifications in your browser settings.');
+      }
+    });
+  }
+}
+function sendPushNotif(title,body){
+  var settings=JSON.parse(localStorage.getItem('dm_inbox_settings')||'{}');
+  if(!settings.notif)return;
+  if('Notification' in window&&Notification.permission==='granted'){
+    new Notification(title,{body:body,icon:'icons/icon192.png'});
+  }
+}
+
+// ── GMAIL CONNECT ────────────────────────────────────────
+function toggleGmail(){
+  var btn=document.getElementById('gmail-btn');
+  var body=document.getElementById('gmail-body');
+  var sub=document.getElementById('gmail-sub');
+  if(btn.classList.contains('on')){
+    // Disconnect
+    btn.className='conn-btn off';
+    btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M5 12h14M12 5l7 7-7 7"/></svg><span>'+(lang==='nl'?'Verbinden':'Connect')+'</span>';
+    body.classList.remove('show');
+    sub.textContent=lang==='nl'?'Niet verbonden':'Not connected';
+    localStorage.removeItem('dm_gmail_user');
+  }else{
+    // Connect — use Firebase Google auth (already logged in, just show email)
+    var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
+    var email=user.email||'';
+    if(email){
+      setGmailConnected(email);
+      localStorage.setItem('dm_gmail_user',email);
+    }
+  }
+}
+function setGmailConnected(email){
+  var btn=document.getElementById('gmail-btn');
+  var body=document.getElementById('gmail-body');
+  var sub=document.getElementById('gmail-sub');
+  btn.className='conn-btn on';
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M20 6L9 17l-5-5"/></svg><span>'+(lang==='nl'?'Verbonden':'Connected')+'</span>';
+  body.classList.add('show');
+  sub.textContent=email;
+}
+
+// ── WHATSAPP FILE UPLOAD ──────────────────────────────────
+function toggleWA(){
+  var body=document.getElementById('wa-body');
+  body.classList.toggle('show');
+  var btn=document.getElementById('wa-btn');
+  if(body.classList.contains('show')){
+    btn.className='conn-btn on';
+    btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M20 6L9 17l-5-5"/></svg><span>'+(lang==='nl'?'Open':'Open')+'</span>';
+  }else{
+    btn.className='conn-btn off';
+    btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M5 12h14M12 5l7 7-7 7"/></svg><span>'+(lang==='nl'?'Uploaden':'Upload')+'</span>';
+  }
+}
+var waMessages=[];
+function handleWAFile(event){
+  var file=event.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var text=e.target.result;
+    // Parse WhatsApp export format: "DD/MM/YYYY, HH:MM - Sender: message"
+    var lines=text.split('\n');
+    var msgs=[];
+    lines.forEach(function(line){
+      var m=line.match(/^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s*\d{1,2}:\d{2}\s*(?:AM|PM)?\s*-\s*([^:]+):\s*(.+)$/);
+      if(m){msgs.push({sender:m[2].trim(),text:m[3].trim()});}
+    });
+    waMessages=msgs;
+    var fname=file.name;
+    document.getElementById('wa-file-name').textContent=(lang==='nl'?'Bestand geladen: ':'File loaded: ')+fname+' ('+msgs.length+' '+(lang==='nl'?'berichten':'messages')+')';
+    document.getElementById('wa-file-name').classList.add('show');
+    document.getElementById('wa-scan-btn').disabled=msgs.length===0;
+    localStorage.setItem('dm_wa_file',fname);
+    event.target.value='';
+  };
+  reader.readAsText(file);
+}
+function setWAReady(fname){
+  document.getElementById('wa-body').classList.add('show');
+  document.getElementById('wa-btn').className='conn-btn on';
+  document.getElementById('wa-btn').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M20 6L9 17l-5-5"/></svg><span>Open</span>';
+}
+
+// ── EXCLUSION LIST ────────────────────────────────────────
+function getExclusions(){
+  try{return JSON.parse(localStorage.getItem('dm_exclusions')||'[]');}catch(e){return[];}
+}
+function saveExclusions(list){localStorage.setItem('dm_exclusions',JSON.stringify(list));}
+function renderExclList(){
+  var list=getExclusions();
+  var el=document.getElementById('excl-list');
+  if(!list.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--mu);padding:4px 0">'+(lang==='nl'?'Nog geen afzenders toegevoegd.':'No senders added yet.')+'</div>';
+    return;
+  }
+  el.innerHTML=list.map(function(item,i){
+    return '<div class="excl-row">'
+      +'<div class="excl-info"><div class="excl-name">'+item.name+'</div><div class="excl-addr">'+item.addr+'</div></div>'
+      +'<button class="excl-rm" onclick="removeExclusion('+i+')">'+(lang==='nl'?'Verwijder':'Remove')+'</button>'
+      +'</div>';
+  }).join('');
+}
+function removeExclusion(i){
+  var list=getExclusions();list.splice(i,1);saveExclusions(list);renderExclList();
+}
+function showAddModal(){document.getElementById('add-modal').classList.add('show');}
+function closeModal(e){
+  if(!e||e.target===document.getElementById('add-modal')){
+    document.getElementById('add-modal').classList.remove('show');
+    document.getElementById('excl-name-inp').value='';
+    document.getElementById('excl-addr-inp').value='';
+  }
+}
+function saveExclusion(){
+  var name=document.getElementById('excl-name-inp').value.trim();
+  var addr=document.getElementById('excl-addr-inp').value.trim();
+  if(!name||!addr){alert(lang==='nl'?'Vul naam en e-mailadres in.':'Please fill in name and email.');return;}
+  var list=getExclusions();
+  list.push({name:name,addr:addr});
+  saveExclusions(list);renderExclList();
+  closeModal();
+}
+
+// ── SCAN HISTORY ─────────────────────────────────────────
+function getScanHistory(){
+  try{return JSON.parse(localStorage.getItem('dm_scan_history')||'[]');}catch(e){return[];}
+}
+function renderHistory(){
+  var hist=getScanHistory();
+  var el=document.getElementById('hist-list');
+  if(!hist.length){
+    el.innerHTML='<div class="hist-empty">'+(lang==='nl'?'Nog geen scans uitgevoerd.':'No scans run yet.')+'</div>';
+    return;
+  }
+  el.innerHTML=hist.slice(0,5).map(function(h){
+    var d=new Date(h.time);
+    var dateStr=d.toLocaleDateString(lang==='nl'?'nl-NL':'en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    var dotColor=h.suspicious>0?'var(--r)':h.warnings>0?'var(--am)':'#3B6D11';
+    return '<div class="hist-row" onclick="showLastResults()">'
+      +'<div class="hdot" style="background:'+dotColor+'"></div>'
+      +'<div class="hinfo"><div class="hdate">'+dateStr+'</div>'
+      +'<div class="hcounts">'+h.suspicious+' '+(lang==='nl'?'verdacht':'suspicious')+' · '+h.warnings+' '+(lang==='nl'?'waarschuwingen':'warnings')+' · '+h.safe+' '+(lang==='nl'?'veilig':'safe')+'</div></div>'
+      +'<svg class="harr" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>'
+      +'</div>';
+  }).join('');
+}
+
+// ── SCANNING ANIMATION ────────────────────────────────────
+var GMAIL_STEPS=[
+  {en:'Connecting to Gmail…',nl:'Verbinding met Gmail maken…'},
+  {en:'Fetching messages…',nl:'Berichten ophalen…'},
+  {en:'Analysing senders…',nl:'Afzenders analyseren…'},
+  {en:'Checking message content…',nl:'Berichtinhoud controleren…'},
+  {en:'Preparing results…',nl:'Resultaten voorbereiden…'}
+];
+var WA_STEPS=[
+  {en:'Reading chat export…',nl:'Chat-export lezen…'},
+  {en:'Parsing messages…',nl:'Berichten verwerken…'},
+  {en:'Analysing senders…',nl:'Afzenders analyseren…'},
+  {en:'Checking message content…',nl:'Berichtinhoud controleren…'},
+  {en:'Preparing results…',nl:'Resultaten voorbereiden…'}
+];
+
+function startScan(source){
+  showView('scanning');
+  var steps=source==='gmail'?GMAIL_STEPS:WA_STEPS;
+  var circle=document.getElementById('pr-fill');
+  var numEl=document.getElementById('pr-num');
+  var titleEl=document.getElementById('scan-prog-title');
+  var subEl=document.getElementById('scan-prog-sub');
+  var stepListEl=document.getElementById('step-list');
+  var circumference=251;
+
+  // Render step list
+  stepListEl.innerHTML=steps.map(function(s,i){
+    return '<div class="sl-row" id="sl-'+i+'">'
+      +'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+      +'<span>'+(lang==='nl'?s.nl:s.en)+'</span>'
+      +'</div>';
+  }).join('');
+
+  // Set initial sub text
+  var excl=getExclusions();
+  subEl.textContent=(lang==='nl'
+    ?'Overslaan: '+excl.length+' afzender'+(excl.length!==1?'s':'')
+    :'Skipping: '+excl.length+' excluded sender'+(excl.length!==1?'s':''));
+
+  var pct=0;
+  var stepThresholds=[15,35,60,82,100];
+  var stepsDone=[];
+
+  var tick=setInterval(function(){
+    pct=Math.min(pct+(source==='whatsapp'?2:1),100);
+    circle.style.strokeDashoffset=circumference-(circumference*pct/100);
+    numEl.textContent=pct+'%';
+
+    // Update title
+    if(pct<20)titleEl.textContent=lang==='nl'?steps[0].nl:steps[0].en;
+    else if(pct<40)titleEl.textContent=lang==='nl'?steps[1].nl:steps[1].en;
+    else if(pct<65)titleEl.textContent=lang==='nl'?steps[2].nl:steps[2].en;
+    else if(pct<85)titleEl.textContent=lang==='nl'?steps[3].nl:steps[3].en;
+    else titleEl.textContent=lang==='nl'?steps[4].nl:steps[4].en;
+
+    // Step checkmarks
+    stepThresholds.forEach(function(threshold,i){
+      if(pct>=threshold&&stepsDone.indexOf(i)===-1){
+        stepsDone.push(i);
+        var row=document.getElementById('sl-'+i);
+        if(row){
+          row.className='sl-row done';
+          row.querySelector('svg').innerHTML='<path d="M20 6L9 17l-5-5"/>';
+        }
+        if(i+1<steps.length){
+          var next=document.getElementById('sl-'+(i+1));
+          if(next)next.className='sl-row cur';
+        }
+      }
+    });
+
+    if(pct>=100){
+      clearInterval(tick);
+      setTimeout(function(){
+        if(source==='whatsapp'&&waMessages.length>0){
+          renderWAResults();
+        }else{
+          renderDemoResults();
+        }
+      },600);
+    }
+  },source==='whatsapp'?20:35);
+}
+
+// ── WHATSAPP REAL SCAN ────────────────────────────────────
+function renderWAResults(){
+  // Run Layer 1 rules against real WA messages
+  var NL_PATTERNS=[
+    {re:/belastingdienst/i,tag_en:'Fake tax authority',tag_nl:'Nep Belastingdienst'},
+    {re:/digid/i,tag_en:'Fake DigiD',tag_nl:'Nep DigiD'},
+    {re:/geblokkeerd/i,tag_en:'Urgency tactic',tag_nl:'Urgentietactiek'},
+    {re:/klik hier/i,tag_en:'Click-here tactic',tag_nl:'Klik-hier tactiek'},
+    {re:/secure-login|login-secure/i,tag_en:'Suspicious domain',tag_nl:'Verdacht domein'},
+    {re:/\bing\b.*rekening|\bing\b.*account/i,tag_en:'Bank impersonation',tag_nl:'Bankimitatie'},
+    {re:/rabobank/i,tag_en:'Bank impersonation',tag_nl:'Bankimitatie'},
+    {re:/gewonnen|winnaar/i,tag_en:'Prize scam',tag_nl:'Prijsoplichting'},
+    {re:/betaal.*nu|direct.*betalen/i,tag_en:'Payment pressure',tag_nl:'Betalingsdruk'},
+    {re:/pin.*invoer|uw.*pin/i,tag_en:'PIN request',tag_nl:'Pincodeaanvraag'},
+  ];
+  var excl=getExclusions().map(function(e){return e.addr.toLowerCase();});
+  var suspicious=[];var warnings=[];var safeCount=0;
+
+  waMessages.forEach(function(msg){
+    if(excl.some(function(a){return msg.sender.toLowerCase().includes(a);})){return;}
+    var score=0;var tags_en=[];var tags_nl=[];
+    NL_PATTERNS.forEach(function(p){
+      if(p.re.test(msg.text)){
+        score++;
+        if(tags_en.indexOf(p.tag_en)===-1){tags_en.push(p.tag_en);tags_nl.push(p.tag_nl);}
+      }
+    });
+    if(score>=2){suspicious.push({title:msg.text.substring(0,60)+'…',from:msg.sender,tags_en:tags_en,tags_nl:tags_nl});}
+    else if(score===1){warnings.push({title:msg.text.substring(0,60)+'…',from:msg.sender,tags_en:tags_en,tags_nl:tags_nl});}
+    else{safeCount++;}
+  });
+
+  saveAndShowResults(suspicious,warnings,safeCount);
+}
+
+// ── DEMO RESULTS (Gmail / fallback) ───────────────────────
+function renderDemoResults(){
+  var suspicious=[
+    {title:'Uw ING account is geblokkeerd — actie vereist',from:'no-reply@ing-secure-login.net',tags_en:['Fake domain','Bank impersonation'],tags_nl:['Nep domein','Bankimitatie']},
+    {title:'Belastingdienst: openstaande schuld €347',from:'belasting@gov-nl-pay.com',tags_en:['Fake tax authority','Payment pressure'],tags_nl:['Nep Belastingdienst','Betalingsdruk']},
+    {title:'Uw DigiD verloopt morgen — verifieer nu',from:'digid-support@login-verify.nl',tags_en:['Fake DigiD','Urgency tactic'],tags_nl:['Nep DigiD','Urgentietactiek']},
+  ];
+  var warnings=[
+    {title:'Pakket bezorging mislukt — herplan',from:'postnl-info@delivery-track.com',tags_en:['Unverified sender'],tags_nl:['Onbekende afzender']},
+    {title:'Gefeliciteerd — u heeft een prijs gewonnen',from:'winners@eu-lottery-claim.net',tags_en:['Prize scam'],tags_nl:['Prijsoplichting']},
+  ];
+  saveAndShowResults(suspicious,warnings,41);
+}
+
+function saveAndShowResults(suspicious,warnings,safeCount){
+  // Save to history
+  var hist=getScanHistory();
+  hist.unshift({time:Date.now(),suspicious:suspicious.length,warnings:warnings.length,safe:safeCount});
+  if(hist.length>10)hist=hist.slice(0,10);
+  localStorage.setItem('dm_scan_history',JSON.stringify(hist));
+  // Save current results for "view last"
+  localStorage.setItem('dm_last_results',JSON.stringify({suspicious:suspicious,warnings:warnings,safe:safeCount}));
+  // Write to home recent
+  addRecent(suspicious.length+' '+(lang==='nl'?'verdachte berichten gevonden':'suspicious messages found'),
+    suspicious.length+' suspicious messages found in inbox scan',
+    suspicious.length+' verdachte berichten gevonden in inbox scan',
+    suspicious.length>0?'r':'a');
+  // Push notification if enabled
+  if(suspicious.length>0){
+    sendPushNotif('DigiMaat — '+suspicious.length+' suspicious message'+(suspicious.length>1?'s':''),suspicious[0].title);
+  }
+  renderResults(suspicious,warnings,safeCount);
+  showView('results');
+}
+
+function showLastResults(){
+  var r=JSON.parse(localStorage.getItem('dm_last_results')||'null');
+  if(!r)return;
+  renderResults(r.suspicious,r.warnings,r.safe);
+  showView('results');
+}
+
+function renderResults(suspicious,warnings,safeCount){
+  // Summary
+  document.getElementById('result-summary').innerHTML=
+    '<div><div class="rs-num" style="color:var(--r)">'+suspicious.length+'</div><div class="rs-label">'+(lang==='nl'?'Verdacht':'Suspicious')+'</div></div>'
+    +'<div class="rs-div"></div>'
+    +'<div><div class="rs-num" style="color:var(--am)">'+warnings.length+'</div><div class="rs-label">'+(lang==='nl'?'Waarschuwingen':'Warnings')+'</div></div>'
+    +'<div class="rs-div"></div>'
+    +'<div><div class="rs-num" style="color:var(--gd)">'+safeCount+'</div><div class="rs-label">'+(lang==='nl'?'Veilig':'Safe')+'</div></div>';
+
+  document.getElementById('suspicious-label').style.display=suspicious.length?'block':'none';
+  document.getElementById('warnings-label').style.display=warnings.length?'block':'none';
+
+  function renderItems(items,color,tagCls,containerId){
+    document.getElementById(containerId).innerHTML=items.map(function(item){
+      var tags=lang==='nl'?item.tags_nl:item.tags_en;
+      return '<div class="result-item" onclick="openInScam(\''+encodeURIComponent(item.title)+'\')">'
+        +'<div class="ri-dot" style="background:'+color+'"></div>'
+        +'<div class="ri-info"><div class="ri-title">'+item.title+'</div>'
+        +'<div class="ri-from">'+(lang==='nl'?'Van: ':'From: ')+item.from+'</div>'
+        +'<div class="ri-tags">'+tags.map(function(t){return'<span class="ri-tag '+tagCls+'">'+t+'</span>';}).join('')+'</div>'
+        +'</div>'
+        +'<svg class="ri-arr" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>'
+        +'</div>';
+    }).join('');
+  }
+  renderItems(suspicious,'var(--r)','tag-r','flagged-list');
+  renderItems(warnings,'var(--am)','tag-a','warnings-list');
+}
+
+function openInScam(encodedText){
+  localStorage.setItem('dm_scam_prefill',decodeURIComponent(encodedText));
+  window.location.href='scam.html';
+}
+
+// RECENT ACTIVITY WRITER
+function addRecent(text,en,nl,sev){
+  var items=[];try{items=JSON.parse(localStorage.getItem('dm_recent')||'[]');}catch(e){}
+  items.unshift({type:'inbox',title_en:en,title_nl:nl,time:Date.now(),severity:sev});
+  if(items.length>20)items=items.slice(0,20);
+  localStorage.setItem('dm_recent',JSON.stringify(items));
+}
+</script>
+</body>
+</html>
