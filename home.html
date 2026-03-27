@@ -100,7 +100,89 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .nb span{font-size:9px;color:var(--mu);font-weight:700;transition:color .15s}
 .nb.on svg{stroke:var(--g)}.nb.on span{color:var(--g)}
 
-/* LOADING */
+/* ALERT RESOLUTION STYLES */
+.alert-banner{margin:12px 18px 0;border-radius:var(--rad);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:opacity .15s}
+.alert-banner:active{opacity:.85}
+.alert-banner.safe{background:var(--g)}
+.alert-banner.danger{background:var(--r)}
+.ab-icon{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ab-icon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ab-text{flex:1}
+.ab-title{font-size:15px;font-weight:800;color:#fff}
+.ab-sub{font-size:11px;color:rgba(255,255,255,.85);margin-top:2px}
+.ab-arr{font-size:20px;color:rgba(255,255,255,.7);font-weight:700}
+
+/* ALERT LIST VIEW */
+.alert-list-wrap{padding:0 18px;margin-top:14px}
+.alert-list-title{font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.alert-item{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:13px 14px;display:flex;align-items:center;gap:11px;margin-bottom:8px;cursor:pointer;box-shadow:var(--sh);transition:transform .15s}
+.alert-item:active{transform:scale(.98)}
+.ai-sev{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ai-body{flex:1;min-width:0}
+.ai-title{font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-from{font-size:11px;color:var(--mu);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:5px;display:inline-block}
+.ai-tag.r{background:var(--rl);color:var(--r)}
+.ai-tag.a{background:var(--al);color:var(--am)}
+.fix-btn{background:var(--r);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;flex-shrink:0;white-space:nowrap}
+
+/* FULL SCREEN DETAIL */
+.detail-screen{position:fixed;inset:0;background:#fff;z-index:500;display:none;flex-direction:column;max-width:390px;left:50%;transform:translateX(-50%)}
+.detail-screen.show{display:flex}
+.ds-topbar{background:var(--r);padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ds-close{background:none;border:none;cursor:pointer;padding:0}
+.ds-close svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;display:block}
+.ds-progress{font-size:12px;color:rgba(255,255,255,.8);font-weight:700;margin-left:auto}
+.ds-nav{display:flex;gap:6px}
+.ds-nav-btn{background:rgba(255,255,255,.2);border:none;border-radius:6px;padding:5px 10px;color:#fff;font-size:12px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer}
+.ds-nav-btn:disabled{opacity:.3;cursor:default}
+.ds-body{flex:1;overflow-y:auto;padding:18px 18px 20px}
+/* WHY DANGEROUS box */
+.why-box{background:var(--rl);border-radius:var(--rad);padding:14px 16px;margin-bottom:16px}
+.why-title{font-size:13px;font-weight:800;color:var(--r);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.why-title svg{width:14px;height:14px;stroke:var(--r);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.why-text{font-size:14px;color:#791F1F;line-height:1.6;font-family:'Literata',serif}
+/* Message preview */
+.msg-box{background:var(--bg);border:1px solid var(--br);border-radius:var(--rad);padding:13px 14px;margin-bottom:16px}
+.msg-label{font-size:10px;font-weight:800;color:var(--mu);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px}
+.msg-from{font-size:12px;font-weight:700;color:var(--mu);margin-bottom:6px}
+.msg-subject{font-size:15px;font-weight:800;margin-bottom:8px}
+.msg-body{font-size:13px;color:var(--mu);line-height:1.6;font-family:'Literata',serif;white-space:pre-wrap}
+/* Actions */
+.action-label{font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.4px;text-transform:uppercase;margin-bottom:10px}
+.action-grid{display:flex;flex-direction:column;gap:8px}
+.action-card{background:var(--card);border:1.5px solid var(--br);border-radius:var(--rad);padding:13px 15px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.action-card:active{transform:scale(.98)}
+.action-card.delete{border-color:#F09595}
+.action-card.spam{border-color:#FAC775}
+.action-card.family{border-color:var(--gm)}
+.action-card.password{border-color:#B5D4F4}
+.ac-ico2{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ac-ico2 svg{width:17px;height:17px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ac-info{flex:1}
+.ac-name{font-size:14px;font-weight:800}
+.ac-desc{font-size:11px;color:var(--mu);margin-top:2px;line-height:1.4}
+.ac-chev{width:16px;height:16px;stroke:var(--br);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* CONFIRMATION SCREEN */
+.confirm-screen{position:fixed;inset:0;background:var(--gd);z-index:600;display:none;flex-direction:column;align-items:center;justify-content:center;max-width:390px;left:50%;transform:translateX(-50%);padding:32px 28px;text-align:center}
+.confirm-screen.show{display:flex}
+.confirm-ico{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin-bottom:22px}
+.confirm-ico svg{width:40px;height:40px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.confirm-title{font-size:24px;font-weight:800;color:#fff;margin-bottom:10px}
+.confirm-body{font-size:15px;color:rgba(255,255,255,.85);line-height:1.6;margin-bottom:28px;font-family:'Literata',serif}
+.confirm-done{background:#fff;color:var(--gd);border:none;border-radius:var(--rads);padding:14px 32px;font-size:16px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer}
+
+/* CONFIRM DIALOG */
+.confirm-dialog{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:700;display:none;align-items:flex-end;justify-content:center}
+.confirm-dialog.show{display:flex}
+.cd-sheet{background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 36px;width:100%;max-width:390px}
+.cd-handle{width:36px;height:4px;background:var(--br);border-radius:2px;margin:0 auto 16px}
+.cd-title{font-size:17px;font-weight:800;margin-bottom:8px}
+.cd-body{font-size:14px;color:var(--mu);line-height:1.5;margin-bottom:18px}
+.cd-actions{display:flex;gap:8px}
+.cd-cancel{flex:1;background:var(--bg);border:1.5px solid var(--br);border-radius:var(--rads);padding:13px;font-size:15px;font-weight:800;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer}
+.cd-confirm{flex:1;border:none;border-radius:var(--rads);padding:13px;font-size:15px;font-weight:800;color:#fff;font-family:'Nunito',sans-serif;cursor:pointer;background:var(--r)}
 .page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px}
 .page-loader .spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -182,11 +264,58 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 
     </div>
 
-    <!-- RECENT -->
-    <div class="sec-label" data-en="Recent activity" data-nl="Recente activiteit">Recent activity</div>
-    <div class="recent-list" id="recent-list"></div>
+    <!-- SMART ALERT BANNER (replaces status banner) -->
+    <div id="smart-banner"></div>
+
+    <!-- ALERT LIST (shown when alerts exist) -->
+    <div id="alert-list-section"></div>
+
+    <!-- RECENT (shown when safe) -->
+    <div id="safe-section">
+      <div class="sec-label" data-en="Recent activity" data-nl="Recente activiteit">Recent activity</div>
+      <div class="recent-list" id="recent-list"></div>
+    </div>
 
   </div><!-- /body -->
+
+  <!-- ══ FULL SCREEN DETAIL ══ -->
+  <div class="detail-screen" id="detail-screen">
+    <div class="ds-topbar">
+      <button class="ds-close" onclick="closeDetail()">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
+      <span style="font-size:14px;font-weight:800;color:#fff" id="ds-label">Alert</span>
+      <span class="ds-progress" id="ds-progress">1 / 3</span>
+      <div class="ds-nav">
+        <button class="ds-nav-btn" id="ds-prev" onclick="prevAlert()">←</button>
+        <button class="ds-nav-btn" id="ds-next" onclick="nextAlert()">→</button>
+      </div>
+    </div>
+    <div class="ds-body" id="ds-body"></div>
+  </div>
+
+  <!-- ══ CONFIRMATION SCREEN ══ -->
+  <div class="confirm-screen" id="confirm-screen">
+    <div class="confirm-ico">
+      <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <div class="confirm-title" id="confirm-title">You handled this safely</div>
+    <div class="confirm-body" id="confirm-body">Well done. This message has been deleted.</div>
+    <button class="confirm-done" onclick="confirmDone()" id="confirm-done-btn">Back to home</button>
+  </div>
+
+  <!-- ══ CONFIRM DIALOG ══ -->
+  <div class="confirm-dialog" id="confirm-dialog">
+    <div class="cd-sheet">
+      <div class="cd-handle"></div>
+      <div class="cd-title" id="cd-title">Are you sure?</div>
+      <div class="cd-body" id="cd-body">This action cannot be undone.</div>
+      <div class="cd-actions">
+        <button class="cd-cancel" onclick="closeDialog()" id="cd-cancel">Cancel</button>
+        <button class="cd-confirm" onclick="confirmAction()" id="cd-confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
 
   <!-- BOTTOM NAV -->
 <!-- EMERGENCY CONTACT BUTTON -->
@@ -431,10 +560,181 @@ auth.onAuthStateChanged(function(user){
     addRecent('inbox','3 suspicious emails found','3 verdachte e-mails gevonden','a');
     addRecent('scam','Message checked — safe','Bericht gecontroleerd — veilig','g');
   }
-  renderRecent();
+  renderAlertView();
 });
 </script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").then(function(r){console.log("SW registered:",r.scope);}).catch(function(e){console.log("SW error:",e);});});}</script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").then(function(){console.log("SW registered");}).catch(function(e){console.log("SW error:",e);});}</script>
 </body>
 </html>
+<script>
+// ══ ALERT RESOLUTION ENGINE ══════════════════════════════
+function getAlerts(){
+  var items=getRecent();
+  var dismissed=JSON.parse(localStorage.getItem('dm_dismissed_alerts')||'[]');
+  return items.filter(function(item){
+    return (item.severity==='r'||item.severity==='a')&&dismissed.indexOf(item.time)===-1;
+  });
+}
+function dismissAlert(time){
+  var dismissed=JSON.parse(localStorage.getItem('dm_dismissed_alerts')||'[]');
+  dismissed.push(time);
+  localStorage.setItem('dm_dismissed_alerts',JSON.stringify(dismissed));
+}
+function getWhyDangerous(item){
+  var t=(lang==='nl'?item.title_nl:item.title_en).toLowerCase();
+  if(lang==='nl'){
+    if(t.includes('lek')||t.includes('breach')||t.includes('linkedin'))
+      return 'Uw e-mailadres is gevonden in een datalek. Criminelen kunnen uw adres gebruiken om u te misleiden of uw wachtwoord te raden.';
+    if(t.includes('oplichting')||t.includes('scam')||t.includes('verdacht'))
+      return 'Dit bericht probeert u te misleiden. Het doet alsof het van een bekende organisatie komt, maar is nep. Als u klikt, kunnen criminelen uw gegevens stelen.';
+    if(t.includes('inbox'))
+      return 'In uw inbox zijn verdachte berichten gevonden die tekenen van oplichting vertonen. Verwijder ze zo snel mogelijk.';
+    return 'DigiMaat heeft een veiligheidsrisico gedetecteerd dat uw aandacht vereist.';
+  }else{
+    if(t.includes('breach')||t.includes('linkedin')||t.includes('leak'))
+      return 'Your email address was found in a data breach. Criminals may have your address and could try to trick you or guess your password.';
+    if(t.includes('scam')||t.includes('suspicious')||t.includes('likely'))
+      return 'This message is trying to trick you. It pretends to be from a trusted organisation but is fake. Clicking any links could allow criminals to steal your information.';
+    if(t.includes('inbox'))
+      return 'Suspicious messages were found in your inbox showing signs of fraud. It is important to remove them.';
+    return 'DigiMaat detected a security risk that needs your attention.';
+  }
+}
+function renderAlertView(){
+  var alerts=getAlerts();
+  var banner=document.getElementById('smart-banner');
+  var alertSection=document.getElementById('alert-list-section');
+  var safeSection=document.getElementById('safe-section');
+  var statusBanner=document.querySelector('.status-banner');
+  if(alerts.length===0){
+    if(statusBanner)statusBanner.style.display='flex';
+    banner.innerHTML='';alertSection.innerHTML='';
+    safeSection.style.display='block';renderRecent();
+  }else{
+    if(statusBanner)statusBanner.style.display='none';
+    safeSection.style.display='none';
+    banner.innerHTML='<div class="alert-banner danger" onclick="scrollToAlerts()" style="margin:12px 18px 0;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;background:var(--r)">'
+      +'<div class="ab-icon" style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>'
+      +'<div style="flex:1"><div style="font-size:15px;font-weight:800;color:#fff">'+(lang==='nl'?alerts.length+' melding'+(alerts.length>1?'en':'')+' vereisen uw aandacht':alerts.length+' alert'+(alerts.length>1?'s':'')+' need your attention')+'</div>'
+      +'<div style="font-size:11px;color:rgba(255,255,255,.85);margin-top:2px">'+(lang==='nl'?'Tik om te bekijken en op te lossen':'Tap to review and fix them')+'</div></div>'
+      +'<span style="font-size:22px;color:rgba(255,255,255,.7);font-weight:700">›</span></div>';
+    var html='<div style="padding:0 18px;margin-top:14px" id="alert-list-anchor">'
+      +'<div style="font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">'+(lang==='nl'?'Te verhelpen meldingen':'Alerts to fix')+'</div>';
+    alerts.forEach(function(item,i){
+      var title=lang==='nl'?item.title_nl:item.title_en;
+      var isCrit=item.severity==='r';
+      html+='<div style="background:#fff;border-radius:16px;border:1px solid var(--br);padding:13px 14px;display:flex;align-items:center;gap:11px;margin-bottom:8px;cursor:pointer;box-shadow:var(--sh)" onclick="openDetail('+i+')">'
+        +'<div style="width:10px;height:10px;border-radius:50%;background:'+(isCrit?'var(--r)':'var(--am)')+';flex-shrink:0"></div>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+title+'</div>'
+        +'<div style="font-size:11px;color:var(--mu);margin-top:2px">'+timeAgo(item.time)+'</div>'
+        +'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:5px;display:inline-block;background:'+(isCrit?'var(--rl)':'var(--al)')+';color:'+(isCrit?'var(--r)':'var(--am)')+'">'+( isCrit?(lang==='nl'?'Urgent':'Urgent'):(lang==='nl'?'Waarschuwing':'Warning'))+'</span></div>'
+        +'<button style="background:var(--r);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;font-family:Nunito,sans-serif;cursor:pointer;flex-shrink:0" onclick="event.stopPropagation();openDetail('+i+')">'+(lang==='nl'?'Fix dit →':'Fix this →')+'</button>'
+        +'</div>';
+    });
+    html+='</div>';
+    alertSection.innerHTML=html;
+  }
+}
+function scrollToAlerts(){var el=document.getElementById('alert-list-anchor');if(el)el.scrollIntoView({behavior:'smooth'});}
+var currentAlertIndex=0,pendingAction=null;
+function openDetail(index){
+  var alerts=getAlerts();if(!alerts.length)return;
+  currentAlertIndex=index;renderDetailScreen(alerts);
+  document.getElementById('detail-screen').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeDetail(){
+  document.getElementById('detail-screen').classList.remove('show');
+  document.body.style.overflow='';renderAlertView();
+}
+function prevAlert(){var a=getAlerts();if(currentAlertIndex>0){currentAlertIndex--;renderDetailScreen(a);}}
+function nextAlert(){var a=getAlerts();if(currentAlertIndex<a.length-1){currentAlertIndex++;renderDetailScreen(a);}}
+function renderDetailScreen(alerts){
+  var item=alerts[currentAlertIndex],total=alerts.length;
+  var title=lang==='nl'?item.title_nl:item.title_en;
+  var why=getWhyDangerous(item);
+  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
+  document.getElementById('ds-label').textContent=lang==='nl'?'Melding '+(currentAlertIndex+1):'Alert '+(currentAlertIndex+1);
+  document.getElementById('ds-progress').textContent=(currentAlertIndex+1)+' / '+total;
+  document.getElementById('ds-prev').disabled=currentAlertIndex===0;
+  document.getElementById('ds-next').disabled=currentAlertIndex===total-1;
+  var safeTitle=title.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  var html='<div class="why-box">'
+    +'<div class="why-title"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--r)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>&nbsp;'+(lang==='nl'?'Waarom is dit gevaarlijk?':'Why is this dangerous?')+'</div>'
+    +'<div class="why-text">'+why+'</div></div>'
+    +'<div class="msg-box"><div class="msg-label">'+(lang==='nl'?'Wat er gevonden is':'What was found')+'</div>'
+    +'<div class="msg-subject">'+title+'</div>'
+    +'<div class="msg-body" style="font-size:12px;color:var(--mu);font-family:Nunito,sans-serif">'+timeAgo(item.time)+'</div></div>'
+    +'<div class="action-label">'+(lang==='nl'?'Wat wilt u doen?':'What would you like to do?')+'</div>'
+    +'<div class="action-grid">'
+    +'<div class="action-card delete" onclick="showDialog(\'delete\','+item.time+')">'
+    +'<div class="ac-ico2" style="background:var(--rl)"><svg viewBox="0 0 24 24" style="stroke:var(--r)"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></div>'
+    +'<div class="ac-info"><div class="ac-name">'+(lang==='nl'?'Verwijderen':'Delete')+'</div><div class="ac-desc">'+(lang==='nl'?'Verwijder dit bericht definitief':'Permanently remove this message')+'</div></div>'
+    +'<svg class="ac-chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>'
+    +'<div class="action-card spam" onclick="showDialog(\'spam\','+item.time+')">'
+    +'<div class="ac-ico2" style="background:var(--al)"><svg viewBox="0 0 24 24" style="stroke:var(--am)"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>'
+    +'<div class="ac-info"><div class="ac-name">'+(lang==='nl'?'Markeren als spam':'Move to spam')+'</div><div class="ac-desc">'+(lang==='nl'?'Blokkeer de afzender en markeer als spam':'Block the sender and mark as spam')+'</div></div>'
+    +'<svg class="ac-chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>'
+    +'<div class="action-card family" onclick="callFamilyHelp(\''+safeTitle+'\')">'
+    +'<div class="ac-ico2" style="background:var(--gl)"><svg viewBox="0 0 24 24" style="stroke:var(--gd)"><circle cx="8" cy="7" r="4"/><path d="M2 20c0-4 2.686-6 6-6s6 2 6 6"/><circle cx="18" cy="9" r="3"/></svg></div>'
+    +'<div class="ac-info"><div class="ac-name">'+(lang==='nl'?'Vraag familie om hulp':'Ask family for help')+'</div>'
+    +'<div class="ac-desc">'+(family?family.name.split(' ')[0]+(lang==='nl'?' ontvangt uitleg van dit probleem':' receives an explanation of this problem'):(lang==='nl'?'Voeg eerst een familiecontact toe':'Add a family contact first'))+'</div></div>'
+    +'<svg class="ac-chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>'
+    +'<div class="action-card password" onclick="showPasswordHelp()">'
+    +'<div class="ac-ico2" style="background:#E6F1FB"><svg viewBox="0 0 24 24" style="stroke:#185FA5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>'
+    +'<div class="ac-info"><div class="ac-name">'+(lang==='nl'?'Wachtwoord wijzigen':'Change my password')+'</div>'
+    +'<div class="ac-desc">'+(lang==='nl'?'Stap-voor-stap uitleg hoe u dit doet':'Step-by-step guide to changing your password')+'</div></div>'
+    +'<svg class="ac-chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>'
+    +'</div>';
+  document.getElementById('ds-body').innerHTML=html;
+  document.getElementById('ds-body').scrollTop=0;
+}
+function showDialog(action,alertTime){
+  pendingAction={action:action,time:alertTime};
+  var isDelete=action==='delete';
+  document.getElementById('cd-title').textContent=isDelete?(lang==='nl'?'Bericht verwijderen?':'Delete this message?'):(lang==='nl'?'Als spam markeren?':'Mark as spam?');
+  document.getElementById('cd-body').textContent=isDelete?(lang==='nl'?'Het bericht wordt definitief verwijderd.':'The message will be permanently deleted.'):(lang==='nl'?'De afzender wordt geblokkeerd en het bericht als spam gemarkeerd.':'The sender will be blocked and the message marked as spam.');
+  document.getElementById('cd-confirm').style.background=isDelete?'var(--r)':'var(--am)';
+  document.getElementById('cd-confirm').textContent=isDelete?(lang==='nl'?'Ja, verwijderen':'Yes, delete'):(lang==='nl'?'Ja, als spam markeren':'Yes, mark as spam');
+  document.getElementById('cd-cancel').textContent=lang==='nl'?'Annuleren':'Cancel';
+  document.getElementById('confirm-dialog').classList.add('show');
+}
+function closeDialog(){document.getElementById('confirm-dialog').classList.remove('show');pendingAction=null;}
+function confirmAction(){
+  closeDialog();if(!pendingAction)return;
+  dismissAlert(pendingAction.time);
+  var isDelete=pendingAction.action==='delete';
+  document.getElementById('detail-screen').classList.remove('show');
+  document.getElementById('confirm-title').textContent=lang==='nl'?'Goed gedaan!':'Well done!';
+  document.getElementById('confirm-body').textContent=isDelete?(lang==='nl'?'Het bericht is verwijderd. U bent nu veiliger.':'The message has been deleted. You are safer now.'):(lang==='nl'?'Het bericht is als spam gemarkeerd en de afzender geblokkeerd.':'The message has been marked as spam and the sender blocked.');
+  document.getElementById('confirm-done-btn').textContent=lang==='nl'?'Terug naar startpagina':'Back to home';
+  document.getElementById('confirm-screen').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function confirmDone(){
+  document.getElementById('confirm-screen').classList.remove('show');
+  document.body.style.overflow='';pendingAction=null;
+  renderAlertView();
+  var remaining=getAlerts();
+  if(remaining.length>0)setTimeout(function(){openDetail(0);},300);
+}
+function callFamilyHelp(alertTitle){
+  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
+  if(!family||!family.phone){alert(lang==='nl'?'Voeg eerst een familiecontact toe via de Familiepagina.':'Please add a family contact first on the Family page.');return;}
+  var name=family.name.split(' ')[0];
+  var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
+  var senderName=user.name?user.name.split(' ')[0]:'Jan';
+  var msg=lang==='nl'
+    ?'Hoi '+name+', DigiMaat heeft een veiligheidsmelding gevonden voor '+senderName+': "'+alertTitle+'". Kun je me helpen dit op te lossen? Groet, '+senderName
+    :'Hi '+name+', DigiMaat found a security alert for '+senderName+': "'+alertTitle+'". Can you help me deal with this? Thanks, '+senderName;
+  var phone=family.phone.replace(/[\s\+\-\(\)]/g,'');
+  if(phone.startsWith('0'))phone='31'+phone.substring(1);
+  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
+}
+function showPasswordHelp(){
+  alert(lang==='nl'
+    ?'Stappen om uw wachtwoord te wijzigen:\n\n1. Ga naar de betreffende website of app\n2. Klik op "Inloggen" → "Wachtwoord vergeten"\n3. Voer uw e-mailadres in — u ontvangt een resetlink\n4. Klik de link in uw e-mail en kies een nieuw wachtwoord\n5. Gebruik een wachtwoord dat u nergens anders gebruikt\n\nTip: Minimaal 12 tekens, een hoofdletter, een cijfer en een leesteken.'
+    :'Steps to change your password:\n\n1. Go to the website or app where the breach was found\n2. Click "Sign in" → "Forgot password"\n3. Enter your email address — you will receive a reset link\n4. Click the link in your email and choose a new password\n5. Use a password you do not use anywhere else\n\nTip: At least 12 characters, a capital letter, a number and a symbol.');
+}
+</script>
