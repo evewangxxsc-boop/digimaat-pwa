@@ -82,6 +82,17 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .empty-recent{text-align:center;padding:20px;color:var(--mu);font-size:13px;line-height:1.6}
 .empty-recent svg{width:32px;height:32px;stroke:var(--br);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 8px;display:block}
 
+/* EMERGENCY BUTTON */
+.emergency-btn{position:fixed;bottom:72px;right:calc(50% - 185px);z-index:200;display:flex;align-items:center;gap:8px;background:var(--r);color:#fff;border:none;border-radius:30px;padding:11px 16px 11px 13px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(163,45,45,.35);transition:transform .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent}
+.emergency-btn:active{transform:scale(.96);box-shadow:0 2px 8px rgba(163,45,45,.3)}
+.emergency-btn svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.emergency-btn .eb-label{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
+.emergency-btn .eb-name{font-size:13px;font-weight:800}
+.emergency-btn .eb-hint{font-size:10px;font-weight:600;opacity:.85}
+/* No contact state */
+.emergency-btn.no-contact{background:var(--mu)}
+.emergency-btn.no-contact{box-shadow:0 4px 16px rgba(107,107,101,.25)}
+
 /* BOTTOM NAV */
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;-webkit-tap-highlight-color:transparent}
@@ -178,6 +189,15 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   </div><!-- /body -->
 
   <!-- BOTTOM NAV -->
+<!-- EMERGENCY CONTACT BUTTON -->
+<button class="emergency-btn" id="emergency-btn" onclick="emergencyCall()">
+  <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+  <div class="eb-label">
+    <span class="eb-name" id="eb-name">Add contact</span>
+    <span class="eb-hint" id="eb-hint">Tap to call for help</span>
+  </div>
+</button>
+
   <nav class="bnav">
     <button class="nb on" onclick="goTo('home.html')">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -229,6 +249,7 @@ function setLang(l){
   // Re-render dynamic content in correct language
   updateGreeting();
   renderRecent();
+  updateEmergencyBtn();
 }
 
 // NAVIGATE
@@ -328,7 +349,32 @@ function renderRecent(){
   }).join('');
 }
 
-// WRITE A RECENT ITEM (called by other pages)
+// EMERGENCY BUTTON
+function updateEmergencyBtn(){
+  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
+  var btn=document.getElementById('emergency-btn');
+  var nameEl=document.getElementById('eb-name');
+  var hintEl=document.getElementById('eb-hint');
+  if(family&&family.name&&family.phone){
+    btn.classList.remove('no-contact');
+    nameEl.textContent=family.name.split(' ')[0];
+    hintEl.textContent=lang==='nl'?'Tik om te bellen':'Tap to call';
+    btn.title=family.phone;
+  }else{
+    btn.classList.add('no-contact');
+    nameEl.textContent=lang==='nl'?'Contact toevoegen':'Add contact';
+    hintEl.textContent=lang==='nl'?'Tik om in te stellen':'Tap to set up';
+  }
+}
+
+function emergencyCall(){
+  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
+  if(family&&family.phone){
+    window.location.href='tel:'+family.phone.replace(/\s/g,'');
+  }else{
+    window.location.href='family.html';
+  }
+}
 function addRecent(type,title_en,title_nl,severity){
   var items=getRecent();
   items.unshift({type:type,title_en:title_en,title_nl:title_nl,time:Date.now(),severity:severity||'g'});
@@ -377,6 +423,7 @@ auth.onAuthStateChanged(function(user){
   setAvatar(stored);
   setLang(lang);
   updateFamilySub();
+  updateEmergencyBtn();
 
   // Demo recent items if empty (first-time user experience)
   if(getRecent().length===0){
