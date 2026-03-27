@@ -151,32 +151,6 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
       <span class="profile-plan">Family Plan · €2.99/month</span>
     </div>
 
-    <!-- API KEY -->
-    <div class="section">
-      <div class="sec-lbl" data-en="Claude AI — Scam analysis" data-nl="Claude AI — Scamanalyse">Claude AI — Scam analysis</div>
-      <div class="settings-card">
-        <div class="api-wrap">
-          <div style="font-size:13px;color:var(--mu);margin-bottom:8px;line-height:1.5"
-            data-en="Enter your Anthropic API key to enable real-time AI scam analysis (Layer 3). Without it, DigiMaat uses local Dutch rules only."
-            data-nl="Voer uw Anthropic API-sleutel in voor realtime AI-scamanalyse (Laag 3). Zonder sleutel gebruikt DigiMaat alleen lokale Nederlandse regels.">
-            Enter your Anthropic API key to enable real-time AI scam analysis (Layer 3). Without it, DigiMaat uses local Dutch rules only.
-          </div>
-          <div class="api-row">
-            <input class="api-inp" type="password" id="api-key-inp"
-              data-ph-en="sk-ant-…" data-ph-nl="sk-ant-…" placeholder="sk-ant-…"/>
-            <button class="api-save" onclick="saveApiKey()"
-              data-en="Save" data-nl="Opslaan">Save</button>
-          </div>
-          <div class="api-status inactive" id="api-status">
-            <div class="api-status-dot"></div>
-            <span id="api-status-text" data-en-active="Claude AI active" data-nl-active="Claude AI actief"
-              data-en-inactive="No API key — using local rules only"
-              data-nl-inactive="Geen API-sleutel — alleen lokale regels">No API key — using local rules only</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- ACCESSIBILITY -->
     <div class="section">
       <div class="sec-lbl" data-en="Accessibility" data-nl="Toegankelijkheid">Accessibility</div>
@@ -307,7 +281,6 @@ function setLang(l){
     el.placeholder=el.getAttribute('data-ph-'+l);
   });
   document.getElementById('lang-current').textContent=l==='nl'?'Nederlands':'English';
-  updateApiStatus();
   renderDataManagement();
   renderFAQ();
   updateFamilyNotifSub();
@@ -334,9 +307,6 @@ function initPage(user){
   var ava=document.getElementById('profile-ava');
   if(stored.photo){ava.innerHTML='<img src="'+stored.photo+'" alt="avatar"/>';}
   else{ava.textContent=name.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();}
-  // API key
-  var key=localStorage.getItem('dm_api_key')||'';
-  if(key){document.getElementById('api-key-inp').value=key;}
   // Prefs
   var prefs=JSON.parse(localStorage.getItem('dm_prefs')||'{}');
   if(prefs.large_text)document.getElementById('tog-large').classList.remove('off');
@@ -361,21 +331,11 @@ function updateFamilyNotifSub(){
 }
 
 // ── API KEY ───────────────────────────────────────────────
-function saveApiKey(){
-  var key=document.getElementById('api-key-inp').value.trim();
-  if(!key){showToast(lang==='nl'?'Voer een geldige API-sleutel in.':'Please enter a valid API key.','warn');return;}
-  if(!key.startsWith('sk-ant')){showToast(lang==='nl'?'Ongeldige sleutel. Begint met sk-ant-':'Invalid key. Must start with sk-ant-','warn');return;}
-  localStorage.setItem('dm_api_key',key);
-  updateApiStatus();
-  showToast(lang==='nl'?'✓ API-sleutel opgeslagen — Claude AI is actief':'✓ API key saved — Claude AI is now active','success');
-}
-function updateApiStatus(){
-  var key=localStorage.getItem('dm_api_key')||'';
-  var el=document.getElementById('api-status');
-  var txt=document.getElementById('api-status-text');
-  var active=key.startsWith('sk-ant');
-  el.className='api-status '+(active?'active':'inactive');
-  txt.textContent=txt.getAttribute('data-'+lang+'-'+(active?'active':'inactive'));
+function changeSubscription(){
+  // V1: show info sheet; V2 would open payment portal
+  alert(lang==='nl'
+    ?'Abonnement wijzigen is beschikbaar in de volgende update. Neem contact op via support@digimaat.app voor directe hulp.'
+    :'Subscription management is available in the next update. Contact us at support@digimaat.app for immediate help.');
 }
 
 // ── DATA MANAGEMENT ───────────────────────────────────────
@@ -440,7 +400,18 @@ function renderDataManagement(){
   var meta=getDeletedMeta();
   var now=Date.now();
   var THIRTY_DAYS=30*24*60*60*1000;
-  var html='';
+
+  // Subscription card first
+  var html='<div class="data-category" style="margin-bottom:10px">'
+    +'<div class="dc-header">'
+    +'<div class="dc-info">'
+    +'<div class="dc-title">'+(lang==='nl'?'Abonnement':'Subscription')+'</div>'
+    +'<div class="dc-count" style="color:var(--gd);font-weight:700">Family Plan · €2.99/month</div>'
+    +'</div>'
+    +'<button class="dc-delete-btn" style="background:var(--gl);color:var(--gd);border:1.5px solid var(--gm)" onclick="changeSubscription()">'
+    +(lang==='nl'?'Wijzigen':'Change')
+    +'</button>'
+    +'</div></div>';
   DATA_CATEGORIES.forEach(function(cat){
     var count=getItemCount(cat.key);
     var pending=meta[cat.key];
