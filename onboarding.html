@@ -195,44 +195,79 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
       <span class="skip-link" onclick="skipToSlide(2)" data-en="Skip for now — I'll do this later" data-nl="Nu overslaan — ik doe dit later">Skip for now — I'll do this later</span>
     </div>
 
-    <!-- SCREEN 3: FIRST CHECK -->
-    <div class="slide" id="slide-2">
-      <div class="illo" style="background:#FEF9EC">
-        <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="90" cy="90" r="90" fill="#FEF9EC"/>
-          <!-- Magnifying glass -->
-          <circle cx="80" cy="80" r="32" fill="none" stroke="#BA7517" stroke-width="8"/>
-          <line x1="103" y1="103" x2="130" y2="130" stroke="#BA7517" stroke-width="8" stroke-linecap="round"/>
-          <!-- Check inside -->
-          <path d="M67 80l10 10 18-18" stroke="#BA7517" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
-      </div>
+    <!-- SCREEN 3: HOW IT WORKS + WHAT HAPPENS -->
+    <div class="slide" id="slide-2" style="justify-content:flex-start;padding-top:52px;overflow-y:auto">
 
-      <div class="slide-title" data-en="You are ready!" data-nl="U bent klaar!">You are ready!</div>
-      <div class="slide-sub" data-en="Let's run your first safety check right now. It only takes 10 seconds." data-nl="Laten we nu meteen uw eerste veiligheidscontrole uitvoeren. Het duurt maar 10 seconden.">Let's run your first safety check right now. It only takes 10 seconds.</div>
+      <div class="slide-tag" data-en="How DigiMaat works" data-nl="Hoe DigiMaat werkt">How DigiMaat works</div>
+      <h1 class="slide-title" style="font-size:22px;margin-bottom:6px" data-en="We check. We explain. <span>We help.</span>" data-nl="Wij controleren. Wij leggen uit. <span>Wij helpen.</span>">We check. We explain. <span>We help.</span></h1>
+      <p class="slide-body" style="font-size:14px;margin-bottom:18px" data-en="Here is exactly what DigiMaat does — and what happens if we find something." data-nl="Dit is precies wat DigiMaat doet — en wat er gebeurt als wij iets vinden.">Here is exactly what DigiMaat does — and what happens if we find something.</p>
 
-      <div class="check-card" onclick="goTo('breach.html')">
-        <svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
-        <div class="check-card-title" data-en="Check if my email is safe" data-nl="Controleer of mijn e-mail veilig is">Check if my email is safe</div>
-        <div class="check-card-sub" data-en="Takes 10 seconds · Free · No sign-up needed" data-nl="Duurt 10 seconden · Gratis · Geen aanmelding nodig">Takes 10 seconds · Free · No sign-up needed</div>
-      </div>
-
-      <div class="alt-options">
-        <button class="alt-btn" onclick="goTo('scam.html')">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          <div style="text-align:left">
-            <div style="font-weight:800;font-size:14px" data-en="Check a suspicious message" data-nl="Controleer een verdacht bericht">Check a suspicious message</div>
-            <div style="font-size:12px;color:var(--mu)" data-en="Paste an email or SMS to check" data-nl="Plak een e-mail of sms om te controleren">Paste an email or SMS to check</div>
+      <!-- HOW WE DETECT -->
+      <div style="width:100%;background:#fff;border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+        <div style="background:var(--gl);padding:11px 16px;border-bottom:1px solid var(--br)">
+          <div style="font-size:12px;font-weight:800;color:var(--gd);text-transform:uppercase;letter-spacing:.4px" data-en="What we check" data-nl="Wat wij controleren">What we check</div>
+        </div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:11px;align-items:flex-start">
+            <div style="width:28px;height:28px;background:var(--rl);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M12 8v4M12 16h.01"/></svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:800" data-en="Data leaks" data-nl="Datalekken">Data leaks</div>
+              <div style="font-size:12px;color:var(--mu);line-height:1.5;margin-top:2px" data-en="We check if your email address has been stolen in a hack of websites like LinkedIn or Facebook." data-nl="Wij controleren of uw e-mailadres is gestolen bij een hack van websites zoals LinkedIn of Facebook.">We check if your email address has been stolen in a hack of websites like LinkedIn or Facebook.</div>
+            </div>
           </div>
-        </button>
-        <button class="alt-btn" onclick="goTo('home.html')">
-          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          <div style="text-align:left">
-            <div style="font-weight:800;font-size:14px" data-en="Go to the home screen" data-nl="Ga naar het startscherm">Go to the home screen</div>
-            <div style="font-size:12px;color:var(--mu)" data-en="Explore the app first" data-nl="Verken eerst de app">Explore the app first</div>
+          <div style="display:flex;gap:11px;align-items:flex-start">
+            <div style="width:28px;height:28px;background:var(--al);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#BA7517" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:800" data-en="Suspicious messages" data-nl="Verdachte berichten">Suspicious messages</div>
+              <div style="font-size:12px;color:var(--mu);line-height:1.5;margin-top:2px" data-en="We look for fake messages pretending to be your bank, the tax office, DigiD, or PostNL — and dangerous links." data-nl="Wij zoeken naar nep-berichten die doen alsof ze van uw bank, de Belastingdienst, DigiD of PostNL komen — en gevaarlijke links.">We look for fake messages pretending to be your bank, the tax office, DigiD, or PostNL — and dangerous links.</div>
+            </div>
           </div>
-        </button>
+          <div style="display:flex;gap:11px;align-items:flex-start">
+            <div style="width:28px;height:28px;background:#E6F1FB;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div>
+              <div style="font-size:14px;font-weight:800" data-en="Your inbox" data-nl="Uw inbox">Your inbox</div>
+              <div style="font-size:12px;color:var(--mu);line-height:1.5;margin-top:2px" data-en="With your permission, we scan your email inbox and automatically flag anything suspicious." data-nl="Met uw toestemming scannen wij uw e-mailinbox en markeren wij automatisch alles wat verdacht is.">With your permission, we scan your email inbox and automatically flag anything suspicious.</div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <!-- WHAT HAPPENS IF RISK FOUND -->
+      <div style="width:100%;background:#fff;border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+        <div style="background:var(--rl);padding:11px 16px;border-bottom:1px solid #F09595">
+          <div style="font-size:12px;font-weight:800;color:var(--r);text-transform:uppercase;letter-spacing:.4px" data-en="If we find a risk" data-nl="Als wij een risico vinden">If we find a risk</div>
+        </div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--gd);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div>
+            <div style="font-size:13px;line-height:1.5;padding-top:2px" data-en="We show you exactly what was found — in plain language, no technical jargon." data-nl="Wij laten u precies zien wat er gevonden is — in gewone taal, zonder technisch jargon.">We show you exactly what was found — in plain language, no technical jargon.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--gd);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div>
+            <div style="font-size:13px;line-height:1.5;padding-top:2px" data-en="We give you simple step-by-step instructions: delete, block, or change your password." data-nl="Wij geven u eenvoudige stap-voor-stap instructies: verwijderen, blokkeren of wachtwoord wijzigen.">We give you simple step-by-step instructions: delete, block, or change your password.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--gd);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div>
+            <div style="font-size:13px;line-height:1.5;padding-top:2px" data-en="With one tap you can ask your family member for help — they receive a message explaining what happened." data-nl="Met één tik kunt u uw familielid om hulp vragen — zij ontvangen een bericht met uitleg over wat er is gebeurd.">With one tap you can ask your family member for help — they receive a message explaining what happened.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:22px;height:22px;border-radius:50%;background:var(--gd);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">4</div>
+            <div style="font-size:13px;line-height:1.5;padding-top:2px" data-en="We confirm when the danger has been handled — so you can feel safe again." data-nl="Wij bevestigen wanneer het gevaar is afgehandeld — zodat u zich weer veilig kunt voelen.">We confirm when the danger has been handled — so you can feel safe again.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRIVACY NOTE -->
+      <div style="background:var(--bg);border:1px solid var(--br);border-radius:var(--rads);padding:10px 14px;width:100%;margin-bottom:4px">
+        <div style="font-size:12px;color:var(--mu);line-height:1.6;text-align:center" data-en="🔒 Your messages are never stored. We only show you the result — nothing is saved on our servers." data-nl="🔒 Uw berichten worden nooit opgeslagen. Wij tonen u alleen het resultaat — niets wordt op onze servers bewaard.">🔒 Your messages are never stored. We only show you the result — nothing is saved on our servers.</div>
+      </div>
+
     </div>
 
   </div><!-- /slides -->
@@ -306,18 +341,40 @@ function updateNav(){
   var nextLabel=document.getElementById('next-label');
   if(currentSlide===0){
     nextLabel.textContent=lang==='nl'?'Volgende':'Next';
+    document.getElementById('next-btn').style.display='flex';
   }else if(currentSlide===1){
-    var name=document.getElementById('ob-name').value.trim();
+    var name=document.getElementById('ob-name')?document.getElementById('ob-name').value.trim():'';
     nextLabel.textContent=name
       ?(lang==='nl'?'Opslaan & doorgaan':'Save & continue')
       :(lang==='nl'?'Overslaan':'Skip');
+    document.getElementById('next-btn').style.display='flex';
   }else{
-    nextLabel.textContent=lang==='nl'?'Beginnen':'Get started';
+    // Screen 3 — show two action buttons instead of next
+    document.getElementById('next-btn').style.display='none';
+    // Render action buttons if not already there
+    if(!document.getElementById('s3-actions')){
+      var bar=document.querySelector('.bottom-bar');
+      var div=document.createElement('div');
+      div.id='s3-actions';
+      div.style.cssText='display:flex;flex-direction:column;gap:8px;width:100%';
+      div.innerHTML=
+        '<button onclick="finishOnboarding(\'breach.html\')" style="background:var(--gd);color:#fff;border:none;border-radius:10px;padding:15px;font-size:16px;font-weight:800;font-family:Nunito,sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px">'
+        +'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>'
+        +'<span>'+(lang==='nl'?'Controleer mijn e-mail nu':'Check my email now')+'</span>'
+        +'</button>'
+        +'<button onclick="finishOnboarding(\'home.html\')" style="background:none;border:none;color:var(--mu);font-size:14px;font-weight:700;font-family:Nunito,sans-serif;cursor:pointer;text-decoration:underline;text-underline-offset:3px">'
+        +(lang==='nl'?'Ga naar de startpagina':'Go to the home screen')
+        +'</button>';
+      bar.appendChild(div);
+    }
   }
   // Back link
   document.getElementById('back-link').style.display=currentSlide>0?'block':'none';
-  // Hide next button on last slide
-  document.getElementById('next-btn').style.display=currentSlide===2?'none':'flex';
+}
+
+function finishOnboarding(dest){
+  localStorage.setItem('dm_onboarded','true');
+  window.location.href=dest||'home.html';
 }
 
 function nextSlide(){
