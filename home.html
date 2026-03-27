@@ -609,31 +609,24 @@ function renderAlertView(){
   var statusBanner=document.querySelector('.status-banner');
   if(alerts.length===0){
     if(statusBanner)statusBanner.style.display='flex';
-    banner.innerHTML='';alertSection.innerHTML='';
-    safeSection.style.display='block';renderRecent();
+    if(banner)banner.innerHTML='';
+    if(alertSection)alertSection.innerHTML='';
+    if(safeSection)safeSection.style.display='block';
+    renderRecent();
   }else{
     if(statusBanner)statusBanner.style.display='none';
-    safeSection.style.display='none';
-    banner.innerHTML='<div class="alert-banner danger" onclick="scrollToAlerts()" style="margin:12px 18px 0;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;background:var(--r)">'
-      +'<div class="ab-icon" style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>'
-      +'<div style="flex:1"><div style="font-size:15px;font-weight:800;color:#fff">'+(lang==='nl'?alerts.length+' melding'+(alerts.length>1?'en':'')+' vereisen uw aandacht':alerts.length+' alert'+(alerts.length>1?'s':'')+' need your attention')+'</div>'
-      +'<div style="font-size:11px;color:rgba(255,255,255,.85);margin-top:2px">'+(lang==='nl'?'Tik om te bekijken en op te lossen':'Tap to review and fix them')+'</div></div>'
-      +'<span style="font-size:22px;color:rgba(255,255,255,.7);font-weight:700">›</span></div>';
-    var html='<div style="padding:0 18px;margin-top:14px" id="alert-list-anchor">'
-      +'<div style="font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">'+(lang==='nl'?'Te verhelpen meldingen':'Alerts to fix')+'</div>';
-    alerts.forEach(function(item,i){
-      var title=lang==='nl'?item.title_nl:item.title_en;
-      var isCrit=item.severity==='r';
-      html+='<div style="background:#fff;border-radius:16px;border:1px solid var(--br);padding:13px 14px;display:flex;align-items:center;gap:11px;margin-bottom:8px;cursor:pointer;box-shadow:var(--sh)" onclick="openDetail('+i+')">'
-        +'<div style="width:10px;height:10px;border-radius:50%;background:'+(isCrit?'var(--r)':'var(--am)')+';flex-shrink:0"></div>'
-        +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+title+'</div>'
-        +'<div style="font-size:11px;color:var(--mu);margin-top:2px">'+timeAgo(item.time)+'</div>'
-        +'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:5px;display:inline-block;background:'+(isCrit?'var(--rl)':'var(--al)')+';color:'+(isCrit?'var(--r)':'var(--am)')+'">'+( isCrit?(lang==='nl'?'Urgent':'Urgent'):(lang==='nl'?'Waarschuwing':'Warning'))+'</span></div>'
-        +'<button style="background:var(--r);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;font-family:Nunito,sans-serif;cursor:pointer;flex-shrink:0" onclick="event.stopPropagation();openDetail('+i+')">'+(lang==='nl'?'Fix dit →':'Fix this →')+'</button>'
-        +'</div>';
-    });
-    html+='</div>';
-    alertSection.innerHTML=html;
+    if(safeSection)safeSection.style.display='none';
+    if(alertSection)alertSection.innerHTML='';
+    if(banner)banner.innerHTML=
+      '<div onclick="goTo(\'alerts.html\')" style="margin:12px 18px 0;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;background:#FAEEDA;border:2px solid #FAC775;-webkit-tap-highlight-color:transparent">'
+      +'<div style="width:40px;height:40px;border-radius:10px;background:#FAC775;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+      +'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7A4A00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:15px;font-weight:800;color:#7A4A00">'+(lang==="nl"?alerts.length+" melding"+(alerts.length>1?"en":"")+" vereisen aandacht":alerts.length+" alert"+(alerts.length>1?"s":"")+" need attention")+'</div>'
+      +'<div style="font-size:12px;color:#AA6800;margin-top:2px">'+(lang==="nl"?"Tik hier om te bekijken en op te lossen":"Tap here to review and fix them")+'</div>'
+      +'</div>'
+      +'<span style="font-size:24px;color:#BA7517;font-weight:700">›</span>'
+      +'</div>';
   }
 }
 function scrollToAlerts(){var el=document.getElementById('alert-list-anchor');if(el)el.scrollIntoView({behavior:'smooth'});}
