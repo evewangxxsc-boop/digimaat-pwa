@@ -578,34 +578,68 @@ function sendPushNotif(title,body){
   }
 }
 
-// ── GMAIL CONNECT ────────────────────────────────────────
+// ── GMAIL OAUTH CONSTANTS ─────────────────────────────────
+var GMAIL_CLIENT_ID='32711322292-vdbio9jqg1r8ikl4qo80qlldl6b6ir1p.apps.googleusercontent.com';
+var GMAIL_REDIRECT='https://digimaat-pwa.vercel.app/api/gmail-scan';
+var GMAIL_SCOPE='https://www.googleapis.com/auth/gmail.readonly';
+
+// ── GMAIL CONNECT ─────────────────────────────────────────
 function toggleGmail(){
   var btn=document.getElementById('gmail-btn');
   var body=document.getElementById('gmail-body');
   var sub=document.getElementById('gmail-sub');
   if(btn.classList.contains('on')){
-    // Disconnect
     btn.className='conn-btn off';
     btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M5 12h14M12 5l7 7-7 7"/></svg><span>'+(lang==='nl'?'Verbinden':'Connect')+'</span>';
     body.classList.remove('show');
     sub.textContent=lang==='nl'?'Niet verbonden':'Not connected';
     localStorage.removeItem('dm_gmail_user');
+    localStorage.removeItem('dm_gmail_auth_code');
   }else{
-    // Connect — use Firebase Google auth (already logged in, just show email)
-    var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
-    var email=user.email||'';
-    if(email){
-      setGmailConnected(email);
-      localStorage.setItem('dm_gmail_user',email);
-    }
+    launchGmailOAuth();
   }
 }
+
+function launchGmailOAuth(){
+  var state=Math.random().toString(36).substring(2);
+  localStorage.setItem('dm_gmail_oauth_state',state);
+  var params=new URLSearchParams({
+    client_id:GMAIL_CLIENT_ID,
+    redirect_uri:GMAIL_REDIRECT,
+    response_type:'code',
+    scope:GMAIL_SCOPE,
+    access_type:'offline',
+    prompt:'consent',
+    state:state,
+  });
+  var oauthUrl='https://accounts.google.com/o/oauth2/v2/auth?'+params.toString();
+  var popup=window.open(oauthUrl,'gmail_oauth','width=500,height=620,scrollbars=yes,resizable=yes');
+  var listener=function(event){
+    if(event.origin!==window.location.origin)return;
+    if(event.data&&event.data.type==='gmail_auth_code'){
+      window.removeEventListener('message',listener);
+      if(popup)popup.close();
+      var code=event.data.code;
+      if(event.data.state!==localStorage.getItem('dm_gmail_oauth_state')){
+        alert(lang==='nl'?'Beveiligingsfout. Probeer opnieuw.':'Security error. Please try again.');
+        return;
+      }
+      localStorage.setItem('dm_gmail_auth_code',code);
+      var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
+      setGmailConnected(user.email||'Gmail account');
+      localStorage.setItem('dm_gmail_user',user.email||'Gmail account');
+    }
+  };
+  window.addEventListener('message',listener);
+  if(!popup||popup.closed){window.location.href=oauthUrl;}
+}
+
 function setGmailConnected(email){
   var btn=document.getElementById('gmail-btn');
   var body=document.getElementById('gmail-body');
   var sub=document.getElementById('gmail-sub');
   btn.className='conn-btn on';
-  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M20 6L9 17l-5-5"/></svg><span>'+(lang==='nl'?'Verbonden':'Connected')+'</span>';
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M20 6L9 17l-5-5"/></svg><span>'+(lang==='nl'?'Verbonden':'Connected')+'</span>';
   body.classList.add('show');
   sub.textContent=email;
 }
@@ -794,6 +828,8 @@ function startScan(source){
       setTimeout(function(){
         if(source==='whatsapp'&&waMessages.length>0){
           renderWAResults();
+        }else if(source==='gmail'){
+          callGmailAPI();
         }else{
           renderDemoResults();
         }
@@ -837,7 +873,92 @@ function renderWAResults(){
   saveAndShowResults(suspicious,warnings,safeCount);
 }
 
-// ── DEMO RESULTS (Gmail / fallback) ───────────────────────
+// ── REAL GMAIL API CALL ────────────────────────────────────
+function callGmailAPI(){
+  var code=localStorage.getItem('dm_gmail_auth_code');
+  if(!code){renderDemoResults();return;}
+
+  var fromDate=document.getElementById('gmail-from').value;
+  var toDate=document.getElementById('gmail-to').value;
+  var unknownOnly=!document.getElementById('tog-unknown').classList.contains('off');
+
+  fetch('/api/gmail-scan',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({code:code,dateFrom:fromDate,dateTo:toDate,unknownOnly:unknownOnly})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){
+      console.warn('Gmail API error:',data.error);
+      renderDemoResults();
+      return;
+    }
+    // Clear auth code after use — one-time use only
+    localStorage.removeItem('dm_gmail_auth_code');
+    processGmailMessages(data.messages||[]);
+  })
+  .catch(function(err){
+    console.warn('Gmail fetch error:',err);
+    renderDemoResults();
+  });
+}
+
+function processGmailMessages(messages){
+  var NL_PATTERNS=[
+    {re:/belastingdienst/i,     tag_en:'Fake tax authority',    tag_nl:'Nep Belastingdienst'},
+    {re:/digid/i,               tag_en:'Fake DigiD',            tag_nl:'Nep DigiD'},
+    {re:/geblokkeerd/i,         tag_en:'Urgency tactic',        tag_nl:'Urgentietactiek'},
+    {re:/klik hier|click here/i,tag_en:'Click-here tactic',     tag_nl:'Klik-hier tactiek'},
+    {re:/secure-login|login-secure/i,tag_en:'Suspicious domain',tag_nl:'Verdacht domein'},
+    {re:/\bing\b.*rekening|\bing\b.*account/i,tag_en:'Bank impersonation',tag_nl:'Bankimitatie'},
+    {re:/rabobank/i,            tag_en:'Bank impersonation',    tag_nl:'Bankimitatie'},
+    {re:/abn.?amro/i,           tag_en:'Bank impersonation',    tag_nl:'Bankimitatie'},
+    {re:/gewonnen|winnaar/i,    tag_en:'Prize scam',            tag_nl:'Prijsoplichting'},
+    {re:/betaal.*nu|direct.*betalen/i,tag_en:'Payment pressure',tag_nl:'Betalingsdruk'},
+    {re:/uw.*pin|pincode/i,     tag_en:'PIN request',           tag_nl:'Pincodeaanvraag'},
+    {re:/postnl.*pakket|pakket.*mislukt/i,tag_en:'Fake PostNL', tag_nl:'Nep PostNL'},
+    {re:/overdue|achterstallig/i,tag_en:'Overdue payment',      tag_nl:'Achterstallige betaling'},
+    {re:/verify.*account|account.*verify/i,tag_en:'Account verification scam',tag_nl:'Verificatiescam'},
+    {re:/\.tk|\.xyz|\.top|secure-login|login-verify/i,tag_en:'Suspicious domain',tag_nl:'Verdacht domein'},
+  ];
+
+  var excl=getExclusions().map(function(e){return e.addr.toLowerCase();});
+  var suspicious=[];var warnings=[];var safeCount=0;
+
+  messages.forEach(function(msg){
+    // Skip excluded senders
+    var fromLower=(msg.from||'').toLowerCase();
+    if(excl.some(function(a){return fromLower.includes(a);}))return;
+
+    // Check subject + snippet + from address
+    var text=(msg.subject||'')+' '+(msg.snippet||'')+' '+(msg.from||'');
+    var score=0;var tags_en=[];var tags_nl=[];
+
+    NL_PATTERNS.forEach(function(p){
+      if(p.re.test(text)){
+        score++;
+        if(tags_en.indexOf(p.tag_en)===-1){tags_en.push(p.tag_en);tags_nl.push(p.tag_nl);}
+      }
+    });
+
+    var item={
+      title:msg.subject||'(no subject)',
+      from:msg.from||'Unknown',
+      fullText:'Subject: '+(msg.subject||'')+'\\n\\nFrom: '+(msg.from||'')+'\\n\\n'+msg.snippet,
+      tags_en:tags_en,tags_nl:tags_nl,
+      date:msg.date||''
+    };
+
+    if(score>=2)suspicious.push(item);
+    else if(score===1)warnings.push(item);
+    else safeCount++;
+  });
+
+  saveAndShowResults(suspicious,warnings,safeCount);
+}
+
+// ── DEMO RESULTS (fallback) ────────────────────────────────
 function renderDemoResults(){
   var suspicious=[
     {title:'Uw ING account is geblokkeerd — actie verei…',from:'no-reply@ing-secure-login.net',
