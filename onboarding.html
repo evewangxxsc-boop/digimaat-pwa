@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#0F6E56"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icons/icon192.png"/>
+<title>DigiMaat — Welcome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Literata:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1D9E75;--gd:#0F6E56;--gl:#E1F5EE;--gm:#9FE1CB;
+  --r:#A32D2D;--rl:#FCEBEB;--am:#BA7517;--al:#FAEEDA;
+  --bg:#F5F3EE;--card:#fff;--tx:#1a1a18;--mu:#6b6b65;--br:#E0DDD6;
+  --rads:12px;--rad:20px;
+}
+html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--tx);overflow:hidden}
+.app{max-width:390px;margin:0 auto;height:100vh;display:flex;flex-direction:column;position:relative}
+
+/* LANG TOGGLE */
+.lang-bar{position:absolute;top:16px;right:16px;z-index:10;display:flex;background:rgba(255,255,255,.85);border-radius:20px;overflow:hidden;border:1px solid var(--br)}
+.lbtn{background:none;border:none;color:var(--mu);font-size:11px;font-weight:700;padding:6px 12px;cursor:pointer;font-family:'Nunito',sans-serif}
+.lbtn.on{background:var(--g);color:#fff}
+
+/* SLIDES CONTAINER */
+.slides{flex:1;display:flex;overflow:hidden;position:relative}
+.slide{min-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:56px 24px 0;transition:transform .4s cubic-bezier(.4,0,.2,1);text-align:center}
+
+/* PROGRESS DOTS */
+.dots{display:flex;gap:8px;justify-content:center;padding:20px 0 16px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--br);transition:all .3s}
+.dot.on{width:24px;border-radius:4px;background:var(--g)}
+
+/* ILLUSTRATION */
+.illo{width:180px;height:180px;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.illo svg{width:100%;height:100%}
+
+/* TEXT */
+.slide-title{font-size:26px;font-weight:800;line-height:1.2;margin-bottom:12px}
+.slide-sub{font-size:16px;color:var(--mu);line-height:1.6;font-family:'Literata',serif;max-width:300px}
+
+/* FEATURE LIST (screen 1) */
+.feature-list{display:flex;flex-direction:column;gap:10px;margin:20px 0;width:100%;text-align:left}
+.feat{background:var(--card);border-radius:var(--rads);border:1px solid var(--br);padding:13px 15px;display:flex;align-items:center;gap:12px}
+.feat-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.feat-ico svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.feat-title{font-size:14px;font-weight:800}
+.feat-sub{font-size:12px;color:var(--mu);margin-top:1px}
+
+/* FORM (screen 2) */
+.form-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:18px;width:100%;margin-top:20px;text-align:left}
+.form-card-title{font-size:14px;font-weight:800;margin-bottom:12px;color:var(--gd)}
+.field{margin-bottom:12px}
+.field label{font-size:14px;font-weight:700;display:block;margin-bottom:5px}
+.field input{width:100%;background:var(--bg);border:2px solid var(--br);border-radius:var(--rads);padding:13px 14px;font-size:16px;font-family:'Nunito',sans-serif;color:var(--tx);outline:none;transition:border .2s}
+.field input:focus{border-color:var(--g)}
+.skip-link{font-size:13px;color:var(--mu);text-decoration:underline;cursor:pointer;margin-top:8px;display:inline-block}
+
+/* SCREEN 3 */
+.check-card{background:var(--g);border-radius:var(--rad);padding:20px;width:100%;margin-top:20px;text-align:center;cursor:pointer;transition:background .2s}
+.check-card:active{background:var(--gd)}
+.check-card svg{width:32px;height:32px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-bottom:10px}
+.check-card-title{font-size:18px;font-weight:800;color:#fff}
+.check-card-sub{font-size:13px;color:rgba(255,255,255,.8);margin-top:4px;line-height:1.5}
+.alt-options{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:12px}
+.alt-btn{background:var(--card);border:1.5px solid var(--br);border-radius:var(--rads);padding:13px;font-size:14px;font-weight:700;color:var(--tx);font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;gap:10px;transition:border-color .15s}
+.alt-btn:hover{border-color:var(--g)}
+.alt-btn svg{width:18px;height:18px;stroke:var(--g);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* BOTTOM BAR */
+.bottom-bar{padding:16px 24px calc(env(safe-area-inset-bottom,0px) + 16px);background:var(--bg)}
+.next-btn{background:var(--g);color:#fff;border:none;border-radius:var(--rads);padding:16px;font-size:17px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
+.next-btn:hover{background:var(--gd)}
+.next-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.back-link{text-align:center;margin-top:10px;font-size:13px;color:var(--mu);cursor:pointer}
+.back-link span{text-decoration:underline}
+
+/* PAGE LOADER */
+.page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.pl-spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app" id="app" style="display:none">
+
+  <!-- LANG TOGGLE -->
+  <div class="lang-bar">
+    <button class="lbtn on" id="btn-en" onclick="setLang('en')">EN</button>
+    <button class="lbtn" id="btn-nl" onclick="setLang('nl')">NL</button>
+  </div>
+
+  <!-- PROGRESS DOTS -->
+  <div class="dots">
+    <div class="dot on" id="dot-0"></div>
+    <div class="dot" id="dot-1"></div>
+    <div class="dot" id="dot-2"></div>
+  </div>
+
+  <!-- SLIDES -->
+  <div class="slides" id="slides">
+
+    <!-- SCREEN 1: WELCOME -->
+    <div class="slide" id="slide-0">
+      <!-- Shield illustration -->
+      <div class="illo" style="background:var(--gl)">
+        <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="90" cy="90" r="90" fill="#E1F5EE"/>
+          <path d="M90 30L50 52v38c0 33 18 58 40 68 22-10 40-35 40-68V52L90 30z" fill="#0F6E56" opacity=".15"/>
+          <path d="M90 38L54 58v32c0 29 16 52 36 62 20-10 36-33 36-62V58L90 38z" fill="none" stroke="#0F6E56" stroke-width="5" stroke-linejoin="round"/>
+          <path d="M72 90l14 14 28-28" stroke="#0F6E56" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <!-- Friendly face -->
+          <circle cx="90" cy="130" r="22" fill="#fff" stroke="#0F6E56" stroke-width="3"/>
+          <circle cx="83" cy="126" r="2.5" fill="#0F6E56"/>
+          <circle cx="97" cy="126" r="2.5" fill="#0F6E56"/>
+          <path d="M83 134 Q90 140 97 134" stroke="#0F6E56" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+
+      <div class="slide-title" id="s1-title">Welcome to DigiMaat</div>
+      <div class="slide-sub" id="s1-sub">Your personal safety helper online. We protect you from scams, data leaks, and suspicious messages.</div>
+
+      <div class="feature-list">
+        <div class="feat">
+          <div class="feat-ico" style="background:var(--rl)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--r)"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M12 8v4M12 16h.01"/></svg>
+          </div>
+          <div>
+            <div class="feat-title" data-en="Data leak check" data-nl="Datalek controle">Data leak check</div>
+            <div class="feat-sub" data-en="Find out if your email has been exposed" data-nl="Controleer of uw e-mail is uitgelekt">Find out if your email has been exposed</div>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-ico" style="background:var(--al)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--am)"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div>
+            <div class="feat-title" data-en="Check a message" data-nl="Bericht controleren">Check a message</div>
+            <div class="feat-sub" data-en="Is this email or text a scam? We tell you" data-nl="Is dit e-mail of sms oplichting? Wij vertellen het u">Is this email or text a scam? We tell you</div>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="feat-ico" style="background:var(--gl)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--gd)"><circle cx="8" cy="7" r="4"/><path d="M2 20c0-4 2.686-6 6-6s6 2 6 6"/><circle cx="18" cy="9" r="3"/></svg>
+          </div>
+          <div>
+            <div class="feat-title" data-en="Family stays informed" data-nl="Familie blijft op de hoogte">Family stays informed</div>
+            <div class="feat-sub" data-en="Connect a family member who can help you" data-nl="Verbind een familielid dat u kan helpen">Connect a family member who can help you</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: ADD FAMILY CONTACT -->
+    <div class="slide" id="slide-1">
+      <div class="illo" style="background:#EDE8FB">
+        <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="90" cy="90" r="90" fill="#EDE8FB"/>
+          <!-- Two people -->
+          <circle cx="65" cy="72" r="22" fill="#5B44C1" opacity=".2"/>
+          <circle cx="65" cy="72" r="16" fill="#5B44C1" opacity=".5"/>
+          <path d="M35 130c0-16 13-26 30-26s30 10 30 26" fill="#5B44C1" opacity=".4"/>
+          <circle cx="118" cy="78" r="18" fill="#5B44C1" opacity=".3"/>
+          <circle cx="118" cy="78" r="13" fill="#5B44C1" opacity=".6"/>
+          <path d="M92 130c0-14 11-22 26-22s26 8 26 22" fill="#5B44C1" opacity=".5"/>
+          <!-- Heart -->
+          <path d="M90 108 C86 102 78 100 76 107 C74 114 82 120 90 126 C98 120 106 114 104 107 C102 100 94 102 90 108z" fill="#5B44C1"/>
+        </svg>
+      </div>
+
+      <div class="slide-title" data-en="Add a family member" data-nl="Voeg een familielid toe">Add a family member</div>
+      <div class="slide-sub" data-en="Add someone you trust — a child, neighbour, or friend. They can see if you are safe and help if something goes wrong." data-nl="Voeg iemand toe die u vertrouwt — een kind, buurman of vriend. Zij kunnen zien of u veilig bent en helpen als er iets misgaat.">Add someone you trust — a child, neighbour, or friend. They can see if you are safe and help if something goes wrong.</div>
+
+      <div class="form-card">
+        <div class="form-card-title" data-en="Their details" data-nl="Hun gegevens">Their details</div>
+        <div class="field">
+          <label data-en="Full name" data-nl="Volledige naam">Full name</label>
+          <input type="text" id="ob-name" data-ph-en="e.g. Anna de Boer" data-ph-nl="bijv. Anna de Boer" placeholder="e.g. Anna de Boer"/>
+        </div>
+        <div class="field">
+          <label data-en="Phone number" data-nl="Telefoonnummer">Phone number</label>
+          <input type="tel" id="ob-phone" placeholder="+31 6 12345678"/>
+        </div>
+        <div class="field">
+          <label data-en="Relationship" data-nl="Relatie">Relationship</label>
+          <input type="text" id="ob-rel" data-ph-en="e.g. Daughter, Son, Neighbour" data-ph-nl="bijv. Dochter, Zoon, Buurman" placeholder="e.g. Daughter"/>
+        </div>
+      </div>
+      <span class="skip-link" onclick="skipToSlide(2)" data-en="Skip for now — I'll do this later" data-nl="Nu overslaan — ik doe dit later">Skip for now — I'll do this later</span>
+    </div>
+
+    <!-- SCREEN 3: FIRST CHECK -->
+    <div class="slide" id="slide-2">
+      <div class="illo" style="background:#FEF9EC">
+        <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="90" cy="90" r="90" fill="#FEF9EC"/>
+          <!-- Magnifying glass -->
+          <circle cx="80" cy="80" r="32" fill="none" stroke="#BA7517" stroke-width="8"/>
+          <line x1="103" y1="103" x2="130" y2="130" stroke="#BA7517" stroke-width="8" stroke-linecap="round"/>
+          <!-- Check inside -->
+          <path d="M67 80l10 10 18-18" stroke="#BA7517" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+
+      <div class="slide-title" data-en="You are ready!" data-nl="U bent klaar!">You are ready!</div>
+      <div class="slide-sub" data-en="Let's run your first safety check right now. It only takes 10 seconds." data-nl="Laten we nu meteen uw eerste veiligheidscontrole uitvoeren. Het duurt maar 10 seconden.">Let's run your first safety check right now. It only takes 10 seconds.</div>
+
+      <div class="check-card" onclick="goTo('breach.html')">
+        <svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
+        <div class="check-card-title" data-en="Check if my email is safe" data-nl="Controleer of mijn e-mail veilig is">Check if my email is safe</div>
+        <div class="check-card-sub" data-en="Takes 10 seconds · Free · No sign-up needed" data-nl="Duurt 10 seconden · Gratis · Geen aanmelding nodig">Takes 10 seconds · Free · No sign-up needed</div>
+      </div>
+
+      <div class="alt-options">
+        <button class="alt-btn" onclick="goTo('scam.html')">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <div style="text-align:left">
+            <div style="font-weight:800;font-size:14px" data-en="Check a suspicious message" data-nl="Controleer een verdacht bericht">Check a suspicious message</div>
+            <div style="font-size:12px;color:var(--mu)" data-en="Paste an email or SMS to check" data-nl="Plak een e-mail of sms om te controleren">Paste an email or SMS to check</div>
+          </div>
+        </button>
+        <button class="alt-btn" onclick="goTo('home.html')">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <div style="text-align:left">
+            <div style="font-weight:800;font-size:14px" data-en="Go to the home screen" data-nl="Ga naar het startscherm">Go to the home screen</div>
+            <div style="font-size:12px;color:var(--mu)" data-en="Explore the app first" data-nl="Verken eerst de app">Explore the app first</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /slides -->
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <button class="next-btn" id="next-btn" onclick="nextSlide()">
+      <span id="next-label" data-en="Next" data-nl="Volgende">Next</span>
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+    <div class="back-link" id="back-link" style="display:none">
+      <span onclick="prevSlide()" data-en="← Back" data-nl="← Terug">← Back</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-loader" id="page-loader"><div class="pl-spin"></div></div>
+
+<script>
+// FIREBASE
+var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth();
+auth.onAuthStateChanged(function(user){
+  if(!user){window.location.href='register.html';return;}
+  // If already onboarded, skip to home
+  if(localStorage.getItem('dm_onboarded')==='true'){
+    window.location.href='home.html';return;
+  }
+  // Pre-fill name from Firebase user
+  var stored=JSON.parse(localStorage.getItem('dm_user')||'{}');
+  document.getElementById('page-loader').style.display='none';
+  document.getElementById('app').style.display='flex';
+  setLang(localStorage.getItem('dm_lang')||'en');
+});
+
+var lang='en';
+var currentSlide=0;
+var TOTAL=3;
+
+function setLang(l){
+  lang=l;
+  localStorage.setItem('dm_lang',l);
+  document.getElementById('html-root').setAttribute('lang',l);
+  document.getElementById('btn-en').classList.toggle('on',l==='en');
+  document.getElementById('btn-nl').classList.toggle('on',l==='nl');
+  document.querySelectorAll('[data-en]').forEach(function(el){
+    var v=el.getAttribute('data-'+l);if(!v)return;
+    if(el.tagName==='INPUT')el.placeholder=v;
+    else el.textContent=v;
+  });
+  document.querySelectorAll('[data-ph-'+l+']').forEach(function(el){
+    el.placeholder=el.getAttribute('data-ph-'+l);
+  });
+  updateNav();
+}
+
+function goTo(p){
+  // Mark as onboarded before leaving
+  localStorage.setItem('dm_onboarded','true');
+  window.location.href=p;
+}
+
+function updateNav(){
+  // Update dots
+  for(var i=0;i<TOTAL;i++){
+    document.getElementById('dot-'+i).classList.toggle('on',i===currentSlide);
+  }
+  // Update next button label
+  var nextLabel=document.getElementById('next-label');
+  if(currentSlide===0){
+    nextLabel.textContent=lang==='nl'?'Volgende':'Next';
+  }else if(currentSlide===1){
+    var name=document.getElementById('ob-name').value.trim();
+    nextLabel.textContent=name
+      ?(lang==='nl'?'Opslaan & doorgaan':'Save & continue')
+      :(lang==='nl'?'Overslaan':'Skip');
+  }else{
+    nextLabel.textContent=lang==='nl'?'Beginnen':'Get started';
+  }
+  // Back link
+  document.getElementById('back-link').style.display=currentSlide>0?'block':'none';
+  // Hide next button on last slide
+  document.getElementById('next-btn').style.display=currentSlide===2?'none':'flex';
+}
+
+function nextSlide(){
+  if(currentSlide===1){
+    // Save family contact if filled in
+    var name=document.getElementById('ob-name').value.trim();
+    var phone=document.getElementById('ob-phone').value.trim();
+    var rel=document.getElementById('ob-rel').value.trim();
+    if(name&&phone){
+      localStorage.setItem('dm_family',JSON.stringify({name:name,phone:phone,rel:rel,city:''}));
+    }
+  }
+  if(currentSlide<TOTAL-1){
+    currentSlide++;
+    moveSlides();
+  }else{
+    goTo('home.html');
+  }
+}
+
+function prevSlide(){
+  if(currentSlide>0){currentSlide--;moveSlides();}
+}
+
+function skipToSlide(n){
+  currentSlide=n;
+  moveSlides();
+}
+
+function moveSlides(){
+  var offset=-currentSlide*100;
+  document.querySelectorAll('.slide').forEach(function(s,i){
+    s.style.transform='translateX('+(i*100+offset)+'%)';
+  });
+  updateNav();
+}
+
+// Init slide positions
+document.querySelectorAll('.slide').forEach(function(s,i){
+  s.style.transform='translateX('+(i*100)+'%)';
+  s.style.position='absolute';
+  s.style.width='100%';
+  s.style.height='100%';
+  s.style.overflowY='auto';
+});
+</script>
+</body>
+</html>

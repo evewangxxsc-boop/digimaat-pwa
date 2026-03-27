@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#0F6E56"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icons/icon192.png"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icons/icon192.png"/>
 <title>DigiMaat — Register</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
@@ -195,7 +200,15 @@ var ERRS={'auth/email-already-in-use':{en:'This email is already registered.',nl
 function eMsg(code){return((ERRS[code]||{en:'Something went wrong.',nl:'Er ging iets mis.'})[lang]);}
 
 // NAVIGATE
-function goHome(role){localStorage.setItem('dm_role',role||'senior');window.location.href='home.html';}
+function goHome(role){
+  localStorage.setItem('dm_role',role||'senior');
+  // New user — show onboarding; returning user — go to home
+  if(localStorage.getItem('dm_onboarded')==='true'){
+    window.location.href='home.html';
+  }else{
+    window.location.href='onboarding.html';
+  }
+}
 
 // GOOGLE
 function signInWithGoogle(){
@@ -289,5 +302,7 @@ auth.onAuthStateChanged(function(user){
   }
 });
 </script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").then(function(r){console.log("SW registered:",r.scope);}).catch(function(e){console.log("SW error:",e);});});}</script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").then(function(){console.log("SW registered");}).catch(function(e){console.log("SW error:",e);});}</script>
 </body>
 </html>
