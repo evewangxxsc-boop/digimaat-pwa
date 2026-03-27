@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#0F6E56"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>DigiMaat — Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Literata:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1D9E75;--gd:#0F6E56;--gl:#E1F5EE;--gm:#9FE1CB;
+  --r:#A32D2D;--rl:#FCEBEB;--am:#BA7517;--al:#FAEEDA;
+  --bg:#F5F3EE;--card:#fff;--tx:#1a1a18;--mu:#6b6b65;--br:#E0DDD6;
+  --rads:10px;--rad:16px;--sh:0 2px 12px rgba(0,0,0,.07);
+}
+html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--tx)}
+.app{max-width:390px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{background:var(--gd);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tl{display:flex;align-items:center;gap:9px}
+.back-btn{background:none;border:none;cursor:pointer;padding:0}
+.back-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;display:block}
+.page-title{font-size:17px;font-weight:800;color:#fff}
+.lang-pill{display:flex;background:rgba(255,255,255,.15);border-radius:20px;overflow:hidden}
+.lbtn{background:none;border:none;color:rgba(255,255,255,.65);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s}
+.lbtn.on{background:rgba(255,255,255,.3);color:#fff}
+
+/* BODY */
+.body{flex:1;overflow-y:auto;padding:0 0 100px}
+
+/* PROFILE HEADER */
+.profile-header{background:var(--gd);padding:24px 20px 22px;display:flex;flex-direction:column;align-items:center;gap:9px}
+.profile-ava{width:64px;height:64px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--gd);overflow:hidden;flex-shrink:0}
+.profile-ava img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.profile-name{font-size:20px;font-weight:800;color:#fff}
+.profile-email{font-size:12px;color:var(--gm);margin-top:-4px}
+.profile-plan{background:rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px}
+
+/* SECTIONS */
+.section{padding:18px 18px 0}
+.sec-lbl{font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+
+/* SETTINGS CARD */
+.settings-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh);margin-bottom:18px}
+.str{background:var(--card);border-bottom:1px solid var(--br);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.str:last-child{border-bottom:none}
+.strt{font-size:14px;font-weight:700}
+.strs{font-size:11px;color:var(--mu);margin-top:1px}
+.str svg{width:17px;height:17px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.tog{width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;flex-shrink:0;border:none;background:var(--g);transition:background .2s}
+.tok{width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;transition:right .2s}
+.tog.off{background:var(--br)}.tog.off .tok{right:22px}
+
+/* API KEY */
+.api-wrap{padding:13px 16px;border-bottom:1px solid var(--br)}
+.api-row{display:flex;gap:8px;align-items:center}
+.api-inp{flex:1;background:var(--bg);border:1.5px solid var(--br);border-radius:var(--rads);padding:10px 12px;font-size:13px;font-family:'Nunito',sans-serif;color:var(--tx);outline:none;transition:border .2s}
+.api-inp:focus{border-color:var(--g)}
+.api-save{background:var(--g);color:#fff;border:none;border-radius:var(--rads);padding:10px 14px;font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;white-space:nowrap;transition:background .2s}
+.api-save:hover{background:var(--gd)}
+.api-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;margin-top:6px}
+.api-status.active{color:var(--gd)}.api-status.inactive{color:var(--mu)}
+.api-status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.api-status.active .api-status-dot{background:var(--g)}
+.api-status.inactive .api-status-dot{background:var(--br)}
+
+/* DATA MANAGEMENT */
+.data-category{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh);margin-bottom:10px}
+.dc-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.dc-info{flex:1}
+.dc-title{font-size:14px;font-weight:800}
+.dc-count{font-size:11px;color:var(--mu);margin-top:2px}
+.dc-delete-btn{background:var(--rl);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:800;color:var(--r);font-family:'Nunito',sans-serif;cursor:pointer;white-space:nowrap}
+.dc-delete-btn:disabled{opacity:.4;cursor:not-allowed}
+.dc-pending{background:var(--al);padding:9px 16px;font-size:11px;color:#633806;font-weight:600;line-height:1.5;border-top:1px solid #FAC775}
+.dc-restore{background:none;border:none;color:var(--am);font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;text-decoration:underline;padding:0;margin-left:6px}
+
+/* FAQ ACCORDION */
+.faq-item{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh);margin-bottom:8px}
+.faq-question{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:10px;-webkit-tap-highlight-color:transparent}
+.faq-q-text{font-size:14px;font-weight:700;flex:1;line-height:1.4}
+.faq-chevron{width:18px;height:18px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;transition:transform .2s}
+.faq-item.open .faq-chevron{transform:rotate(180deg)}
+.faq-answer{display:none;padding:0 16px 14px;border-top:1px solid var(--br)}
+.faq-item.open .faq-answer{display:block}
+.faq-answer-text{font-size:13px;line-height:1.7;color:var(--mu);font-family:'Literata',serif;padding-top:12px}
+.faq-answer-text strong{color:var(--tx);font-family:'Nunito',sans-serif;font-weight:700}
+.faq-badge{display:inline-flex;align-items:center;gap:4px;background:var(--gl);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--gd);margin-top:8px}
+
+/* DANGER ZONE */
+.danger-zone{background:var(--card);border-radius:var(--rad);border:1.5px solid #F09595;overflow:hidden;box-shadow:var(--sh);margin-bottom:18px}
+.dz-header{padding:13px 16px;border-bottom:1px solid #F09595;background:var(--rl)}
+.dz-title{font-size:14px;font-weight:800;color:var(--r)}
+.dz-sub{font-size:11px;color:var(--r);margin-top:2px;opacity:.8}
+.dz-btn{margin:14px 16px;background:var(--r);color:#fff;border:none;border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:calc(100% - 32px);display:flex;align-items:center;justify-content:center;gap:8px}
+.dz-btn svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* SIGN OUT */
+.signout-btn{margin:0 18px 18px;background:#fff;border:1.5px solid var(--br);border-radius:var(--rads);padding:13px;font-size:15px;font-weight:800;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer;width:calc(100% - 36px);display:flex;align-items:center;justify-content:center;gap:8px}
+.signout-btn svg{width:17px;height:17px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--tx);color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:20px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;z-index:999;font-family:'Nunito',sans-serif}
+.toast.show{opacity:1}
+.toast.success{background:var(--gd)}
+.toast.warn{background:var(--am)}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
+.nb svg{width:21px;height:21px;stroke:var(--mu);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nb span{font-size:9px;color:var(--mu);font-weight:700}
+.nb.on svg{stroke:var(--g)}.nb.on span{color:var(--g)}
+
+/* PAGE LOADER */
+.page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.pl-spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app" id="app" style="display:none">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tl">
+      <button class="back-btn" onclick="goTo('home.html')">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </button>
+      <span class="page-title" data-en="Profile & Settings" data-nl="Profiel & Instellingen">Profile & Settings</span>
+    </div>
+    <div class="lang-pill">
+      <button class="lbtn on" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lbtn" id="btn-nl" onclick="setLang('nl')">NL</button>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- PROFILE HEADER -->
+    <div class="profile-header">
+      <div class="profile-ava" id="profile-ava">?</div>
+      <div class="profile-name" id="profile-name">—</div>
+      <div class="profile-email" id="profile-email">—</div>
+      <span class="profile-plan">Family Plan · €2.99/month</span>
+    </div>
+
+    <!-- API KEY -->
+    <div class="section">
+      <div class="sec-lbl" data-en="Claude AI — Scam analysis" data-nl="Claude AI — Scamanalyse">Claude AI — Scam analysis</div>
+      <div class="settings-card">
+        <div class="api-wrap">
+          <div style="font-size:13px;color:var(--mu);margin-bottom:8px;line-height:1.5"
+            data-en="Enter your Anthropic API key to enable real-time AI scam analysis (Layer 3). Without it, DigiMaat uses local Dutch rules only."
+            data-nl="Voer uw Anthropic API-sleutel in voor realtime AI-scamanalyse (Laag 3). Zonder sleutel gebruikt DigiMaat alleen lokale Nederlandse regels.">
+            Enter your Anthropic API key to enable real-time AI scam analysis (Layer 3). Without it, DigiMaat uses local Dutch rules only.
+          </div>
+          <div class="api-row">
+            <input class="api-inp" type="password" id="api-key-inp"
+              data-ph-en="sk-ant-…" data-ph-nl="sk-ant-…" placeholder="sk-ant-…"/>
+            <button class="api-save" onclick="saveApiKey()"
+              data-en="Save" data-nl="Opslaan">Save</button>
+          </div>
+          <div class="api-status inactive" id="api-status">
+            <div class="api-status-dot"></div>
+            <span id="api-status-text" data-en-active="Claude AI active" data-nl-active="Claude AI actief"
+              data-en-inactive="No API key — using local rules only"
+              data-nl-inactive="Geen API-sleutel — alleen lokale regels">No API key — using local rules only</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCESSIBILITY -->
+    <div class="section">
+      <div class="sec-lbl" data-en="Accessibility" data-nl="Toegankelijkheid">Accessibility</div>
+      <div class="settings-card">
+        <div class="str">
+          <div><div class="strt" data-en="Large text" data-nl="Grote tekst">Large text</div>
+          <div class="strs" data-en="Easier to read" data-nl="Gemakkelijker te lezen">Easier to read</div></div>
+          <button class="tog off" id="tog-large" onclick="togglePref('large_text',this)"><div class="tok"></div></button>
+        </div>
+        <div class="str">
+          <div><div class="strt" data-en="Voice input" data-nl="Spraakinvoer">Voice input</div>
+          <div class="strs" data-en="Speak instead of type" data-nl="Spreken in plaats van typen">Speak instead of type</div></div>
+          <button class="tog" id="tog-voice" onclick="togglePref('voice_input',this)"><div class="tok"></div></button>
+        </div>
+        <div class="str" onclick="cycleLang()" style="cursor:pointer">
+          <div><div class="strt" data-en="Language" data-nl="Taal">Language</div>
+          <div class="strs" id="lang-current">English</div></div>
+          <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="section">
+      <div class="sec-lbl" data-en="Notifications" data-nl="Meldingen">Notifications</div>
+      <div class="settings-card">
+        <div class="str">
+          <div><div class="strt" data-en="Breach alerts" data-nl="Datalek-meldingen">Breach alerts</div>
+          <div class="strs" data-en="Email + SMS" data-nl="E-mail + sms">Email + SMS</div></div>
+          <button class="tog" id="tog-breach-notif" onclick="togglePref('breach_notif',this)"><div class="tok"></div></button>
+        </div>
+        <div class="str">
+          <div><div class="strt" data-en="Family notifications" data-nl="Familiemeldingen">Family notifications</div>
+          <div class="strs" id="family-notif-sub">—</div></div>
+          <button class="tog" id="tog-family-notif" onclick="togglePref('family_notif',this)"><div class="tok"></div></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATA MANAGEMENT -->
+    <div class="section">
+      <div class="sec-lbl" data-en="Data management" data-nl="Gegevensbeheer">Data management</div>
+      <div id="data-management-section"></div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="section">
+      <div class="sec-lbl" data-en="Questions & answers" data-nl="Vragen & antwoorden">Questions & answers</div>
+      <div id="faq-section"></div>
+    </div>
+
+    <!-- DANGER ZONE -->
+    <div class="section">
+      <div class="sec-lbl" data-en="Danger zone" data-nl="Gevarenzone">Danger zone</div>
+      <div class="danger-zone">
+        <div class="dz-header">
+          <div class="dz-title" data-en="Delete account" data-nl="Account verwijderen">Delete account</div>
+          <div class="dz-sub" data-en="This permanently deletes all your data and cannot be undone." data-nl="Dit verwijdert al uw gegevens permanent en kan niet ongedaan worden gemaakt.">This permanently deletes all your data and cannot be undone.</div>
+        </div>
+        <button class="dz-btn" onclick="deleteAccount()">
+          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          <span data-en="Delete my account" data-nl="Mijn account verwijderen">Delete my account</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SIGN OUT -->
+    <button class="signout-btn" onclick="signOut()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span data-en="Sign out" data-nl="Uitloggen">Sign out</span>
+    </button>
+
+  </div><!-- /body -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bnav">
+    <button class="nb" onclick="goTo('home.html')">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span data-en="Home" data-nl="Home">Home</span>
+    </button>
+    <button class="nb" onclick="goTo('inbox.html')">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span data-en="Inbox" data-nl="Inbox">Inbox</span>
+    </button>
+    <button class="nb" onclick="goTo('scam.html')">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span data-en="Check" data-nl="Check">Check</span>
+    </button>
+    <button class="nb" onclick="goTo('family.html')">
+      <svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="4"/><path d="M2 20c0-4 2.686-6 6-6s6 2 6 6"/><circle cx="18" cy="9" r="3"/></svg>
+      <span data-en="Family" data-nl="Familie">Family</span>
+    </button>
+    <button class="nb on">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>
+      <span data-en="Profile" data-nl="Profiel">Profile</span>
+    </button>
+  </nav>
+</div>
+
+<div class="page-loader" id="page-loader"><div class="pl-spin"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// FIREBASE
+var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
+firebase.initializeApp(firebaseConfig);
+var auth=firebase.auth();
+auth.onAuthStateChanged(function(user){
+  if(!user){window.location.href='register.html';return;}
+  document.getElementById('page-loader').style.display='none';
+  document.getElementById('app').style.display='flex';
+  initPage(user);
+});
+
+// ── LANGUAGE ─────────────────────────────────────────────
+var lang='en';
+function setLang(l){
+  lang=l;localStorage.setItem('dm_lang',l);
+  document.getElementById('html-root').setAttribute('lang',l);
+  document.getElementById('btn-en').classList.toggle('on',l==='en');
+  document.getElementById('btn-nl').classList.toggle('on',l==='nl');
+  document.querySelectorAll('[data-en]').forEach(function(el){
+    var v=el.getAttribute('data-'+l);if(!v)return;
+    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')el.placeholder=v;
+    else el.textContent=v;
+  });
+  document.querySelectorAll('[data-ph-'+l+']').forEach(function(el){
+    el.placeholder=el.getAttribute('data-ph-'+l);
+  });
+  document.getElementById('lang-current').textContent=l==='nl'?'Nederlands':'English';
+  updateApiStatus();
+  renderDataManagement();
+  renderFAQ();
+  updateFamilyNotifSub();
+}
+function goTo(p){window.location.href=p;}
+function cycleLang(){setLang(lang==='en'?'nl':'en');}
+
+// ── TOAST ─────────────────────────────────────────────────
+function showToast(msg,type){
+  var el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show '+(type||'');
+  clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show');},2800);
+}
+
+// ── INIT ─────────────────────────────────────────────────
+function initPage(user){
+  lang=localStorage.getItem('dm_lang')||'en';
+  // Profile header
+  var stored=JSON.parse(localStorage.getItem('dm_user')||'{}');
+  var name=stored.name||user.displayName||'User';
+  var email=stored.email||user.email||'';
+  document.getElementById('profile-name').textContent=name;
+  document.getElementById('profile-email').textContent=email;
+  var ava=document.getElementById('profile-ava');
+  if(stored.photo){ava.innerHTML='<img src="'+stored.photo+'" alt="avatar"/>';}
+  else{ava.textContent=name.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();}
+  // API key
+  var key=localStorage.getItem('dm_api_key')||'';
+  if(key){document.getElementById('api-key-inp').value=key;}
+  // Prefs
+  var prefs=JSON.parse(localStorage.getItem('dm_prefs')||'{}');
+  if(prefs.large_text)document.getElementById('tog-large').classList.remove('off');
+  if(prefs.voice_input===false)document.getElementById('tog-voice').classList.add('off');
+  if(prefs.breach_notif===false)document.getElementById('tog-breach-notif').classList.add('off');
+  if(prefs.family_notif===false)document.getElementById('tog-family-notif').classList.add('off');
+  setLang(lang);
+  purgeExpiredDeleted();
+}
+
+// ── PREFERENCES ──────────────────────────────────────────
+function togglePref(key,btn){
+  btn.classList.toggle('off');
+  var prefs=JSON.parse(localStorage.getItem('dm_prefs')||'{}');
+  prefs[key]=!btn.classList.contains('off');
+  localStorage.setItem('dm_prefs',JSON.stringify(prefs));
+}
+function updateFamilyNotifSub(){
+  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
+  var el=document.getElementById('family-notif-sub');
+  el.textContent=family?family.name:(lang==='nl'?'Geen contact verbonden':'No contact connected');
+}
+
+// ── API KEY ───────────────────────────────────────────────
+function saveApiKey(){
+  var key=document.getElementById('api-key-inp').value.trim();
+  if(!key){showToast(lang==='nl'?'Voer een geldige API-sleutel in.':'Please enter a valid API key.','warn');return;}
+  if(!key.startsWith('sk-ant')){showToast(lang==='nl'?'Ongeldige sleutel. Begint met sk-ant-':'Invalid key. Must start with sk-ant-','warn');return;}
+  localStorage.setItem('dm_api_key',key);
+  updateApiStatus();
+  showToast(lang==='nl'?'✓ API-sleutel opgeslagen — Claude AI is actief':'✓ API key saved — Claude AI is now active','success');
+}
+function updateApiStatus(){
+  var key=localStorage.getItem('dm_api_key')||'';
+  var el=document.getElementById('api-status');
+  var txt=document.getElementById('api-status-text');
+  var active=key.startsWith('sk-ant');
+  el.className='api-status '+(active?'active':'inactive');
+  txt.textContent=txt.getAttribute('data-'+lang+'-'+(active?'active':'inactive'));
+}
+
+// ── DATA MANAGEMENT ───────────────────────────────────────
+var DATA_CATEGORIES=[
+  {key:'dm_recent',     label_en:'Recent activity',      label_nl:'Recente activiteit',    icon:'clock'},
+  {key:'dm_scan_history',label_en:'Inbox scan history',  label_nl:'Inbox scangeschiedenis', icon:'inbox'},
+];
+
+function getItemCount(key){
+  try{var d=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(d)?d.length:0;}catch(e){return 0;}
+}
+function getDeletedMeta(){
+  try{return JSON.parse(localStorage.getItem('dm_deleted_meta')||'{}');}catch(e){return{};}
+}
+function saveDeletedMeta(meta){localStorage.setItem('dm_deleted_meta',JSON.stringify(meta));}
+
+function purgeExpiredDeleted(){
+  var meta=getDeletedMeta();
+  var now=Date.now();
+  var THIRTY_DAYS=30*24*60*60*1000;
+  Object.keys(meta).forEach(function(key){
+    if(now-meta[key].deletedAt>THIRTY_DAYS){
+      localStorage.removeItem(key+'_deleted');
+      delete meta[key];
+    }
+  });
+  saveDeletedMeta(meta);
+}
+
+function softDelete(key){
+  var count=getItemCount(key);
+  if(count===0){showToast(lang==='nl'?'Geen gegevens om te verwijderen.':'No data to delete.','warn');return;}
+  var confirmed=confirm(lang==='nl'
+    ?'Weet u zeker dat u deze '+count+' items wilt verwijderen? Ze worden na 30 dagen permanent verwijderd. U kunt ze herstellen vóór die tijd.'
+    :'Are you sure you want to delete these '+count+' items? They will be permanently deleted after 30 days. You can restore them before then.');
+  if(!confirmed)return;
+  // Move data to _deleted key
+  var data=localStorage.getItem(key);
+  localStorage.setItem(key+'_deleted',data||'[]');
+  localStorage.removeItem(key);
+  // Record deletion timestamp
+  var meta=getDeletedMeta();
+  meta[key]={deletedAt:Date.now(),count:count};
+  saveDeletedMeta(meta);
+  showToast(lang==='nl'?'Verwijderd — herstel mogelijk binnen 30 dagen':'Deleted — restore available for 30 days','success');
+  renderDataManagement();
+}
+
+function restoreData(key){
+  var deleted=localStorage.getItem(key+'_deleted');
+  if(!deleted)return;
+  localStorage.setItem(key,deleted);
+  localStorage.removeItem(key+'_deleted');
+  var meta=getDeletedMeta();
+  delete meta[key];
+  saveDeletedMeta(meta);
+  showToast(lang==='nl'?'✓ Gegevens hersteld':'✓ Data restored','success');
+  renderDataManagement();
+}
+
+function renderDataManagement(){
+  var meta=getDeletedMeta();
+  var now=Date.now();
+  var THIRTY_DAYS=30*24*60*60*1000;
+  var html='';
+  DATA_CATEGORIES.forEach(function(cat){
+    var count=getItemCount(cat.key);
+    var pending=meta[cat.key];
+    var label=lang==='nl'?cat.label_nl:cat.label_en;
+    var daysLeft=pending?Math.ceil((THIRTY_DAYS-(now-pending.deletedAt))/86400000):0;
+    html+='<div class="data-category">'
+      +'<div class="dc-header">'
+      +'<div class="dc-info">'
+      +'<div class="dc-title">'+label+'</div>'
+      +'<div class="dc-count">'+(count>0
+        ?(lang==='nl'?count+' item'+(count!==1?'s':'')+' opgeslagen':count+' item'+(count!==1?'s':'')+' stored')
+        :(lang==='nl'?'Geen gegevens':'No data'))
+      +'</div></div>'
+      +'<button class="dc-delete-btn" '+(count===0?'disabled':'')+' onclick="softDelete(\''+cat.key+'\')">'
+      +(lang==='nl'?'Verwijderen':'Delete')+'</button>'
+      +'</div>';
+    if(pending&&daysLeft>0){
+      html+='<div class="dc-pending">'
+        +(lang==='nl'
+          ?'⏳ '+pending.count+' verwijderde items worden permanent verwijderd over '+daysLeft+' dag'+(daysLeft!==1?'en':'')+'.'
+          :'⏳ '+pending.count+' deleted items will be permanently removed in '+daysLeft+' day'+(daysLeft!==1?'s':'')+'.')
+        +'<button class="dc-restore" onclick="restoreData(\''+cat.key+'\')">'
+        +(lang==='nl'?'Herstellen':'Restore')+'</button>'
+        +'</div>';
+    }
+    html+='</div>';
+  });
+  document.getElementById('data-management-section').innerHTML=html;
+}
+
+// ── FAQ DATA ─────────────────────────────────────────────
+var FAQ=[
+  {
+    q_en:'How do we keep your account and password safe?',
+    q_nl:'Hoe houden wij uw account en wachtwoord veilig?',
+    a_en:'<strong>Your password is never stored by DigiMaat.</strong> We use Firebase Authentication by Google, which handles all login security. Your password is encrypted using industry-standard bcrypt hashing before it ever reaches any server. We support Google Sign-In, which means many users never create a password with us at all. Your session is protected by a secure Firebase token that expires automatically. We recommend using a unique password for DigiMaat and enabling two-step login on your Google account for extra protection.',
+    a_nl:'<strong>Uw wachtwoord wordt nooit opgeslagen door DigiMaat.</strong> Wij gebruiken Firebase Authentication van Google, dat alle inlogbeveiliging afhandelt. Uw wachtwoord wordt versleuteld met branchestandaard bcrypt-hashing voordat het een server bereikt. Wij ondersteunen inloggen via Google, waardoor veel gebruikers nooit een wachtwoord bij ons aanmaken. Uw sessie wordt beschermd door een beveiligd Firebase-token dat automatisch verloopt. Wij adviseren een uniek wachtwoord voor DigiMaat en tweestapsverificatie op uw Google-account.',
+    badge_en:'Powered by Firebase Auth',badge_nl:'Aangedreven door Firebase Auth'
+  },
+  {
+    q_en:'How often is the scam detection data updated?',
+    q_nl:'Hoe vaak worden de scamdetectiegegevens bijgewerkt?',
+    a_en:'DigiMaat uses three layers of detection, each updated differently. <strong>Layer 1 (Dutch rules)</strong> is updated with every new app release, which we aim to do monthly or whenever a major new scam pattern emerges in the Netherlands. <strong>Layer 2 (PhishTank)</strong> is a live database updated in real time by the security community — every scan queries the latest data. <strong>Layer 3 (Claude AI)</strong> uses Anthropic\'s model which is continuously improved. We also monitor Fraudehelpdesk.nl for new Dutch scam patterns and incorporate them quickly.',
+    a_nl:'DigiMaat gebruikt drie detectielagen, elk met een eigen updatefrequentie. <strong>Laag 1 (Nederlandse regels)</strong> wordt bijgewerkt bij elke nieuwe app-release, die wij maandelijks nastreven of wanneer er een nieuw belangrijk scampatroon in Nederland opduikt. <strong>Laag 2 (PhishTank)</strong> is een live database die real-time door de beveiligingsgemeenschap wordt bijgewerkt — elke scan bevraagt de meest recente data. <strong>Laag 3 (Claude AI)</strong> gebruikt het model van Anthropic, dat continu wordt verbeterd. Wij monitoren ook Fraudehelpdesk.nl voor nieuwe Nederlandse scampatronen.',
+    badge_en:'Updated monthly + real-time',badge_nl:'Maandelijks + real-time bijgewerkt'
+  },
+  {
+    q_en:'How do we protect your data and privacy?',
+    q_nl:'Hoe beschermen wij uw gegevens en privacy?',
+    a_en:'<strong>We store as little as possible, and only on your device.</strong> Your recent activity, settings, and family contact details are stored in your browser\'s localStorage — meaning they never leave your device unless you explicitly use a feature that requires it. API calls (breach checks, scam analysis) are made directly from your browser to the respective services over HTTPS. No third-party analytics or advertising trackers are present in the app. We comply with GDPR. You can delete all your data at any time from this page.',
+    a_nl:'<strong>Wij slaan zo weinig mogelijk op, en alleen op uw apparaat.</strong> Uw recente activiteit, instellingen en familiecontactgegevens worden opgeslagen in de localStorage van uw browser — wat betekent dat ze uw apparaat nooit verlaten tenzij u een functie gebruikt die dat vereist. API-aanvragen (lekcontroles, scamanalyse) worden rechtstreeks vanuit uw browser naar de betreffende services gemaakt via HTTPS. Er zijn geen externe analyses of advertentietrackers in de app. Wij voldoen aan de AVG. U kunt al uw gegevens te allen tijde verwijderen via deze pagina.',
+    badge_en:'GDPR compliant · No trackers',badge_nl:'AVG-conform · Geen trackers'
+  },
+  {
+    q_en:'Does DigiMaat store my messages or emails?',
+    q_nl:'Slaat DigiMaat mijn berichten of e-mails op?',
+    a_en:'<strong>No. DigiMaat never stores your message content.</strong> When you paste a message into the Scam Checker, it is analysed immediately and then discarded — nothing is written to any database or server. If you use Claude AI analysis (Layer 3), the message text is sent to Anthropic\'s API for analysis. Anthropic\'s data processing policy applies in that case, and they do not use API inputs to train their models. Inbox scan results show only metadata (sender, subject, verdict) — never the full message body.',
+    a_nl:'<strong>Nee. DigiMaat slaat uw berichtinhoud nooit op.</strong> Wanneer u een bericht plakt in de Scam Checker, wordt het direct geanalyseerd en daarna verwijderd — er wordt niets naar een database of server geschreven. Als u Claude AI-analyse gebruikt (Laag 3), wordt de berichttekst naar de API van Anthropic gestuurd voor analyse. Het gegevensverwerkingsbeleid van Anthropic is dan van toepassing, en zij gebruiken API-invoer niet voor modeltraining. Inbox-scanresultaten tonen alleen metadata (afzender, onderwerp, oordeel) — nooit de volledige berichtinhoud.',
+    badge_en:'Zero message storage',badge_nl:'Geen berichtopslag'
+  },
+  {
+    q_en:'Who can see my activity — and can I control it?',
+    q_nl:'Wie kan mijn activiteit zien — en kan ik dat beheren?',
+    a_en:'<strong>Only you and the family contact you explicitly choose.</strong> Your activity timeline is stored locally on your device. If you add a family contact, they can see a summary of your safety events — but only the categories you enable in the Sharing settings on this page. They have read-only access and cannot change any settings. You can remove the family contact at any time from the Family page, which immediately stops all sharing. No DigiMaat employee can see your data.',
+    a_nl:'<strong>Alleen u en het familiecontact dat u expliciet kiest.</strong> Uw activiteitstimeline wordt lokaal op uw apparaat opgeslagen. Als u een familiecontact toevoegt, kunnen zij een samenvatting van uw veiligheidsgebeurtenissen zien — maar alleen de categorieën die u inschakelt in de Deelinstelling op deze pagina. Zij hebben alleen-leestoegang en kunnen geen instellingen wijzigen. U kunt het familiecontact op elk moment verwijderen via de Familiepagina, wat het delen onmiddellijk stopt. Geen enkele DigiMaat-medewerker kan uw gegevens zien.',
+    badge_en:'You are in full control',badge_nl:'U heeft volledige controle'
+  },
+  {
+    q_en:'How do I cancel my subscription?',
+    q_nl:'Hoe kan ik mijn abonnement opzeggen?',
+    a_en:'<strong>You can cancel at any time — no questions asked.</strong> Go to your subscription settings and click Cancel. Your access continues until the end of the current billing period. We do not charge cancellation fees. If you cancel within 14 days of subscribing, you are entitled to a full refund under EU consumer law. To request a refund, contact us at support@digimaat.app. After cancellation your data remains on your device until you delete it manually or delete your account.',
+    a_nl:'<strong>U kunt op elk moment opzeggen — zonder opgaaf van reden.</strong> Ga naar uw abonnementsinstellingen en klik op Opzeggen. Uw toegang loopt door tot het einde van de huidige factureringsperiode. Wij brengen geen annuleringskosten in rekening. Als u binnen 14 dagen na het afsluiten van een abonnement opzegt, heeft u recht op volledige terugbetaling op grond van het Europese consumentenrecht. Neem contact op via support@digimaat.app voor een terugbetaling. Na opzegging blijft uw gegevens op uw apparaat totdat u ze handmatig verwijdert of uw account verwijdert.',
+    badge_en:'Cancel anytime · EU refund rights',badge_nl:'Altijd opzeggen · EU-terugbetalingsrecht'
+  },
+];
+
+function renderFAQ(){
+  var html=FAQ.map(function(item,i){
+    var q=lang==='nl'?item.q_nl:item.q_en;
+    var a=lang==='nl'?item.a_nl:item.a_en;
+    var badge=lang==='nl'?item.badge_nl:item.badge_en;
+    return '<div class="faq-item" id="faq-'+i+'">'
+      +'<div class="faq-question" onclick="toggleFAQ('+i+')">'
+      +'<span class="faq-q-text">'+q+'</span>'
+      +'<svg class="faq-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>'
+      +'</div>'
+      +'<div class="faq-answer">'
+      +'<div class="faq-answer-text">'+a+'</div>'
+      +'<div class="faq-badge">✓ '+badge+'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+  document.getElementById('faq-section').innerHTML=html;
+}
+
+function toggleFAQ(i){
+  var item=document.getElementById('faq-'+i);
+  var wasOpen=item.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-item').forEach(function(el){el.classList.remove('open');});
+  // Open clicked if it was closed
+  if(!wasOpen)item.classList.add('open');
+}
+
+// ── SIGN OUT ─────────────────────────────────────────────
+function signOut(){
+  var ok=confirm(lang==='nl'?'Weet u zeker dat u wilt uitloggen?':'Are you sure you want to sign out?');
+  if(!ok)return;
+  auth.signOut().then(function(){
+    localStorage.removeItem('dm_user');
+    localStorage.removeItem('dm_role');
+    window.location.href='register.html';
+  });
+}
+
+// ── DELETE ACCOUNT ────────────────────────────────────────
+function deleteAccount(){
+  var ok=confirm(lang==='nl'
+    ?'Weet u zeker dat u uw account wilt verwijderen? Dit verwijdert al uw gegevens permanent en kan niet ongedaan worden gemaakt.'
+    :'Are you sure you want to delete your account? This permanently deletes all your data and cannot be undone.');
+  if(!ok)return;
+  // Clear all localStorage keys
+  ['dm_user','dm_role','dm_lang','dm_api_key','dm_recent','dm_family',
+   'dm_exclusions','dm_scan_history','dm_inbox_settings','dm_share_settings',
+   'dm_prefs','dm_deleted_meta','dm_last_results','dm_wa_file'].forEach(function(k){
+    localStorage.removeItem(k);
+  });
+  // Delete Firebase account
+  var user=auth.currentUser;
+  if(user){
+    user.delete().then(function(){
+      window.location.href='register.html';
+    }).catch(function(){
+      // Re-authentication may be needed — sign out at minimum
+      auth.signOut().then(function(){window.location.href='register.html';});
+    });
+  }else{
+    window.location.href='register.html';
+  }
+}
+</script>
+</body>
+</html>
