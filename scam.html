@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#0F6E56"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icons/icon192.png"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icons/icon192.png"/>
 <title>DigiMaat — Scam Checker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Literata:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
@@ -211,10 +216,14 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
         </div>
         <div class="layer-pill" id="layer2">
           <div class="lp-num">2</div>
-          <div class="lp-txt" data-en="Link check" data-nl="Link check">Link check</div>
+          <div class="lp-txt" data-en="Scam patterns" data-nl="Scam patronen">Scam patterns</div>
         </div>
         <div class="layer-pill" id="layer3">
           <div class="lp-num">3</div>
+          <div class="lp-txt" data-en="Link check" data-nl="Link check">Link check</div>
+        </div>
+        <div class="layer-pill" id="layer4">
+          <div class="lp-num">4</div>
           <div class="lp-txt" data-en="Claude AI" data-nl="Claude AI">Claude AI</div>
         </div>
       </div>
@@ -364,8 +373,9 @@ function addRecent(type,en,nl,sev){
 
 // LAYER HIGHLIGHT
 function highlightLayer(n){
-  [1,2,3].forEach(function(i){
-    document.getElementById('layer'+i).classList.toggle('active',i<=n);
+  [1,2,3,4].forEach(function(i){
+    var el=document.getElementById('layer'+i);
+    if(el)el.classList.toggle('active',i<=n);
   });
 }
 
@@ -413,7 +423,7 @@ var NL_RULES=[
   {pattern:/rabobank/i,                 flag_en:'Bank impersonation (Rabo)', flag_nl:'Bankimitatie (Rabo)',   weight:2},
   {pattern:/abn.?amro/i,               flag_en:'Bank impersonation (ABN)',  flag_nl:'Bankimitatie (ABN)',    weight:2},
   {pattern:/bunq/i,                     flag_en:'Bank impersonation (bunq)', flag_nl:'Bankimitatie (bunq)',   weight:2},
-  {pattern:/bankhelp/i,                 flag_en:'Fake bank helpdesk',       flag_nl:'Nep bankhelpddesk',     weight:3},
+  {pattern:/bankhelp/i,                 flag_en:'Fake bank helpdesk',        flag_nl:'Nep bankhelpddesk',    weight:3},
   // Parcel / delivery
   {pattern:/postnl/i,                   flag_en:'Fake PostNL',               flag_nl:'Nep PostNL',           weight:2},
   {pattern:/dhl/i,                      flag_en:'Fake DHL',                  flag_nl:'Nep DHL',              weight:1},
@@ -440,9 +450,137 @@ var NL_RULES=[
   {pattern:/bankrekening.*nummer/i,     flag_en:'Bank account request',      flag_nl:'Bankrekeningverzoek',  weight:2},
 ];
 
+// ═══════════════════════════════════════════════
+// LAYER 1.5 — SEMANTIC SCAM PATTERNS (International)
+// Detects scam intent regardless of language
+// ═══════════════════════════════════════════════
+var SEMANTIC_RULES=[
+
+  // ── GRANDPARENT / FAMILY EMERGENCY SCAM ─────────────────
+  // "I'm your grandson/granddaughter, I had an accident, send money"
+  {
+    pattern:/\b(grandson|granddaughter|grandchild|kleinkind|kleinzoon|kleindochter)\b/i,
+    flag_en:'Family impersonation',flag_nl:'Familie-imitatie',weight:2
+  },
+  {
+    // Combination: family relation + accident/trouble + money request
+    combo:[
+      /\b(son|daughter|grandson|granddaughter|nephew|niece|grandchild|kid|child|mama|papa|opa|oma|mom|dad)\b/i,
+      /\b(accident|crash|arrested|jail|hospital|trouble|emergency|hurt|injured|ongeluk|ziekenhuis|gevangenis|gearresteerd)\b/i,
+      /\b(money|cash|send|\$|€|pay|transfer|venmo|cashapp|zelle|paypal|wire|geld|sturen|betalen|overmaken)\b/i
+    ],
+    flag_en:'Grandparent scam — fake family emergency',flag_nl:'Opa/oma-scam — nep familienood',weight:5
+  },
+
+  // ── MONEY REQUEST PATTERNS ───────────────────────────────
+  {
+    combo:[
+      /\b(send|transfer|wire|pay|give|need|stuur|overmaak|betaal|geef)\b/i,
+      /(\$|€|£|\d+\s*(dollar|euro|pound|usd|eur))/i
+    ],
+    flag_en:'Money transfer request',flag_nl:'Geldverzoek',weight:3
+  },
+  {
+    pattern:/\b(cashapp|cash app|venmo|zelle|western union|moneygram|bitcoin|crypto|gift card|google play card|itunes card|cadeaukaart)\b/i,
+    flag_en:'Untraceable payment method',flag_nl:'Niet-traceerbare betaalmethode',weight:4
+  },
+  {
+    // Urgency + money
+    combo:[
+      /\b(urgent|emergency|immediately|right now|asap|hurry|quickly|please help|help me|dringend|nu meteen|direct|snel)\b/i,
+      /\b(money|cash|send|pay|transfer|geld|sturen|betalen)\b/i
+    ],
+    flag_en:'Urgent money request',flag_nl:'Dringend geldverzoek',weight:4
+  },
+
+  // ── ROMANCE SCAM ─────────────────────────────────────────
+  {
+    combo:[
+      /\b(love you|miss you|soulmate|destiny|met online|dating|hou van je|mis je|online ontmoet)\b/i,
+      /\b(money|send|transfer|investment|emergency|ticket|visa|geld|sturen|investering|noodsituatie)\b/i
+    ],
+    flag_en:'Romance scam pattern',flag_nl:'Romantische oplichting',weight:4
+  },
+
+  // ── TECH SUPPORT SCAM ────────────────────────────────────
+  {
+    combo:[
+      /\b(microsoft|apple|google|windows|computer|laptop|device|virus|hacked|malware|computer)\b/i,
+      /\b(call|contact|support|helpdesk|technician|bel|support|bellen|technicus)\b/i,
+      /(\+?\d[\d\s\-\(\)]{7,})/  // phone number present
+    ],
+    flag_en:'Tech support scam',flag_nl:'Tech-ondersteuningsscam',weight:4
+  },
+  {
+    pattern:/\b(your computer|uw computer|pc has been|virus detected|hacked|remote access|teamviewer|anydesk)\b/i,
+    flag_en:'Tech support scam',flag_nl:'Tech-ondersteuningsscam',weight:3
+  },
+
+  // ── ADVANCE FEE / INHERITANCE SCAM ──────────────────────
+  {
+    combo:[
+      /\b(million|inheritance|lottery|won|winner|selected|chosen|miljoen|erfenis|loterij|gewonnen|winnaar|gekozen)\b/i,
+      /\b(fee|tax|charge|transfer|release|vergoeding|belasting|kosten|vrijgave)\b/i
+    ],
+    flag_en:'Advance fee scam',flag_nl:'Voorschot-oplichting',weight:4
+  },
+  {
+    pattern:/\b(nigerian|prince|royal family|un representative|diplomat|agent|barrister)\b.*\b(money|million|fund|inheritance)\b/i,
+    flag_en:'419 advance fee scam',flag_nl:'Voorschot-oplichting',weight:5
+  },
+
+  // ── INVESTMENT / CRYPTO SCAM ─────────────────────────────
+  {
+    combo:[
+      /\b(invest|investment|profit|return|crypto|bitcoin|trading|forex|stock|investeer|winst|rendement|handel)\b/i,
+      /\b(guaranteed|100%|risk.?free|double|triple|gegarandeerd|risicovrij|verdubbelen)\b/i
+    ],
+    flag_en:'Investment scam',flag_nl:'Investeringsfraude',weight:4
+  },
+
+  // ── ACCOUNT / CREDENTIAL THEFT ───────────────────────────
+  {
+    combo:[
+      /\b(verify|confirm|update|validate|suspended|blocked|verifieer|bevestig|bijwerken|geblokkeerd)\b/i,
+      /\b(account|password|login|credential|wachtwoord|inloggen|toegang)\b/i,
+      /\b(click|tap|visit|go to|klik|bezoek|ga naar)\b/i
+    ],
+    flag_en:'Credential phishing',flag_nl:'Inloggegevens phishing',weight:4
+  },
+
+  // ── PARCEL / DELIVERY (English) ──────────────────────────
+  {
+    combo:[
+      /\b(parcel|package|delivery|shipment|pakket|bezorging|levering)\b/i,
+      /\b(fee|customs|pay|charge|vergoeding|douane|betaal|kosten)\b/i
+    ],
+    flag_en:'Fake delivery fee',flag_nl:'Nep bezorgkosten',weight:3
+  },
+
+  // ── GENERAL RED FLAGS ─────────────────────────────────────
+  {
+    pattern:/\b(do not tell|don't tell|keep this secret|between us|vertel niemand|hou dit geheim|tussen ons)\b/i,
+    flag_en:'Secrecy request — major red flag',flag_nl:'Geheimhoudingsverzoek — grote waarschuwing',weight:4
+  },
+  {
+    pattern:/\b(i am (a |the )?(prince|king|general|doctor|nurse|soldier|officer)|ik ben (een )?(prins|generaal|dokter|verpleegster|soldaat|officier))\b/i,
+    flag_en:'False identity claim',flag_nl:'Valse identiteitsaanspraak',weight:3
+  },
+  {
+    // New phone / can't reach me on old number
+    combo:[
+      /\b(new (phone|number)|different number|lost (my )?(phone|number)|nieuw (telefoonnummer|nummer)|ander nummer|telefoon kwijt)\b/i,
+      /\b(this is|it\'s me|it is me|dit is|ik ben)\b/i
+    ],
+    flag_en:'New number impersonation',flag_nl:'Nieuw nummer imitatie',weight:3
+  },
+];
+
 function runLayer1(text){
   var score=0;
   var flags_en=[];var flags_nl=[];
+
+  // Standard NL rules
   NL_RULES.forEach(function(rule){
     if(rule.pattern.test(text)){
       score+=rule.weight;
@@ -450,6 +588,23 @@ function runLayer1(text){
       if(flags_nl.indexOf(rule.flag_nl)===-1){flags_nl.push(rule.flag_nl);}
     }
   });
+
+  // Semantic rules
+  SEMANTIC_RULES.forEach(function(rule){
+    var matched=false;
+    if(rule.pattern){
+      matched=rule.pattern.test(text);
+    }else if(rule.combo){
+      // All patterns in combo must match
+      matched=rule.combo.every(function(p){return p.test(text);});
+    }
+    if(matched){
+      score+=rule.weight;
+      if(flags_en.indexOf(rule.flag_en)===-1){flags_en.push(rule.flag_en);}
+      if(flags_nl.indexOf(rule.flag_nl)===-1){flags_nl.push(rule.flag_nl);}
+    }
+  });
+
   return {score:score,flags_en:flags_en,flags_nl:flags_nl};
 }
 
@@ -543,14 +698,14 @@ function runCheck(){
 
   // ── LAYER 1: Local rules (instant) ──────────────
   setLoading(
-    lang==='nl'?'Stap 1: Nederlandse regels controleren…':'Step 1: Checking Dutch scam rules…',
-    lang==='nl'?'Lokale database':'Local database'
+    lang==='nl'?'Stap 1 & 2: Nederlandse regels en scam-patronen…':'Steps 1 & 2: Dutch rules and scam patterns…',
+    lang==='nl'?'Lokale analyse':'Local analysis'
   );
-  highlightLayer(1);
+  highlightLayer(2);
   var l1=runLayer1(text);
 
   // If layer 1 gives strong signal (score ≥ 5), we can already decide
-  if(l1.score>=5){
+  if(l1.score>=4){
     setTimeout(function(){
       document.getElementById('loading-state').classList.remove('show');
       document.getElementById('check-btn').disabled=false;
@@ -568,10 +723,10 @@ function runCheck(){
   // ── LAYER 2: URL check ──────────────────────────
   setTimeout(function(){
     setLoading(
-      lang==='nl'?'Stap 2: Links controleren…':'Step 2: Checking links…',
+      lang==='nl'?'Stap 3: Links controleren…':'Step 3: Checking links…',
       lang==='nl'?'PhishTank database':'PhishTank database'
     );
-    highlightLayer(2);
+    highlightLayer(3);
 
     var urls=extractURLs(text);
     var urlBad=false;
@@ -629,10 +784,10 @@ function runCheck(){
 
     // Has Claude key — call Layer 3
     setLoading(
-      lang==='nl'?'Stap 3: Claude AI analyseert…':'Step 3: Claude AI analysing…',
+      lang==='nl'?'Stap 4: Claude AI analyseert…':'Step 4: Claude AI analysing…',
       lang==='nl'?'Diepere semantische analyse':'Deep semantic analysis'
     );
-    highlightLayer(3);
+    highlightLayer(4);
 
     runClaude(text).then(function(result){
       document.getElementById('loading-state').classList.remove('show');
@@ -884,5 +1039,7 @@ function showOcrNotice(msg, type){
   ta.parentElement.insertBefore(div,ta);
 }
 </script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").then(function(r){console.log("SW registered:",r.scope);}).catch(function(e){console.log("SW error:",e);});});}</script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").then(function(){console.log("SW registered");}).catch(function(e){console.log("SW error:",e);});}</script>
 </body>
 </html>
