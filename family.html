@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#0F6E56"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icons/icon192.png"/>
 <title>DigiMaat — Family</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Literata:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
@@ -28,94 +30,127 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .back-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;display:block}
 .page-title{font-size:17px;font-weight:800;color:#fff}
 .lang-pill{display:flex;background:rgba(255,255,255,.15);border-radius:20px;overflow:hidden}
-.lbtn{background:none;border:none;color:rgba(255,255,255,.65);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s}
+.lbtn{background:none;border:none;color:rgba(255,255,255,.65);font-size:11px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:'Nunito',sans-serif}
 .lbtn.on{background:rgba(255,255,255,.3);color:#fff}
 
+/* ROLE SWITCHER */
+.role-bar{background:#fff;border-bottom:1px solid var(--br);padding:10px 16px;display:flex;gap:6px;flex-shrink:0}
+.role-btn{flex:1;border:1.5px solid var(--br);border-radius:var(--rads);padding:9px 8px;font-size:12px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;background:#fff;color:var(--mu);display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
+.role-btn svg{width:14px;height:14px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.role-btn.active{background:var(--gd);color:#fff;border-color:var(--gd)}
+.role-btn.active svg{stroke:#fff}
+.role-btn:not(.active) svg{stroke:var(--mu)}
+
 /* BODY */
-.body{flex:1;overflow-y:auto;padding:18px 18px 100px;display:flex;flex-direction:column;gap:14px}
+.body{flex:1;overflow-y:auto;padding:16px 16px 100px}
+
+/* VIEW */
+.view{display:none}
+.view.active{display:block}
 
 /* SECTION LABEL */
-.sec-lbl{font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.5px;text-transform:uppercase}
+.sec-lbl{font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;margin-top:16px}
+.sec-lbl:first-child{margin-top:0}
 
-/* CONTACT CARD */
-.contact-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:16px;box-shadow:var(--sh)}
-.contact-top{display:flex;align-items:center;gap:13px;margin-bottom:14px}
-.contact-ava{width:52px;height:52px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--gd);flex-shrink:0}
-.contact-name{font-size:18px;font-weight:800}
-.contact-sub{font-size:12px;color:var(--mu);margin-top:2px}
-.contact-pill{background:var(--gl);color:var(--gd);font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;margin-top:4px}
-/* ACTION BUTTONS */
-.contact-actions{display:flex;gap:8px}
-.action-btn{flex:1;border:none;border-radius:var(--rads);padding:11px 8px;font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s}
-.action-btn:active{opacity:.75}
-.action-btn svg{width:15px;height:15px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.btn-call{background:var(--g);color:#fff}
-.btn-call svg{stroke:#fff}
-.btn-sms{background:#E6F1FB;color:#185FA5}
-.btn-sms svg{stroke:#185FA5}
-.btn-whatsapp{background:#f0fdf4;color:#15803d}
-.btn-whatsapp svg{stroke:#15803d}
-/* NO CONTACT STATE */
-.no-contact{background:var(--bg);border:1.5px dashed var(--br);border-radius:var(--rad);padding:24px;text-align:center}
-.no-contact p{font-size:13px;color:var(--mu);line-height:1.6;margin-bottom:14px}
-.add-contact-btn{background:var(--g);color:#fff;border:none;border-radius:var(--rads);padding:12px 20px;font-size:14px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
-.add-contact-btn svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+/* STATUS GRID — Guardian view */
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.status-card{background:var(--card);border-radius:var(--rad);border:1.5px solid var(--br);padding:14px;cursor:pointer;transition:transform .15s;box-shadow:var(--sh)}
+.status-card:active{transform:scale(.97)}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sc-ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
+.sc-badge{width:10px;height:10px;border-radius:50%;border:2px solid #fff}
+.sc-name{font-size:13px;font-weight:800;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-rel{font-size:10px;color:var(--mu);margin-bottom:8px}
+.sc-status{font-size:13px;font-weight:800;display:flex;align-items:center;gap:5px}
+.sc-status svg{width:14px;height:14px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sc-last{font-size:10px;color:var(--mu);margin-top:3px}
+.sc-safe{border-color:var(--gm)}
+.sc-warn{border-color:#FAC775}
+.sc-alert{border-color:#F09595}
 
-/* TIMELINE */
-.timeline{display:flex;flex-direction:column;gap:0}
-.tl-item{display:flex;gap:11px}
-.tl-left{display:flex;flex-direction:column;align-items:center;width:18px;flex-shrink:0}
-.tl-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:5px;border:2px solid #fff;box-shadow:0 0 0 1.5px currentColor}
-.tl-dot.high{color:var(--r);background:var(--r)}
-.tl-dot.medium{color:var(--am);background:var(--am)}
-.tl-dot.low{color:#3B6D11;background:#3B6D11}
-.tl-line{width:2px;flex:1;background:var(--br);margin:4px 0;min-height:12px}
-.tl-content{flex:1;background:var(--card);border-radius:var(--rads);border:1px solid var(--br);padding:11px 13px;margin-bottom:8px;box-shadow:var(--sh)}
-.tl-event{font-size:13px;font-weight:700}
-.tl-time{font-size:10px;color:var(--mu);margin-top:2px}
-.tl-pill{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:5px}
-.tl-pill.high{background:var(--rl);color:var(--r)}
-.tl-pill.medium{background:var(--al);color:var(--am)}
-.tl-pill.low{background:#EAF3DE;color:#3B6D11}
-.timeline-empty{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:20px;text-align:center;font-size:13px;color:var(--mu);line-height:1.6;box-shadow:var(--sh)}
+/* ADD CARD */
+.add-card{background:var(--bg);border:1.5px dashed var(--br);border-radius:var(--rad);padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;min-height:130px}
+.add-card svg{width:24px;height:24px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.add-card span{font-size:12px;font-weight:700;color:var(--mu);text-align:center;line-height:1.4}
 
-/* CTA CARD */
-.cta-card{background:var(--gl);border:1px solid var(--gm);border-radius:var(--rads);padding:13px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.cta-card.urgent{background:var(--rl);border-color:#F09595}
-.cta-text{font-size:13px;color:var(--gd);font-weight:600;line-height:1.4;flex:1}
-.cta-card.urgent .cta-text{color:var(--r)}
-.cta-arr{font-size:20px;color:var(--g);font-weight:700;font-style:normal;flex-shrink:0}
-.cta-card.urgent .cta-arr{color:var(--r)}
-
-/* QUICK MESSAGE CARD */
-.quick-msg-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh)}
-.qm-header{padding:13px 16px;border-bottom:1px solid var(--br)}
-.qm-title{font-size:15px;font-weight:800}
-.qm-sub{font-size:12px;color:var(--mu);margin-top:2px}
-.qm-messages{padding:10px 16px;display:flex;flex-direction:column;gap:7px}
-.qm-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg);border-radius:var(--rads);border:1px solid var(--br)}
-.qm-text{flex:1;font-size:13px;color:var(--tx);line-height:1.4}
-.qm-actions{display:flex;gap:6px;flex-shrink:0}
-.qm-btn{border:none;border-radius:7px;padding:5px 9px;font-size:11px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap}
-.qm-btn svg{width:12px;height:12px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.qm-sms{background:#E6F1FB;color:#185FA5}.qm-sms svg{stroke:#185FA5}
-.qm-wa{background:#f0fdf4;color:#15803d}.qm-wa svg{stroke:#15803d}
-
-/* SHARE SETTINGS */
-.settings-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh)}
-.settings-hd{padding:13px 16px;border-bottom:1px solid var(--br)}
-.settings-title{font-size:15px;font-weight:800}
-.settings-sub{font-size:12px;color:var(--mu);margin-top:2px;line-height:1.4}
-.str{background:var(--card);border-bottom:1px solid var(--br);padding:13px 16px;display:flex;align-items:center;justify-content:space-between}
-.str:last-child{border-bottom:none}
-.strt{font-size:14px;font-weight:700}
-.strs{font-size:11px;color:var(--mu);margin-top:1px}
+/* NOTIFICATION TOGGLES */
+.notif-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh);margin-bottom:12px}
+.notif-row{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--br)}
+.notif-row:last-child{border-bottom:none}
+.nr-left{display:flex;align-items:center;gap:9px}
+.nr-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nr-ico svg{width:15px;height:15px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nr-title{font-size:13px;font-weight:700}
+.nr-sub{font-size:10px;color:var(--mu);margin-top:1px}
 .tog{width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;flex-shrink:0;border:none;background:var(--g);transition:background .2s}
 .tok{width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;transition:right .2s}
 .tog.off{background:var(--br)}.tog.off .tok{right:22px}
 
+/* MEMBER VIEW — guardian list */
+.guardian-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh);margin-bottom:10px}
+.gc-header{padding:13px 14px;display:flex;align-items:center;gap:11px}
+.gc-ava{width:40px;height:40px;border-radius:50%;background:var(--gl);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--gd);flex-shrink:0}
+.gc-name{font-size:15px;font-weight:800}
+.gc-rel{font-size:11px;color:var(--mu);margin-top:2px}
+.gc-remove{margin-left:auto;background:var(--rl);border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:var(--r);font-family:'Nunito',sans-serif;cursor:pointer;flex-shrink:0}
+.gc-perms{padding:10px 14px;border-top:1px solid var(--br);display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.gc-perm-row{display:flex;align-items:center;justify-content:space-between}
+.gc-perm-label{font-size:12px;font-weight:700;color:var(--mu)}
+
+/* INVITE FLOW */
+.invite-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:16px;box-shadow:var(--sh);margin-bottom:12px}
+.invite-title{font-size:15px;font-weight:800;margin-bottom:6px}
+.invite-sub{font-size:13px;color:var(--mu);line-height:1.5;margin-bottom:14px}
+.code-display{background:var(--gd);border-radius:var(--rads);padding:14px;text-align:center;margin-bottom:12px}
+.code-digits{font-size:32px;font-weight:800;color:#fff;letter-spacing:8px;font-family:monospace}
+.code-expiry{font-size:11px;color:rgba(255,255,255,.75);margin-top:4px}
+.code-actions{display:flex;gap:8px}
+.btn-share{flex:1;background:var(--g);color:#fff;border:none;border-radius:var(--rads);padding:11px;font-size:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-share svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.btn-new-code{flex:1;background:var(--bg);border:1.5px solid var(--br);border-radius:var(--rads);padding:11px;font-size:13px;font-weight:800;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer}
+
+/* ENTER CODE */
+.enter-code-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:16px;box-shadow:var(--sh);margin-bottom:12px}
+.code-inputs{display:flex;gap:8px;margin:12px 0}
+.code-inp{width:100%;height:52px;border:2px solid var(--br);border-radius:var(--rads);text-align:center;font-size:22px;font-weight:800;font-family:monospace;color:var(--gd);outline:none;background:#fff;transition:border .15s}
+.code-inp:focus{border-color:var(--g)}
+.btn-verify{width:100%;background:var(--gd);color:#fff;border:none;border-radius:var(--rads);padding:13px;font-size:15px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer}
+.btn-verify:disabled{background:var(--br);cursor:not-allowed}
+
 /* PRIVACY NOTE */
-.privacy-note{text-align:center;font-size:11px;color:var(--mu);line-height:1.6;padding:4px 0}
+.privacy-note{background:var(--gl);border:1px solid var(--gm);border-radius:var(--rads);padding:11px 14px;font-size:12px;color:var(--gd);font-weight:600;line-height:1.5;display:flex;align-items:flex-start;gap:8px;margin-bottom:12px}
+.privacy-note svg{width:15px;height:15px;stroke:var(--gd);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:28px 16px;background:var(--card);border-radius:var(--rad);border:1px solid var(--br);box-shadow:var(--sh)}
+.empty-state svg{width:48px;height:48px;stroke:var(--br);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 12px;display:block}
+.empty-state p{font-size:14px;color:var(--mu);line-height:1.6}
+
+/* DETAIL MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;display:none;align-items:flex-end;justify-content:center}
+.modal-ov.show{display:flex}
+.modal-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:390px;max-height:85vh;display:flex;flex-direction:column}
+.modal-handle{width:36px;height:4px;background:var(--br);border-radius:2px;margin:14px auto 0}
+.modal-scroll{flex:1;overflow-y:auto;padding:16px 18px 32px}
+.modal-name{font-size:20px;font-weight:800;margin-bottom:2px}
+.modal-sub{font-size:13px;color:var(--mu);margin-bottom:14px}
+.tl-item{display:flex;gap:10px;margin-bottom:8px}
+.tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.tl-content{flex:1;background:var(--bg);border-radius:var(--rads);border:1px solid var(--br);padding:9px 12px}
+.tl-event{font-size:13px;font-weight:700}
+.tl-time{font-size:10px;color:var(--mu);margin-top:2px}
+.modal-close-btn{margin:0 18px 28px;background:var(--bg);border:1.5px solid var(--br);border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer;width:calc(100% - 36px)}
+
+/* ADD GUARDIAN MODAL */
+.add-modal-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:390px;padding:20px 20px 36px}
+.add-modal-handle{width:36px;height:4px;background:var(--br);border-radius:2px;margin:0 auto 16px}
+.add-modal-title{font-size:17px;font-weight:800;margin-bottom:14px}
+.field-label{font-size:14px;font-weight:800;margin-bottom:5px;display:block}
+.field-inp{width:100%;background:#fff;border:2px solid var(--br);border-radius:var(--rads);padding:12px 14px;font-size:15px;font-family:'Nunito',sans-serif;color:var(--tx);outline:none;transition:border .2s;margin-bottom:10px}
+.field-inp:focus{border-color:var(--g)}
+.modal-actions{display:flex;gap:8px;margin-top:4px}
+.modal-cancel{flex:1;background:var(--bg);border:1.5px solid var(--br);border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer}
+.modal-save{flex:1;background:var(--g);border:none;border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;color:#fff;font-family:'Nunito',sans-serif;cursor:pointer}
 
 /* BOTTOM NAV */
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
@@ -124,23 +159,9 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .nb span{font-size:9px;color:var(--mu);font-weight:700}
 .nb.on svg{stroke:var(--g)}.nb.on span{color:var(--g)}
 
-/* MODALS */
-.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;display:none;align-items:flex-end;justify-content:center}
-.modal-ov.show{display:flex}
-.modal-sheet{background:#fff;border-radius:20px 20px 0 0;padding:22px 20px 36px;width:100%;max-width:390px}
-.modal-handle{width:36px;height:4px;background:var(--br);border-radius:2px;margin:0 auto 16px}
-.modal-title{font-size:17px;font-weight:800;margin-bottom:14px}
-.modal-field{margin-bottom:12px}
-.modal-label{font-size:14px;font-weight:800;margin-bottom:5px;display:block}
-.modal-inp{width:100%;background:#fff;border:2px solid var(--br);border-radius:var(--rads);padding:12px 14px;font-size:15px;font-family:'Nunito',sans-serif;color:var(--tx);outline:none;transition:border .2s}
-.modal-inp:focus{border-color:var(--g)}
-.modal-actions{display:flex;gap:8px;margin-top:4px}
-.modal-cancel{flex:1;background:var(--bg);border:1.5px solid var(--br);border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer}
-.modal-save{flex:1;background:var(--g);border:none;border-radius:var(--rads);padding:12px;font-size:14px;font-weight:800;color:#fff;font-family:'Nunito',sans-serif;cursor:pointer}
-
 /* PAGE LOADER */
 .page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
-.pl-spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
+.pl-spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--gd);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
@@ -153,7 +174,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
       <button class="back-btn" onclick="goTo('home.html')">
         <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       </button>
-      <span class="page-title" data-en="Family view" data-nl="Familieweergave">Family view</span>
+      <span class="page-title" data-en="Family & Safety Circle" data-nl="Familie & Veiligheidskring">Family & Safety Circle</span>
     </div>
     <div class="lang-pill">
       <button class="lbtn on" id="btn-en" onclick="setLang('en')">EN</button>
@@ -161,28 +182,113 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
     </div>
   </div>
 
+  <!-- ROLE SWITCHER -->
+  <div class="role-bar">
+    <button class="role-btn active" id="role-guardian" onclick="switchRole('guardian')">
+      <svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
+      <span id="role-guardian-label">I look after others</span>
+    </button>
+    <button class="role-btn" id="role-member" onclick="switchRole('member')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>
+      <span id="role-member-label">Others look after me</span>
+    </button>
+  </div>
+
+  <!-- BODY -->
   <div class="body">
 
-    <!-- CONTACT CARD -->
-    <div id="contact-section"></div>
+    <!-- ══ GUARDIAN VIEW ══ -->
+    <div class="view active" id="view-guardian">
 
-    <!-- ACTIVITY TIMELINE -->
-    <div class="sec-lbl" data-en="Recent activity" data-nl="Recente activiteit">Recent activity</div>
-    <div id="timeline-section"></div>
+      <!-- STATUS GRID -->
+      <div class="sec-lbl" id="guardian-sec-lbl">People I look after</div>
+      <div class="status-grid" id="status-grid"></div>
 
-    <!-- CTA CARD -->
-    <div id="cta-section"></div>
+      <!-- NOTIFICATIONS -->
+      <div class="sec-lbl" id="notif-sec-lbl">Alert notifications</div>
+      <div class="notif-card">
+        <div class="notif-row">
+          <div class="nr-left">
+            <div class="nr-ico" style="background:var(--rl)">
+              <svg viewBox="0 0 24 24" style="stroke:var(--r)"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M12 8v4M12 16h.01"/></svg>
+            </div>
+            <div>
+              <div class="nr-title" data-en="Data leak alerts" data-nl="Datalek-meldingen">Data leak alerts</div>
+              <div class="nr-sub" data-en="Notify me when a breach is found" data-nl="Meld mij als een lek wordt gevonden">Notify me when a breach is found</div>
+            </div>
+          </div>
+          <button class="tog" id="tog-breach" onclick="toggleNotif('breach',this)"><div class="tok"></div></button>
+        </div>
+        <div class="notif-row">
+          <div class="nr-left">
+            <div class="nr-ico" style="background:var(--al)">
+              <svg viewBox="0 0 24 24" style="stroke:var(--am)"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            </div>
+            <div>
+              <div class="nr-title" data-en="Scam detections" data-nl="Scam detecties">Scam detections</div>
+              <div class="nr-sub" data-en="Notify me when a scam message is found" data-nl="Meld mij als een scam-bericht wordt gevonden">Notify me when a scam message is found</div>
+            </div>
+          </div>
+          <button class="tog" id="tog-scam" onclick="toggleNotif('scam',this)"><div class="tok"></div></button>
+        </div>
+        <div class="notif-row">
+          <div class="nr-left">
+            <div class="nr-ico" style="background:#E6F1FB">
+              <svg viewBox="0 0 24 24" style="stroke:#185FA5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div>
+              <div class="nr-title" data-en="Inbox scan results" data-nl="Inbox scan resultaten">Inbox scan results</div>
+              <div class="nr-sub" data-en="Notify me after an inbox scan" data-nl="Meld mij na een inbox scan">Notify me after an inbox scan</div>
+            </div>
+          </div>
+          <button class="tog off" id="tog-inbox" onclick="toggleNotif('inbox',this)"><div class="tok"></div></button>
+        </div>
+      </div>
 
-    <!-- QUICK MESSAGE -->
-    <div id="quick-msg-section"></div>
+      <!-- GENERATE INVITE CODE -->
+      <div class="sec-lbl" id="invite-sec-lbl">Invite someone to your circle</div>
+      <div class="invite-card">
+        <div class="invite-title" data-en="Add a family member to watch over" data-nl="Voeg een familielid toe om op te passen">Add a family member to watch over</div>
+        <div class="invite-sub" data-en="Generate a 6-digit code and share it with the person you want to look after. They enter the code on their DigiMaat app." data-nl="Genereer een 6-cijferige code en deel deze met de persoon op wie u wilt letten. Zij voeren de code in op hun DigiMaat-app.">Generate a 6-digit code and share it with the person you want to look after. They enter the code on their DigiMaat app.</div>
+        <div id="code-section">
+          <button class="btn-verify" onclick="generateCode()" id="gen-code-btn" style="margin-bottom:0" data-en="Generate invite code" data-nl="Uitnodigingscode genereren">Generate invite code</button>
+        </div>
+      </div>
 
-    <!-- SHARE SETTINGS (senior only) -->
-    <div id="settings-section"></div>
+    </div><!-- /guardian view -->
 
-    <!-- PRIVACY NOTE -->
-    <div class="privacy-note" data-en="Read-only view · Jan controls all sharing permissions" data-nl="Alleen-lezen weergave · Jan beheert alle deelmachtigingen">Read-only view · Jan controls all sharing permissions</div>
+    <!-- ══ MEMBER VIEW ══ -->
+    <div class="view" id="view-member">
 
-  </div>
+      <div class="privacy-note">
+        <svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
+        <span data-en="Your messages are never shared. Your safety circle only sees a summary — safe or alert. You control everything." data-nl="Uw berichten worden nooit gedeeld. Uw veiligheidskring ziet alleen een samenvatting — veilig of melding. U beheert alles.">Your messages are never shared. Your safety circle only sees a summary — safe or alert. You control everything.</span>
+      </div>
+
+      <!-- GUARDIANS LIST -->
+      <div class="sec-lbl" id="member-sec-lbl">People looking after me</div>
+      <div id="guardians-list"></div>
+
+      <!-- ENTER CODE -->
+      <div class="sec-lbl" id="enter-code-sec-lbl">Add someone to my safety circle</div>
+      <div class="enter-code-card">
+        <div class="invite-title" data-en="Enter the 6-digit code" data-nl="Voer de 6-cijferige code in">Enter the 6-digit code</div>
+        <div class="invite-sub" data-en="Ask your family member to open their DigiMaat app and generate a code. Enter it below." data-nl="Vraag uw familielid hun DigiMaat-app te openen en een code te genereren. Voer deze hieronder in.">Ask your family member to open their DigiMaat app and generate a code. Enter it below.</div>
+        <div class="code-inputs" id="code-inputs">
+          <input class="code-inp" type="number" maxlength="1" id="ci0" oninput="codeInput(0,this)" onkeydown="codeKey(0,event)"/>
+          <input class="code-inp" type="number" maxlength="1" id="ci1" oninput="codeInput(1,this)" onkeydown="codeKey(1,event)"/>
+          <input class="code-inp" type="number" maxlength="1" id="ci2" oninput="codeInput(2,this)" onkeydown="codeKey(2,event)"/>
+          <input class="code-inp" type="number" maxlength="1" id="ci3" oninput="codeInput(3,this)" onkeydown="codeKey(3,event)"/>
+          <input class="code-inp" type="number" maxlength="1" id="ci4" oninput="codeInput(4,this)" onkeydown="codeKey(4,event)"/>
+          <input class="code-inp" type="number" maxlength="1" id="ci5" oninput="codeInput(5,this)" onkeydown="codeKey(5,event)"/>
+        </div>
+        <div id="code-error" style="font-size:12px;color:var(--r);font-weight:700;margin-bottom:10px;display:none"></div>
+        <button class="btn-verify" id="verify-btn" onclick="verifyCode()" disabled data-en="Connect" data-nl="Verbinden">Connect</button>
+      </div>
+
+    </div><!-- /member view -->
+
+  </div><!-- /body -->
 
   <!-- BOTTOM NAV -->
   <nav class="bnav">
@@ -209,33 +315,34 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   </nav>
 </div>
 
-<!-- ADD CONTACT MODAL -->
-<div class="modal-ov" id="add-modal" onclick="closeModal(event)">
+<!-- DETAIL MODAL -->
+<div class="modal-ov" id="detail-modal" onclick="closeDetailModal(event)">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title" data-en="Add family contact" data-nl="Familiecontact toevoegen">Add family contact</div>
-    <div class="modal-field">
-      <label class="modal-label" data-en="Their full name" data-nl="Volledige naam">Their full name</label>
-      <input class="modal-inp" type="text" id="fc-name" placeholder="Anna de Boer"/>
+    <div class="modal-scroll">
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-sub" id="modal-sub"></div>
+      <div id="modal-timeline"></div>
     </div>
-    <div class="modal-field">
-      <label class="modal-label" data-en="Relationship" data-nl="Relatie">Relationship</label>
-      <input class="modal-inp" type="text" id="fc-rel"
-        data-ph-en="e.g. Daughter, Son, Neighbour"
-        data-ph-nl="bijv. Dochter, Zoon, Buurman"
-        placeholder="e.g. Daughter, Son, Neighbour"/>
-    </div>
-    <div class="modal-field">
-      <label class="modal-label" data-en="Phone number" data-nl="Telefoonnummer">Phone number</label>
-      <input class="modal-inp" type="tel" id="fc-phone" placeholder="+31 6 12345678"/>
-    </div>
-    <div class="modal-field">
-      <label class="modal-label" data-en="City (optional)" data-nl="Stad (optioneel)">City (optional)</label>
-      <input class="modal-inp" type="text" id="fc-city" placeholder="Amsterdam"/>
-    </div>
+    <button class="modal-close-btn" onclick="closeDetailModal()" data-en="Close" data-nl="Sluiten">Close</button>
+  </div>
+</div>
+
+<!-- ADD GUARDIAN MODAL (for member to label a guardian after entering code) -->
+<div class="modal-ov" id="add-guardian-modal" onclick="closeAddGuardianModal(event)">
+  <div class="add-modal-sheet">
+    <div class="add-modal-handle"></div>
+    <div class="add-modal-title" id="add-guardian-title">Connection successful!</div>
+    <label class="field-label" data-en="Their name" data-nl="Hun naam">Their name</label>
+    <input class="field-inp" type="text" id="guardian-name-inp" placeholder="Anna"/>
+    <label class="field-label" data-en="Relationship" data-nl="Relatie">Relationship</label>
+    <input class="field-inp" type="text" id="guardian-rel-inp"
+      data-ph-en="e.g. Daughter, Son, Neighbour"
+      data-ph-nl="bijv. Dochter, Zoon, Buurman"
+      placeholder="e.g. Daughter, Son, Neighbour"/>
     <div class="modal-actions">
-      <button class="modal-cancel" onclick="closeModal()" data-en="Cancel" data-nl="Annuleren">Cancel</button>
-      <button class="modal-save" onclick="saveContact()" data-en="Save" data-nl="Opslaan">Save</button>
+      <button class="modal-cancel" onclick="closeAddGuardianModal()" data-en="Skip" data-nl="Overslaan">Skip</button>
+      <button class="modal-save" onclick="saveGuardian()" data-en="Save" data-nl="Opslaan">Save</button>
     </div>
   </div>
 </div>
@@ -243,7 +350,6 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 <div class="page-loader" id="page-loader"><div class="pl-spin"></div></div>
 
 <script>
-// FIREBASE
 var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
@@ -269,311 +375,373 @@ function setLang(l){
   document.querySelectorAll('[data-ph-'+l+']').forEach(function(el){
     el.placeholder=el.getAttribute('data-ph-'+l);
   });
-  renderAll();
+  // Update role labels
+  document.getElementById('role-guardian-label').textContent=l==='nl'?'Ik pas op anderen':'I look after others';
+  document.getElementById('role-member-label').textContent=l==='nl'?'Anderen passen op mij':'Others look after me';
+  // Update section labels
+  document.getElementById('guardian-sec-lbl').textContent=l==='nl'?'Personen op wie ik let':'People I look after';
+  document.getElementById('notif-sec-lbl').textContent=l==='nl'?'Meldingsinstelling':'Alert notifications';
+  document.getElementById('invite-sec-lbl').textContent=l==='nl'?'Iemand uitnodigen voor mijn kring':'Invite someone to your circle';
+  document.getElementById('member-sec-lbl').textContent=l==='nl'?'Personen die op mij letten':'People looking after me';
+  document.getElementById('enter-code-sec-lbl').textContent=l==='nl'?'Iemand toevoegen aan mijn veiligheidskring':'Add someone to my safety circle';
+  renderStatusGrid();
+  renderGuardiansList();
 }
 function goTo(p){window.location.href=p;}
 
-// ── DATA HELPERS ─────────────────────────────────────────
-function getFamily(){
-  try{return JSON.parse(localStorage.getItem('dm_family')||'null');}catch(e){return null;}
-}
-function getRecent(){
-  try{return JSON.parse(localStorage.getItem('dm_recent')||'[]');}catch(e){return[];}
-}
-function getShareSettings(){
-  try{return JSON.parse(localStorage.getItem('dm_share_settings')||'{"breaches":true,"scam":true,"inbox":true,"email_notif":false}');}catch(e){return{breaches:true,scam:true,inbox:true,email_notif:false};}
-}
-
-// ── TIME AGO ─────────────────────────────────────────────
-function timeAgo(ts){
-  var diff=Math.floor((Date.now()-ts)/60000);
-  if(diff<1)return lang==='nl'?'Zojuist':'Just now';
-  if(diff<60)return lang==='nl'?diff+' min geleden':diff+' min ago';
-  var h=Math.floor(diff/60);
-  if(h<24)return lang==='nl'?h+' uur geleden':h+(h===1?' hour':' hours')+' ago';
-  var d=Math.floor(h/24);
-  if(d===1)return lang==='nl'?'Gisteren':'Yesterday';
-  return lang==='nl'?d+' dagen geleden':d+' days ago';
-}
-
-// ── SEVERITY MAPPING ─────────────────────────────────────
-function getSeverity(item){
-  if(item.severity==='r'||item.severity==='high')return 'high';
-  if(item.severity==='a'||item.severity==='medium')return 'medium';
-  return 'low';
-}
-function severityLabel(sev){
-  if(sev==='high')return lang==='nl'?'Hoge ernst':'High severity';
-  if(sev==='medium')return lang==='nl'?'Gemiddelde ernst':'Medium severity';
-  return lang==='nl'?'Alles in orde':'All clear';
-}
-
 // ── INIT ─────────────────────────────────────────────────
+var currentRole='guardian';
 function initPage(){
   lang=localStorage.getItem('dm_lang')||'en';
-  // Seed demo recent if empty
-  if(getRecent().length===0){
-    var demo=[
-      {type:'breach',title_en:'Data breach detected — LinkedIn',title_nl:'Datalek gedetecteerd — LinkedIn',time:Date.now()-3600000*2,severity:'r'},
-      {type:'inbox',title_en:'3 suspicious emails found in inbox scan',title_nl:'3 verdachte e-mails gevonden',time:Date.now()-3600000*26,severity:'a'},
-      {type:'scam',title_en:'Message checked — safe',title_nl:'Bericht gecontroleerd — veilig',time:Date.now()-3600000*72,severity:'g'},
-    ];
-    localStorage.setItem('dm_recent',JSON.stringify(demo));
-  }
+  currentRole=localStorage.getItem('dm_family_role')||'guardian';
+  // Load notification prefs
+  var prefs=JSON.parse(localStorage.getItem('dm_guardian_notifs')||'{"breach":true,"scam":true,"inbox":false}');
+  if(!prefs.breach)document.getElementById('tog-breach').classList.add('off');
+  if(!prefs.scam)document.getElementById('tog-scam').classList.add('off');
+  if(prefs.inbox)document.getElementById('tog-inbox').classList.remove('off');
+  switchRole(currentRole,true);
   setLang(lang);
 }
 
-// ── RENDER ALL ────────────────────────────────────────────
-function renderAll(){
-  renderContactCard();
-  renderTimeline();
-  renderCTA();
-  renderQuickMsg();
-  renderSettings();
+// ── ROLE SWITCH ───────────────────────────────────────────
+function switchRole(role,silent){
+  currentRole=role;
+  if(!silent)localStorage.setItem('dm_family_role',role);
+  document.getElementById('role-guardian').classList.toggle('active',role==='guardian');
+  document.getElementById('role-member').classList.toggle('active',role==='member');
+  document.getElementById('view-guardian').classList.toggle('active',role==='guardian');
+  document.getElementById('view-member').classList.toggle('active',role==='member');
+  if(role==='guardian'){renderStatusGrid();}
+  else{renderGuardiansList();}
 }
 
-// ── CONTACT CARD ─────────────────────────────────────────
-function renderContactCard(){
-  var family=getFamily();
-  var el=document.getElementById('contact-section');
-  if(!family){
-    el.innerHTML='<div class="no-contact">'
-      +'<p>'+(lang==='nl'
-        ?'U heeft nog geen familiecontact toegevoegd. Voeg iemand toe zodat zij uw veiligheidsactiviteit kunnen volgen.'
-        :'You have not added a family contact yet. Add someone so they can follow your safety activity.')
-      +'</p>'
-      +'<button class="add-contact-btn" onclick="showAddModal()">'
-      +'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
-      +(lang==='nl'?'Familiecontact toevoegen':'Add family contact')
-      +'</button></div>';
-    return;
-  }
-  var initials=family.name.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
-  var phone=family.phone||'';
-  el.innerHTML='<div class="contact-card">'
-    +'<div class="contact-top">'
-    +'<div class="contact-ava">'+initials+'</div>'
-    +'<div>'
-    +'<div class="contact-name">'+family.name+'</div>'
-    +'<div class="contact-sub">'+(family.rel||'')+(family.city?' · '+family.city:'')+'</div>'
-    +'<span class="contact-pill">'+(lang==='nl'?'Verbonden':'Connected')+'</span>'
-    +'</div></div>'
-    // ACTION BUTTONS
-    +(phone?'<div class="contact-actions">'
-      +'<button class="action-btn btn-call" onclick="callContact()">'
-      +'<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'
-      +(lang==='nl'?'Bellen':'Call')
-      +'</button>'
-      +'<button class="action-btn btn-sms" onclick="sendSMS()">'
-      +'<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>'
-      +'SMS'
-      +'</button>'
-      +'<button class="action-btn btn-whatsapp" onclick="sendWhatsApp()">'
-      +'<svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>'
-      +'WhatsApp'
-      +'</button>'
-      +'</div>':'')
-    // REMOVE LINK
-    +'<div style="text-align:right;margin-top:10px">'
-    +'<span onclick="removeContact()" style="font-size:11px;color:var(--r);font-weight:700;cursor:pointer">'
-    +(lang==='nl'?'Contact verwijderen':'Remove contact')+'</span>'
-    +'</div>'
-    +'</div>';
-}
-
-// ── CALL / SMS / WHATSAPP ────────────────────────────────
-function callContact(){
-  var family=getFamily();
-  if(!family||!family.phone)return;
-  window.location.href='tel:'+family.phone.replace(/\s/g,'');
-}
-
-function sendSMS(){
-  var family=getFamily();
-  if(!family||!family.phone)return;
-  var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
-  var senderName=user.name||'Jan';
-  var msg=lang==='nl'
-    ?'Hoi '+family.name.split(' ')[0]+', dit is '+senderName+'. Alles goed met mij. Wil je even contact opnemen?'
-    :'Hi '+family.name.split(' ')[0]+', this is '+senderName+'. Everything is fine with me. Can you get in touch?';
-  window.location.href='sms:'+family.phone.replace(/\s/g,'')+'?body='+encodeURIComponent(msg);
-}
-
-function sendWhatsApp(){
-  var family=getFamily();
-  if(!family||!family.phone)return;
-  var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
-  var senderName=user.name||'Jan';
-  var msg=lang==='nl'
-    ?'Hoi '+family.name.split(' ')[0]+', dit is '+senderName+'. Alles goed met mij. Wil je even contact opnemen?'
-    :'Hi '+family.name.split(' ')[0]+', this is '+senderName+'. Everything is fine with me. Can you get in touch?';
-  var phone=family.phone.replace(/[\s\+\-\(\)]/g,'');
-  if(phone.startsWith('0'))phone='31'+phone.substring(1);
-  window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
-}
-
-// ── TIMELINE ─────────────────────────────────────────────
-function renderTimeline(){
-  var items=getRecent().slice(0,8);
-  var el=document.getElementById('timeline-section');
-  if(!items.length){
-    el.innerHTML='<div class="timeline-empty">'
-      +(lang==='nl'?'Nog geen activiteit. Gebruik de app om veiligheidscontroles uit te voeren.':'No activity yet. Use the app to run safety checks.')
-      +'</div>';
-    return;
-  }
-  var html='<div class="timeline">';
-  items.forEach(function(item,i){
-    var sev=getSeverity(item);
-    var title=lang==='nl'?item.title_nl:item.title_en;
-    var isLast=i===items.length-1;
-    html+='<div class="tl-item">'
-      +'<div class="tl-left">'
-      +'<div class="tl-dot '+sev+'"></div>'
-      +(!isLast?'<div class="tl-line"></div>':'')
-      +'</div>'
-      +'<div class="tl-content">'
-      +'<div class="tl-event">'+title+'</div>'
-      +'<div class="tl-time">'+timeAgo(item.time)+'</div>'
-      +'<span class="tl-pill '+sev+'">'+severityLabel(sev)+'</span>'
-      +'</div></div>';
-  });
-  html+='</div>';
-  el.innerHTML=html;
-}
-
-// ── CTA CARD ─────────────────────────────────────────────
-function renderCTA(){
-  var items=getRecent();
-  var el=document.getElementById('cta-section');
-  var family=getFamily();
-  if(!family){el.innerHTML='';return;}
-  var firstName=family.name.split(' ')[0];
-  // Check for high-severity event in last 24 hours
-  var recentHigh=items.find(function(i){
-    return (i.severity==='r'||i.severity==='high')&&(Date.now()-i.time)<86400000;
-  });
-  if(recentHigh){
-    el.innerHTML='<div class="cta-card urgent">'
-      +'<span class="cta-text">'
-      +(lang==='nl'
-        ?'⚠ Er is vandaag een waarschuwing gedetecteerd. Overweeg '+firstName+' te bellen om in te checken.'
-        :'⚠ A high-severity alert was detected today. Consider calling '+firstName+' to check in.')
-      +'</span>'
-      +'<i class="cta-arr" onclick="callContact()" style="cursor:pointer">›</i>'
-      +'</div>';
-  }else{
-    el.innerHTML='<div class="cta-card">'
-      +'<span class="cta-text">'
-      +(lang==='nl'
-        ?'✓ '+firstName+' heeft de afgelopen 24 uur geen urgente meldingen ontvangen.'
-        :'✓ '+firstName+' has had no urgent alerts in the last 24 hours.')
-      +'</span>'
-      +'<i class="cta-arr">›</i>'
-      +'</div>';
-  }
-}
-
-// ── QUICK MESSAGE ─────────────────────────────────────────
-function renderQuickMsg(){
-  var family=getFamily();
-  var el=document.getElementById('quick-msg-section');
-  if(!family||!family.phone){el.innerHTML='';return;}
-  var firstName=family.name.split(' ')[0];
-  var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
-  var senderName=user.name?user.name.split(' ')[0]:'Jan';
-
-  var messages=[
-    {en:'Hi '+firstName+', this is '+senderName+'. Everything is fine with me, just checking in!',
-     nl:'Hoi '+firstName+', met '+senderName+'. Alles goed, even inchecken!'},
-    {en:'Hi '+firstName+', I saw an alert on DigiMaat. Can you call me when you have a moment?',
-     nl:'Hoi '+firstName+', ik zag een melding op DigiMaat. Kun je me bellen als je tijd hebt?'},
-    {en:'Hi '+firstName+', are you okay? I saw something on the safety app. Let me know.',
-     nl:'Hoi '+firstName+', gaat het goed? Ik zag iets op de veiligheidsapp. Laat me weten.'},
-  ];
-
-  var html='<div class="quick-msg-card">'
-    +'<div class="qm-header">'
-    +'<div class="qm-title" data-en="Quick message to '+firstName+'" data-nl="Snel bericht naar '+firstName+'">'
-    +(lang==='nl'?'Snel bericht naar '+firstName:'Quick message to '+firstName)+'</div>'
-    +'<div class="qm-sub" data-en="Send a pre-written message with one tap" data-nl="Stuur een voorgeschreven bericht met één tik">'
-    +(lang==='nl'?'Stuur een voorgeschreven bericht met één tik':'Send a pre-written message with one tap')
-    +'</div></div>'
-    +'<div class="qm-messages">';
-
-  messages.forEach(function(msg,i){
-    var text=lang==='nl'?msg.nl:msg.en;
-    var phone=family.phone.replace(/[\s\+\-\(\)]/g,'');
-    if(phone.startsWith('0'))phone='31'+phone.substring(1);
-    var smsHref='sms:'+family.phone.replace(/\s/g,'')+'?body='+encodeURIComponent(text);
-    var waHref='https://wa.me/'+phone+'?text='+encodeURIComponent(text);
-    html+='<div class="qm-row">'
-      +'<div class="qm-text">'+text+'</div>'
-      +'<div class="qm-actions">'
-      +'<button class="qm-btn qm-sms" onclick="window.location.href=\''+smsHref+'\'">'
-      +'<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>SMS</button>'
-      +'<button class="qm-btn qm-wa" onclick="window.open(\''+waHref+'\',\'_blank\')">'
-      +'<svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>WA</button>'
-      +'</div></div>';
-  });
-  html+='</div></div>';
-  el.innerHTML=html;
-}
-
-// ── SHARE SETTINGS ────────────────────────────────────────
-function renderSettings(){
-  var s=getShareSettings();
-  var el=document.getElementById('settings-section');
-  el.innerHTML='<div class="sec-lbl" style="margin-bottom:8px" data-en="Sharing settings" data-nl="Deelinstelling">'
-    +(lang==='nl'?'Deelinstelling':'Sharing settings')+'</div>'
-    +'<div class="settings-card">'
-    +'<div class="settings-hd">'
-    +'<div class="settings-title" data-en="What your family contact can see" data-nl="Wat uw familiecontact kan zien">'+(lang==='nl'?'Wat uw familiecontact kan zien':'What your family contact can see')+'</div>'
-    +'<div class="settings-sub" data-en="You control exactly what is shared. Your family contact has read-only access." data-nl="U bepaalt precies wat er gedeeld wordt. Uw familiecontact heeft alleen-leestoegang.">'+(lang==='nl'?'U bepaalt precies wat er gedeeld wordt. Uw familiecontact heeft alleen-leestoegang.':'You control exactly what is shared. Your family contact has read-only access.')+'</div>'
-    +'</div>'
-    +renderSettingRow('breaches',s.breaches,lang==='nl'?'Datalek-meldingen':'Breach alerts',lang==='nl'?'Wanneer uw e-mail in een lek is gevonden':'When your email is found in a breach')
-    +renderSettingRow('scam',s.scam,lang==='nl'?'Scam controles':'Scam checks',lang==='nl'?'Resultaten van berichtanalyses':'Results of message analyses')
-    +renderSettingRow('inbox',s.inbox,lang==='nl'?'Inbox scan resultaten':'Inbox scan results',lang==='nl'?'Samenvatting van inbox scans':'Summary of inbox scans')
-    +renderSettingRow('email_notif',s.email_notif,lang==='nl'?'E-mailmeldingen':'Email notifications',lang==='nl'?'Stuur e-mail bij urgente meldingen (V2)':'Send email for urgent alerts (V2)')
-    +'</div>';
-}
-
-function renderSettingRow(key,val,title,sub){
-  return '<div class="str">'
-    +'<div><div class="strt">'+title+'</div><div class="strs">'+sub+'</div></div>'
-    +'<button class="tog'+(val?'':' off')+'" onclick="toggleShare(\''+key+'\',this)"><div class="tok"></div></button>'
-    +'</div>';
-}
-
-function toggleShare(key,btn){
+// ── NOTIFICATION TOGGLES ──────────────────────────────────
+function toggleNotif(key,btn){
   btn.classList.toggle('off');
-  var s=getShareSettings();
-  s[key]=!btn.classList.contains('off');
-  localStorage.setItem('dm_share_settings',JSON.stringify(s));
+  var prefs=JSON.parse(localStorage.getItem('dm_guardian_notifs')||'{"breach":true,"scam":true,"inbox":false}');
+  prefs[key]=!btn.classList.contains('off');
+  localStorage.setItem('dm_guardian_notifs',JSON.stringify(prefs));
 }
 
-// ── ADD / REMOVE CONTACT ─────────────────────────────────
-function showAddModal(){document.getElementById('add-modal').classList.add('show');}
-function closeModal(e){
-  if(!e||e.target===document.getElementById('add-modal')){
-    document.getElementById('add-modal').classList.remove('show');
+// ── DEMO SENIOR DATA ──────────────────────────────────────
+// In V1 we seed demo seniors if none exist
+// Real data comes from invite code connections
+function getSeniors(){
+  try{return JSON.parse(localStorage.getItem('dm_seniors')||'[]');}catch(e){return[];}
+}
+function saveSeniors(s){localStorage.setItem('dm_seniors',JSON.stringify(s));}
+
+function seedDemoSeniors(){
+  var existing=getSeniors();
+  if(existing.length>0)return;
+  var demo=[
+    {
+      id:'demo1',name:'Maria de Boer',rel:'Mother',
+      status:'alert',lastActive:Date.now()-3600000*2,
+      activity:[
+        {title_en:'Data breach detected — LinkedIn',title_nl:'Datalek gedetecteerd — LinkedIn',time:Date.now()-3600000*2,severity:'r'},
+        {title_en:'3 suspicious emails found',title_nl:'3 verdachte e-mails gevonden',time:Date.now()-3600000*26,severity:'a'},
+      ],
+      perms:{breach:true,scam:true,inbox:true}
+    },
+    {
+      id:'demo2',name:'Jan de Boer',rel:'Father',
+      status:'safe',lastActive:Date.now()-3600000*5,
+      activity:[
+        {title_en:'Message checked — safe',title_nl:'Bericht gecontroleerd — veilig',time:Date.now()-3600000*5,severity:'g'},
+        {title_en:'Breach check — no leaks found',title_nl:'Lek check — geen lekken gevonden',time:Date.now()-3600000*48,severity:'g'},
+      ],
+      perms:{breach:true,scam:true,inbox:false}
+    }
+  ];
+  saveSeniors(demo);
+}
+
+// ── GUARDIAN VIEW — STATUS GRID ───────────────────────────
+var AVATAR_COLORS=['#0F6E56','#185FA5','#7A4A00','#A32D2D','#5B44C1'];
+
+function renderStatusGrid(){
+  seedDemoSeniors();
+  var seniors=getSeniors();
+  var grid=document.getElementById('status-grid');
+  var html='';
+
+  seniors.forEach(function(s,i){
+    var initials=s.name.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
+    var color=AVATAR_COLORS[i%AVATAR_COLORS.length];
+    var isAlert=s.status==='alert';
+    var isWarn=s.status==='warn';
+    var dotColor=isAlert?'var(--r)':isWarn?'var(--am)':'var(--g)';
+    var cardClass=isAlert?'sc-alert':isWarn?'sc-warn':'sc-safe';
+    var statusText=isAlert?(lang==='nl'?'Melding!':'Alert!'):isWarn?(lang==='nl'?'Waarschuwing':'Warning'):(lang==='nl'?'Veilig':'Safe');
+    var statusColor=isAlert?'var(--r)':isWarn?'var(--am)':'var(--gd)';
+    var statusIcon=isAlert
+      ?'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+      :isWarn?'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/>'
+      :'<path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M9 12l2 2 4-4"/>';
+    var diff=Math.floor((Date.now()-s.lastActive)/60000);
+    var lastStr=diff<60?(lang==='nl'?diff+' min geleden':diff+' min ago'):(lang==='nl'?Math.floor(diff/60)+' uur geleden':Math.floor(diff/60)+' hr ago');
+
+    html+='<div class="status-card '+cardClass+'" onclick="openSeniorDetail(\''+s.id+'\')">'
+      +'<div class="sc-top">'
+      +'<div class="sc-ava" style="background:'+color+'">'+initials+'</div>'
+      +'<div class="sc-badge" style="background:'+dotColor+'"></div>'
+      +'</div>'
+      +'<div class="sc-name">'+s.name+'</div>'
+      +'<div class="sc-rel">'+s.rel+'</div>'
+      +'<div class="sc-status" style="color:'+statusColor+'">'
+      +'<svg viewBox="0 0 24 24" style="stroke:'+statusColor+'">'+statusIcon+'</svg>'
+      +statusText+'</div>'
+      +'<div class="sc-last">'+lastStr+'</div>'
+      +'</div>';
+  });
+
+  // Add card
+  html+='<div class="add-card" onclick="generateCode()">'
+    +'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><circle cx="12" cy="12" r="10"/></svg>'
+    +'<span>'+(lang==='nl'?'Iemand toevoegen':'Add someone')+'</span>'
+    +'</div>';
+
+  grid.innerHTML=html;
+}
+
+// ── SENIOR DETAIL MODAL ───────────────────────────────────
+function openSeniorDetail(id){
+  var seniors=getSeniors();
+  var s=seniors.find(function(x){return x.id===id;});
+  if(!s)return;
+  document.getElementById('modal-name').textContent=s.name;
+  document.getElementById('modal-sub').textContent=s.rel+(lang==='nl'?' · veiligheidsstatus':' · safety status');
+
+  var html='<div style="margin-bottom:14px">';
+  // Permission pills
+  html+='<div style="font-size:11px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">'+(lang==='nl'?'Wat ik kan zien':'What I can see')+'</div>';
+  html+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';
+  if(s.perms&&s.perms.breach)html+='<span style="background:var(--rl);color:var(--r);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">'+(lang==='nl'?'Datalekken':'Breaches')+'</span>';
+  if(s.perms&&s.perms.scam)html+='<span style="background:var(--al);color:var(--am);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">'+(lang==='nl'?'Scam checks':'Scam checks')+'</span>';
+  if(s.perms&&s.perms.inbox)html+='<span style="background:#E6F1FB;color:#185FA5;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px">'+(lang==='nl'?'Inbox scans':'Inbox scans')+'</span>';
+  html+='</div>';
+  html+='</div>';
+
+  // Activity timeline
+  html+='<div style="font-size:11px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">'+(lang==='nl'?'Recente activiteit':'Recent activity')+'</div>';
+  if(s.activity&&s.activity.length){
+    s.activity.forEach(function(item){
+      var dotColor=item.severity==='r'?'var(--r)':item.severity==='a'?'var(--am)':'var(--g)';
+      var title=lang==='nl'?item.title_nl:item.title_en;
+      var diff=Math.floor((Date.now()-item.time)/60000);
+      var timeStr=diff<60?(lang==='nl'?diff+' min geleden':diff+' min ago'):(lang==='nl'?Math.floor(diff/60)+' uur geleden':Math.floor(diff/60)+' hr ago');
+      html+='<div class="tl-item"><div class="tl-dot" style="background:'+dotColor+'"></div>'
+        +'<div class="tl-content"><div class="tl-event">'+title+'</div>'
+        +'<div class="tl-time">'+timeStr+'</div></div></div>';
+    });
+  }else{
+    html+='<div style="font-size:13px;color:var(--mu)">'+(lang==='nl'?'Nog geen activiteit.':'No activity yet.')+'</div>';
+  }
+
+  document.getElementById('modal-timeline').innerHTML=html;
+  document.getElementById('detail-modal').classList.add('show');
+}
+
+function closeDetailModal(e){
+  if(!e||e.target===document.getElementById('detail-modal')){
+    document.getElementById('detail-modal').classList.remove('show');
   }
 }
-function saveContact(){
-  var name=document.getElementById('fc-name').value.trim();
-  var rel=document.getElementById('fc-rel').value.trim();
-  var phone=document.getElementById('fc-phone').value.trim();
-  var city=document.getElementById('fc-city').value.trim();
-  if(!name){alert(lang==='nl'?'Vul een naam in.':'Please enter a name.');return;}
-  if(!phone){alert(lang==='nl'?'Vul een telefoonnummer in.':'Please enter a phone number.');return;}
-  localStorage.setItem('dm_family',JSON.stringify({name:name,rel:rel,phone:phone,city:city}));
-  closeModal();
-  renderAll();
+
+// ── INVITE CODE GENERATION ────────────────────────────────
+var activeCode=null;
+var codeExpiry=null;
+
+function generateCode(){
+  // Generate 6-digit code
+  var code=Math.floor(100000+Math.random()*900000).toString();
+  var expiry=Date.now()+24*60*60*1000; // 24 hours
+  activeCode=code;
+  codeExpiry=expiry;
+  // Store so member can look it up
+  var codes=JSON.parse(localStorage.getItem('dm_invite_codes')||'[]');
+  codes.push({code:code,expiry:expiry,used:false});
+  localStorage.setItem('dm_invite_codes',JSON.stringify(codes));
+
+  var expiryStr=lang==='nl'?'Verloopt over 24 uur':'Expires in 24 hours';
+  var html='<div class="code-display">'
+    +'<div class="code-digits">'+code+'</div>'
+    +'<div class="code-expiry">'+expiryStr+'</div>'
+    +'</div>'
+    +'<div class="code-actions">'
+    +'<button class="btn-share" onclick="shareCode(\''+code+'\')">'
+    +'<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>'
+    +(lang==='nl'?'Delen via WhatsApp':'Share via WhatsApp')
+    +'</button>'
+    +'<button class="btn-new-code" onclick="generateCode()">'+(lang==='nl'?'Nieuwe code':'New code')+'</button>'
+    +'</div>';
+
+  document.getElementById('code-section').innerHTML=html;
+
+  // Switch to guardian view if on member tab
+  if(currentRole!=='guardian')switchRole('guardian');
+  // Scroll to invite card
+  setTimeout(function(){
+    document.querySelector('.invite-card').scrollIntoView({behavior:'smooth',block:'center'});
+  },200);
 }
-function removeContact(){
-  var ok=confirm(lang==='nl'?'Weet u zeker dat u dit contact wilt verwijderen?':'Are you sure you want to remove this contact?');
-  if(ok){localStorage.removeItem('dm_family');renderAll();}
+
+function shareCode(code){
+  var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
+  var name=user.name?user.name.split(' ')[0]:'Jan';
+  var msg=lang==='nl'
+    ?'Hoi! Ik wil je toevoegen aan mijn DigiMaat veiligheidskring zodat je mijn veiligheidsstatus kunt zien. Voer deze code in op je DigiMaat-app: '+code+' (geldig 24 uur). Met vriendelijke groet, '+name
+    :'Hi! I want to add you to my DigiMaat safety circle so you can see my safety status. Enter this code in your DigiMaat app: '+code+' (valid 24 hours). Thanks, '+name;
+  if(navigator.share){
+    navigator.share({title:'DigiMaat invite code',text:msg}).catch(function(){copyToClipboard(code,msg);});
+  }else{
+    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  }
+}
+
+function copyToClipboard(code,msg){
+  if(navigator.clipboard){navigator.clipboard.writeText(msg);}
+  alert(lang==='nl'?'Code gekopieerd: '+code:'Code copied: '+code);
+}
+
+// ── MEMBER VIEW — CODE ENTRY ──────────────────────────────
+function codeInput(idx,inp){
+  var val=inp.value.replace(/\D/g,'');
+  inp.value=val.slice(-1); // keep only last digit
+  if(val&&idx<5){
+    document.getElementById('ci'+(idx+1)).focus();
+  }
+  checkCodeComplete();
+}
+
+function codeKey(idx,e){
+  if(e.key==='Backspace'&&!document.getElementById('ci'+idx).value&&idx>0){
+    document.getElementById('ci'+(idx-1)).focus();
+  }
+}
+
+function checkCodeComplete(){
+  var code='';
+  for(var i=0;i<6;i++){code+=document.getElementById('ci'+i).value;}
+  document.getElementById('verify-btn').disabled=code.length<6;
+}
+
+function getEnteredCode(){
+  var code='';
+  for(var i=0;i<6;i++){code+=document.getElementById('ci'+i).value;}
+  return code;
+}
+
+function verifyCode(){
+  var entered=getEnteredCode();
+  var codes=JSON.parse(localStorage.getItem('dm_invite_codes')||'[]');
+  var match=codes.find(function(c){
+    return c.code===entered&&!c.used&&c.expiry>Date.now();
+  });
+
+  var errEl=document.getElementById('code-error');
+  if(!match){
+    // Check if code exists but expired
+    var expired=codes.find(function(c){return c.code===entered&&c.expiry<=Date.now();});
+    errEl.textContent=expired
+      ?(lang==='nl'?'Deze code is verlopen. Vraag een nieuwe code aan.':'This code has expired. Please ask for a new code.')
+      :(lang==='nl'?'Ongeldige code. Controleer de cijfers en probeer opnieuw.':'Invalid code. Check the digits and try again.');
+    errEl.style.display='block';
+    return;
+  }
+
+  errEl.style.display='none';
+
+  // Mark code as used
+  match.used=true;
+  localStorage.setItem('dm_invite_codes',JSON.stringify(codes));
+
+  // Clear inputs
+  for(var i=0;i<6;i++){document.getElementById('ci'+i).value='';}
+  document.getElementById('verify-btn').disabled=true;
+
+  // Show modal to name the guardian
+  document.getElementById('add-guardian-title').textContent=
+    lang==='nl'?'Verbinding geslaagd! 🎉':'Connection successful! 🎉';
+  document.getElementById('add-guardian-modal').classList.add('show');
+}
+
+function closeAddGuardianModal(e){
+  if(!e||e.target===document.getElementById('add-guardian-modal')){
+    document.getElementById('add-guardian-modal').classList.remove('show');
+    renderGuardiansList();
+  }
+}
+
+function saveGuardian(){
+  var name=document.getElementById('guardian-name-inp').value.trim()||'Guardian';
+  var rel=document.getElementById('guardian-rel-inp').value.trim()||'Family';
+  var guardians=JSON.parse(localStorage.getItem('dm_my_guardians')||'[]');
+  guardians.push({id:'g_'+Date.now(),name:name,rel:rel,perms:{breach:true,scam:true,inbox:false}});
+  localStorage.setItem('dm_my_guardians',JSON.stringify(guardians));
+  document.getElementById('guardian-name-inp').value='';
+  document.getElementById('guardian-rel-inp').value='';
+  closeAddGuardianModal();
+}
+
+// ── MEMBER VIEW — GUARDIANS LIST ──────────────────────────
+function getGuardians(){
+  try{return JSON.parse(localStorage.getItem('dm_my_guardians')||'[]');}catch(e){return[];}
+}
+
+function renderGuardiansList(){
+  var guardians=getGuardians();
+  var el=document.getElementById('guardians-list');
+
+  if(!guardians.length){
+    el.innerHTML='<div class="empty-state">'
+      +'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>'
+      +'<p>'+(lang==='nl'?'Nog niemand in uw veiligheidskring. Voer een code in om iemand toe te voegen.':'No one in your safety circle yet. Enter a code below to add someone.')+'</p>'
+      +'</div>';
+    return;
+  }
+
+  el.innerHTML=guardians.map(function(g,i){
+    var initials=g.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+    return '<div class="guardian-card">'
+      +'<div class="gc-header">'
+      +'<div class="gc-ava">'+initials+'</div>'
+      +'<div><div class="gc-name">'+g.name+'</div><div class="gc-rel">'+g.rel+'</div></div>'
+      +'<button class="gc-remove" onclick="removeGuardian('+i+')">'+(lang==='nl'?'Verwijderen':'Remove')+'</button>'
+      +'</div>'
+      +'<div class="gc-perms">'
+      +'<div style="font-size:11px;font-weight:800;color:var(--mu);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">'+(lang==='nl'?'Wat zij kunnen zien':'What they can see')+'</div>'
+      +permRow(i,'breach',g.perms.breach,lang==='nl'?'Datalekken':'Breach alerts')
+      +permRow(i,'scam',g.perms.scam,lang==='nl'?'Scam checks':'Scam checks')
+      +permRow(i,'inbox',g.perms.inbox,lang==='nl'?'Inbox scans':'Inbox scans')
+      +'</div></div>';
+  }).join('');
+}
+
+function permRow(guardianIdx,key,val,label){
+  return '<div class="gc-perm-row">'
+    +'<div class="gc-perm-label">'+label+'</div>'
+    +'<button class="tog'+(val?'':' off')+'" onclick="togglePerm('+guardianIdx+',\''+key+'\',this)"><div class="tok"></div></button>'
+    +'</div>';
+}
+
+function togglePerm(idx,key,btn){
+  btn.classList.toggle('off');
+  var guardians=getGuardians();
+  guardians[idx].perms[key]=!btn.classList.contains('off');
+  localStorage.setItem('dm_my_guardians',JSON.stringify(guardians));
+}
+
+function removeGuardian(idx){
+  var ok=confirm(lang==='nl'?'Weet u zeker dat u deze persoon wilt verwijderen?':'Are you sure you want to remove this person?');
+  if(!ok)return;
+  var guardians=getGuardians();
+  guardians.splice(idx,1);
+  localStorage.setItem('dm_my_guardians',JSON.stringify(guardians));
+  renderGuardiansList();
 }
 </script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(function(){});}</script>
 </body>
 </html>
