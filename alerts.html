@@ -82,9 +82,21 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 
 /* MESSAGE BOX */
 .msg-box{background:var(--bg);border:1px solid var(--br);border-radius:var(--rad);padding:13px 14px;margin-bottom:16px}
+.msg-box.expandable{cursor:pointer}
+.msg-box.expandable:active{opacity:.8}
 .msg-label{font-size:10px;font-weight:800;color:var(--mu);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px}
 .msg-title{font-size:15px;font-weight:800;margin-bottom:4px}
 .msg-count{font-size:12px;color:var(--am);font-weight:700}
+.msg-see-more{font-size:12px;font-weight:800;color:var(--gd);margin-top:8px}
+/* Suspicious email list */
+.msg-email-list{margin-top:12px;border-top:1px solid var(--br);display:none}
+.msg-email-row{padding:10px 0;border-bottom:1px solid var(--br)}
+.msg-email-row:last-of-type{border-bottom:none;padding-bottom:0}
+.msg-email-from{font-size:11px;font-weight:700;color:var(--mu);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-email-subject{font-size:13px;font-weight:800;margin-bottom:3px}
+.msg-email-snip{font-size:11px;color:var(--mu);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.msg-open-btn{display:inline-block;margin-top:6px;font-size:11px;font-weight:800;color:var(--gd);background:var(--gl);border-radius:6px;padding:3px 10px;text-decoration:none}
+.msg-goto-inbox{display:block;margin-top:12px;text-align:center;font-size:13px;font-weight:800;color:var(--gd);padding:10px;background:var(--gl);border-radius:10px;text-decoration:none;border:1.5px solid var(--gm)}
 
 /* ACTION SECTION - VISUAL STEPS */
 .action-section{margin-bottom:10px}
@@ -373,11 +385,7 @@ function renderDetail(alerts){
     +'<div class="why-text">'+why+'</div>'
     +'</div>'
 
-    +'<div class="msg-box">'
-    +'<div class="msg-label">'+(lang==='nl'?'Gevonden probleem':'Problem found')+'</div>'
-    +'<div class="msg-title">'+title+'</div>'
-    +(a.count>1?'<div class="msg-count">'+(lang==='nl'?a.count+'× gevonden':a.count+'× found')+'</div>':'')
-    +'</div>'
+    +buildMsgBox(a,item,title,lang)
 
     +'<div class="action-section">'
     +'<div class="action-sec-label">'+(lang==='nl'?'Kies wat u wilt doen:':'Choose what to do:')+'</div>'
@@ -430,6 +438,49 @@ function renderDetail(alerts){
 }
 
 function escTitle(t){return t.replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+
+function toggleEmailList(){
+  var l=document.getElementById('ds-email-list');
+  var lbl=document.getElementById('ds-see-more');
+  if(!l||!lbl)return;
+  var open=l.style.display==='block';
+  l.style.display=open?'none':'block';
+  lbl.textContent=open
+    ?('▼ '+lbl.dataset.count+' '+(lang==='nl'?'berichten — tik om te bekijken':'messages — tap to see'))
+    :('▲ '+(lang==='nl'?'Verbergen':'Hide'));
+}
+
+function buildMsgBox(a,item,title,lang){
+  var isInbox=(item.title_en||'').indexOf('inbox scan')!==-1;
+  var lr=null;var msgs=[];
+  if(isInbox){try{lr=JSON.parse(localStorage.getItem('dm_last_results')||'null');}catch(e){}msgs=(lr&&lr.suspicious)||[];}
+  var emailListHtml='';
+  if(isInbox&&msgs.length){
+    emailListHtml='<div class="msg-email-list" id="ds-email-list">'
+      +msgs.slice(0,5).map(function(m){
+        var gmailLink=m.id?'https://mail.google.com/mail/u/0/#inbox/'+m.id:'https://mail.google.com';
+        return '<div class="msg-email-row">'
+          +'<div class="msg-email-from">'+(m.from||'Unknown sender')+'</div>'
+          +'<div class="msg-email-subject">'+(m.subject||(lang==='nl'?'Geen onderwerp':'No subject'))+'</div>'
+          +'<div class="msg-email-snip">'+(m.snippet||'')+'</div>'
+          +'<a class="msg-open-btn" href="'+gmailLink+'" target="_blank">'
+          +(lang==='nl'?'Open in Gmail →':'Open in Gmail →')
+          +'</a>'
+          +'</div>';
+      }).join('')
+      +'<a class="msg-goto-inbox" href="inbox.html">'
+      +(lang==='nl'?'Alle verdachte berichten bekijken in Inbox →':'View all suspicious messages in Inbox →')
+      +'</a></div>';
+  }
+  var clickable=isInbox&&emailListHtml;
+  return '<div class="msg-box'+(clickable?' expandable':'')+'"'+(clickable?' onclick="toggleEmailList()"':'')+'>'+
+    '<div class="msg-label">'+(lang==='nl'?'Gevonden probleem':'Problem found')+'</div>'+
+    '<div class="msg-title">'+title+'</div>'+
+    (a.count>1?'<div class="msg-count">'+(lang==='nl'?a.count+'× gevonden':a.count+'× found')+'</div>':'')+
+    (clickable?'<div class="msg-see-more" id="ds-see-more" data-count="'+msgs.length+'">▼ '+msgs.length+' '+(lang==='nl'?'berichten — tik om te bekijken':'messages — tap to see')+'</div>':'')+
+    emailListHtml+
+    '</div>';
+}
 
 function getWhyText(item){
   var t=(item.title_en||'').toLowerCase();
