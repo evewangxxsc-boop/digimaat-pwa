@@ -156,6 +156,7 @@ var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
 var provider=new firebase.auth.GoogleAuthProvider();
+provider.setCustomParameters({'prompt':'select_account'});
 
 // LANGUAGE
 var lang=localStorage.getItem('dm_lang')||'en';
