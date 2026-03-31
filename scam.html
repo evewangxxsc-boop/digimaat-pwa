@@ -341,8 +341,20 @@ auth.onAuthStateChanged(function(user){
   }
 });
 
-// ANTHROPIC API KEY (stored in localStorage by Profile page)
-function getClaudeKey(){return localStorage.getItem('dm_api_key')||'';}
+// ── CLIENT-SIDE RATE LIMIT (mirrors server, protects UX) ──
+function getClaudeUsage(){
+  try{
+    var u=JSON.parse(localStorage.getItem('dm_claude_usage')||'{}');
+    var today=new Date().toISOString().slice(0,10);
+    if(u.date!==today)return{date:today,count:0};
+    return u;
+  }catch(e){return{date:new Date().toISOString().slice(0,10),count:0};}
+}
+function incrementClaudeUsage(){
+  var u=getClaudeUsage();
+  u.count=(u.count||0)+1;
+  localStorage.setItem('dm_claude_usage',JSON.stringify(u));
+}
 
 // LANGUAGE
 var lang='en';
@@ -762,58 +774,97 @@ function runCheck(){
       return;
     }
 
-    // ── LAYER 3: Claude API ──────────────────────────
-    var claudeKey=getClaudeKey();
-    if(!claudeKey){
-      // No Claude key — use layer 1+2 combined result
+    // ── LAYER 4: Claude API — only if layers 1-3 found nothing ──
+    // If any flags already detected, we have enough to give a verdict.
+    // Claude is only called when the message looks completely clean (score 0)
+    // so we don't send flagged or confirmed-scam content to the API.
+    if(combinedScore>0){
       document.getElementById('loading-state').classList.remove('show');
       document.getElementById('check-btn').disabled=false;
       renderResult({
-        verdict:l1.score>=2?'SUSPICIOUS':'SAFE',
+        verdict:'SUSPICIOUS',
         flags_en:allFlags_en,flags_nl:allFlags_nl,
-        explanation_en:l1.score>=2
-          ?'Some warning signs detected. No Claude AI key configured for deeper analysis.'
-          :'No obvious scam patterns detected in this message.',
-        explanation_nl:l1.score>=2
-          ?'Enkele waarschuwingssignalen gedetecteerd. Geen Claude AI-sleutel geconfigureerd voor diepere analyse.'
-          :'Geen duidelijke oplichterstrucjes gevonden in dit bericht.',
+        explanation_en:'Warning signs detected by pattern analysis. No need for further AI review.',
+        explanation_nl:'Waarschuwingssignalen gedetecteerd door patroonanalyse. Geen verdere AI-controle nodig.',
         source:'layer2',usedClaude:false
       });
       return;
     }
 
-    // Has Claude key — call Layer 3
+    // ── LAYER 4: Claude AI via server (layers 1-3 found nothing) ──
+    var usage=getClaudeUsage();
+    if(usage.count>=10){
+      document.getElementById('loading-state').classList.remove('show');
+      document.getElementById('check-btn').disabled=false;
+      renderResult({
+        verdict:'SAFE',
+        flags_en:[],flags_nl:[],
+        explanation_en:'No patterns detected. Daily AI check limit reached (10/day). Try again tomorrow.',
+        explanation_nl:'Geen patronen gevonden. Dagelijks AI-limiet bereikt (10/dag). Probeer morgen opnieuw.',
+        source:'layer2',usedClaude:false
+      });
+      return;
+    }
+
     setLoading(
       lang==='nl'?'Stap 4: Claude AI analyseert…':'Step 4: Claude AI analysing…',
       lang==='nl'?'Diepere semantische analyse':'Deep semantic analysis'
     );
     highlightLayer(4);
 
-    runClaude(text).then(function(result){
+    fetch('/api/claude-check',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:text,lang:lang})
+    })
+    .then(function(r){return r.json();})
+    .then(function(result){
       document.getElementById('loading-state').classList.remove('show');
       document.getElementById('check-btn').disabled=false;
 
-      if(!result){
-        // Claude failed — fall back to layer 1+2
+      if(result.limitReached){
         renderResult({
-          verdict:l1.score>=2?'SUSPICIOUS':'SAFE',
-          flags_en:allFlags_en,flags_nl:allFlags_nl,
-          explanation_en:'Claude AI was unreachable. Result based on pattern analysis only.',
-          explanation_nl:'Claude AI was niet bereikbaar. Resultaat gebaseerd op patroonanalyse.',
+          verdict:'SAFE',
+          flags_en:[],flags_nl:[],
+          explanation_en:'No patterns detected. Daily AI check limit reached (10/day). Try again tomorrow.',
+          explanation_nl:'Geen patronen gevonden. Dagelijks AI-limiet bereikt (10/dag). Probeer morgen opnieuw.',
           source:'layer2',usedClaude:false
         });
         return;
       }
 
-      // Merge Claude result with layer 1+2 flags
+      if(result.error||!result.verdict){
+        renderResult({
+          verdict:'SAFE',
+          flags_en:[],flags_nl:[],
+          explanation_en:'No scam patterns detected. AI analysis was unavailable; result based on pattern check only.',
+          explanation_nl:'Geen oplichterstrucjes gevonden. AI-analyse niet beschikbaar; resultaat op basis van patrooncheck.',
+          source:'layer2',usedClaude:false
+        });
+        return;
+      }
+
+      incrementClaudeUsage();
+      var remaining=result.checksRemaining;
       var mergedFlags_en=allFlags_en.concat(result.flags||[]);
       var mergedFlags_nl=allFlags_nl.concat(result.flags||[]);
       renderResult({
         verdict:result.verdict,
         flags_en:mergedFlags_en,flags_nl:mergedFlags_nl,
-        explanation_en:result.explanation,
-        explanation_nl:result.explanation,
+        explanation_en:result.explanation+(remaining!==undefined?' ('+remaining+' AI checks left today)':''),
+        explanation_nl:result.explanation+(remaining!==undefined?' ('+remaining+' AI-checks over vandaag)':''),
         source:'claude',usedClaude:true
+      });
+    })
+    .catch(function(){
+      document.getElementById('loading-state').classList.remove('show');
+      document.getElementById('check-btn').disabled=false;
+      renderResult({
+        verdict:'SAFE',
+        flags_en:[],flags_nl:[],
+        explanation_en:'No scam patterns detected. AI analysis was unavailable; result based on pattern check only.',
+        explanation_nl:'Geen oplichterstrucjes gevonden. AI-analyse niet beschikbaar; resultaat op basis van patrooncheck.',
+        source:'layer2',usedClaude:false
       });
     });
 
