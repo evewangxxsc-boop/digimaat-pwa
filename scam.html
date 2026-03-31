@@ -468,6 +468,24 @@ var NL_RULES=[
 // ═══════════════════════════════════════════════
 var SEMANTIC_RULES=[
 
+  // ── FINANCIAL OFFER SCAM ─────────────────────────────────
+  {
+    combo:[
+      /\b(credit card|loan|mortgage|lening|hypotheek|krediet)\b/i,
+      /\b(get now|apply now|act now|limited offer|exclusive offer|pre.?approved|nu aanvragen|direct beschikbaar)\b/i
+    ],
+    flag_en:'Unsolicited financial offer',flag_nl:'Ongewenst financieel aanbod',weight:3
+  },
+  {
+    pattern:/\b(get now|act now|claim now|apply now|nu verkrijgen|nu claimen|nu aanvragen)\b/i,
+    flag_en:'Urgency tactic',flag_nl:'Urgentietactiek',weight:2
+  },
+  {
+    // URL shortener in message body
+    pattern:/https?:\/\/(bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly|rb\.gy|shorturl\.at|1kx\.in|cutt\.ly|is\.gd|v\.gd|tiny\.cc)\//i,
+    flag_en:'Shortened URL — destination hidden',flag_nl:'Verkorte URL — bestemming verborgen',weight:3
+  },
+
   // ── GRANDPARENT / FAMILY EMERGENCY SCAM ─────────────────
   // "I'm your grandson/granddaughter, I had an accident, send money"
   {
@@ -649,45 +667,16 @@ function checkSuspiciousDomain(url){
     /secure-login/i,/login-secure/i,/verify-account/i,
     /account-verify/i,/belasting-betalen/i,/digid-verify/i,
     /ing-secure/i,/rabobank-secure/i,/paypa1/i,/amaz0n/i,
-    /\.tk($|\/)/i,/\.xyz($|\/)/i,/\.top($|\/)/i,/\.pw($|\/)/i
+    /\.tk($|\/)/i,/\.xyz($|\/)/i,/\.top($|\/)/i,/\.pw($|\/)/i,
+    // URL shorteners — commonly used to hide phishing destinations
+    /^https?:\/\/(bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly|rb\.gy|shorturl\.at|1kx\.in|cutt\.ly|is\.gd|v\.gd|tiny\.cc)\//i
   ];
   return suspicious.some(function(p){return p.test(url);});
 }
 
 // ═══════════════════════════════════════════════
-// LAYER 3 — CLAUDE API
+// LAYER 4 — handled via /api/claude-check (server-side)
 // ═══════════════════════════════════════════════
-function runClaude(text){
-  var key=getClaudeKey();
-  if(!key){return Promise.resolve(null);}// No key — skip
-
-  var system=lang==='nl'
-    ?'Je bent DigiMaat, een digitale veiligheidsassistent voor Nederlandse senioren. Analyseer het bericht op oplichting. Focus op: nep-Belastingdienst, nep-DigiD, bankfraude, nep-PostNL, urgentietactieken. Geef je antwoord ALLEEN als JSON: {"verdict":"LIKELY_SCAM"|"SUSPICIOUS"|"SAFE","explanation":"max 2 zinnen in eenvoudig Nederlands","flags":["reden1","reden2"]}'
-    :'You are DigiMaat, a digital safety assistant for Dutch seniors. Analyse this message for scam indicators. Focus on: fake Belastingdienst, fake DigiD, bank fraud, fake PostNL, urgency tactics. Reply ONLY as JSON: {"verdict":"LIKELY_SCAM"|"SUSPICIOUS"|"SAFE","explanation":"max 2 plain sentences","flags":["reason1","reason2"]}';
-
-  return fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'x-api-key':key,
-      'anthropic-version':'2023-06-01',
-      'anthropic-dangerous-direct-browser-access':'true'
-    },
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:300,
-      system:system,
-      messages:[{role:'user',content:text}]
-    })
-  })
-  .then(function(r){return r.json();})
-  .then(function(d){
-    var raw=d.content&&d.content[0]&&d.content[0].text||'';
-    var clean=raw.replace(/```json|```/g,'').trim();
-    return JSON.parse(clean);
-  })
-  .catch(function(){return null;});
-}
 
 // ═══════════════════════════════════════════════
 // MAIN CHECK ORCHESTRATOR

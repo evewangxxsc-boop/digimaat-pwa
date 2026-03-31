@@ -878,6 +878,9 @@ function renderWAResults(){
     {re:/inheritance|next of kin|million.*transfer/i,tag_en:'Advance fee scam',          tag_nl:'Voorschot-fraude'},
     {re:/bitcoin.*invest|crypto.*profit|guaranteed.*return/i,tag_en:'Crypto scam',       tag_nl:'Cryptoscam'},
     {re:/\.tk|\.xyz|\.top|login-verify|secure-verify/i,tag_en:'Suspicious domain',       tag_nl:'Verdacht domein'},
+    {re:/https?:\/\/(bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly|rb\.gy|shorturl\.at|1kx\.in|cutt\.ly|is\.gd|v\.gd|tiny\.cc)\//i,tag_en:'Shortened URL — destination hidden',tag_nl:'Verkorte URL — bestemming verborgen'},
+    {re:/\b(get now|act now|claim now|apply now|nu verkrijgen|nu claimen|nu aanvragen)\b/i,tag_en:'Urgency tactic',                tag_nl:'Urgentietactiek'},
+    {re:/\b(credit card|personal loan|pre.?approved|exclusive offer|lening aanvragen|krediet)\b/i,tag_en:'Unsolicited financial offer',tag_nl:'Ongewenst financieel aanbod'},
   ];
   var excl=getExclusions().map(function(e){return e.addr.toLowerCase();});
   var suspicious=[];var warnings=[];var safeCount=0;
@@ -968,6 +971,9 @@ function processGmailMessages(messages){
     {re:/inheritance|next of kin|million.*transfer/i,tag_en:'Advance fee scam',           tag_nl:'Voorschot-fraude'},
     {re:/bitcoin.*invest|crypto.*profit|guaranteed.*return/i,tag_en:'Crypto scam',        tag_nl:'Cryptoscam'},
     {re:/\.tk|\.xyz|\.top|secure-login|login-verify|login-secure/i,tag_en:'Suspicious domain',tag_nl:'Verdacht domein'},
+    {re:/https?:\/\/(bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly|rb\.gy|shorturl\.at|1kx\.in|cutt\.ly|is\.gd|v\.gd|tiny\.cc)\//i,tag_en:'Shortened URL — destination hidden',tag_nl:'Verkorte URL — bestemming verborgen'},
+    {re:/\b(get now|act now|claim now|apply now|nu verkrijgen|nu claimen|nu aanvragen)\b/i,tag_en:'Urgency tactic',tag_nl:'Urgentietactiek'},
+    {re:/\b(credit card|personal loan|pre.?approved|exclusive offer|lening aanvragen|krediet)\b/i,tag_en:'Unsolicited financial offer',tag_nl:'Ongewenst financieel aanbod'},
   ];
 
   var excl=getExclusions().map(function(e){return e.addr.toLowerCase();});
