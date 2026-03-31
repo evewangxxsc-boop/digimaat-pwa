@@ -65,11 +65,11 @@ export default async function handler(req, res) {
         newToken = accessToken; // will be returned to browser for storage
       }
 
-      // Build Gmail search query with date range
-      // Scan all inbox tabs — scam emails often land in Promotions/Updates
-      let query = 'in:inbox';
-      if (dateFrom) query += ` after:${dateFrom.replace(/-/g,'/')}`;
-      if (dateTo)   query += ` before:${dateTo.replace(/-/g,'/')}`;
+      // Build Gmail search query — no folder restriction, scan all mail
+      let query = '';
+      if (dateFrom) query += `after:${dateFrom.replace(/-/g,'/')}`;
+      if (dateTo)   query += (query ? ' ' : '') + `before:${dateTo.replace(/-/g,'/')}`;
+      if (!query)   query = 'in:anywhere';
 
       // List messages
       const listRes = await fetch(

@@ -81,38 +81,41 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .why-text{font-size:15px;color:#7A4A00;line-height:1.7;font-family:'Literata',serif}
 
 /* MESSAGE BOX */
-.msg-box{background:var(--bg);border:1px solid var(--br);border-radius:var(--rad);padding:13px 14px;margin-bottom:16px}
-.msg-box.expandable{cursor:pointer}
-.msg-box.expandable:active{opacity:.8}
+.msg-box{background:var(--bg);border:1px solid var(--br);border-radius:var(--rad);padding:13px 14px;margin-bottom:0}
 .msg-label{font-size:10px;font-weight:800;color:var(--mu);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px}
 .msg-title{font-size:15px;font-weight:800;margin-bottom:4px}
-.msg-count{font-size:12px;color:var(--am);font-weight:700}
-.msg-see-more{font-size:12px;font-weight:800;color:var(--gd);margin-top:8px}
-/* Suspicious email list */
-.msg-email-list{margin-top:12px;border-top:1px solid var(--br);display:none}
-.msg-email-row{padding:10px 0;border-bottom:1px solid var(--br)}
+.msg-count{font-size:12px;color:var(--am);font-weight:700;margin-bottom:10px}
+/* Suspicious email list — always visible */
+.msg-email-list{margin-top:10px;border-top:1px solid var(--br)}
+.msg-email-row{padding:11px 0;border-bottom:1px solid var(--br)}
 .msg-email-row:last-of-type{border-bottom:none;padding-bottom:0}
 .msg-email-from{font-size:11px;font-weight:700;color:var(--mu);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg-email-subject{font-size:13px;font-weight:800;margin-bottom:3px}
-.msg-email-snip{font-size:11px;color:var(--mu);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.msg-open-btn{display:inline-block;margin-top:6px;font-size:11px;font-weight:800;color:var(--gd);background:var(--gl);border-radius:6px;padding:3px 10px;text-decoration:none}
+.msg-email-subject{font-size:14px;font-weight:800;margin-bottom:3px}
+.msg-email-snip{font-size:12px;color:var(--mu);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.msg-open-btn{display:inline-block;margin-top:7px;font-size:12px;font-weight:800;color:var(--gd);background:var(--gl);border-radius:6px;padding:4px 12px;text-decoration:none}
 .msg-goto-inbox{display:block;margin-top:12px;text-align:center;font-size:13px;font-weight:800;color:var(--gd);padding:10px;background:var(--gl);border-radius:10px;text-decoration:none;border:1.5px solid var(--gm)}
 
-/* ACTION SECTION - VISUAL STEPS */
-.action-section{margin-bottom:10px}
-.action-sec-label{font-size:14px;font-weight:800;color:var(--tx);margin-bottom:10px}
-.action-btn{background:var(--card);border:1.5px solid var(--br);border-radius:var(--rad);padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;width:100%;margin-bottom:8px;transition:border-color .15s;-webkit-tap-highlight-color:transparent;text-align:left}
+/* STEP-BY-STEP LAYOUT */
+.step-block{margin-top:18px}
+.step-hd{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.step-circle{width:30px;height:30px;border-radius:50%;background:var(--gd);color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-title{font-size:15px;font-weight:800;color:var(--tx)}
+/* Action buttons */
+.action-btn{background:var(--card);border:2px solid var(--br);border-radius:var(--rad);padding:14px 15px;display:flex;align-items:center;gap:13px;cursor:pointer;width:100%;margin-bottom:10px;-webkit-tap-highlight-color:transparent;text-align:left}
 .action-btn:active{opacity:.85}
-.action-btn.del{border-color:#FAC775}
-.action-btn.spam{border-color:#B5D4F4}
-.action-btn.fam{border-color:var(--gm)}
-.action-btn.pwd{border-color:var(--br)}
-.ab-ico{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ab-ico svg{width:22px;height:22px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.action-btn.del{border-color:#FAC775;background:#FFFBF2}
+.action-btn.spam{border-color:#B5D4F4;background:#F0F6FF}
+.action-btn.safe{border-color:var(--gm);background:var(--gl)}
+.action-btn.fam{background:var(--gd);border-color:var(--gd)}
+.ab-ico{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ab-ico svg{width:24px;height:24px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ab-txt{flex:1}
-.ab-name{font-size:15px;font-weight:800;color:var(--tx)}
+.ab-name{font-size:16px;font-weight:800;color:var(--tx)}
+.ab-name.light{color:#fff}
 .ab-hint{font-size:12px;color:var(--mu);margin-top:2px;line-height:1.4}
-.ab-arr{font-size:18px;color:var(--br)}
+.ab-hint.light{color:rgba(255,255,255,.8)}
+.ab-arr{font-size:20px;color:var(--br)}
+.ab-arr.light{color:rgba(255,255,255,.6)}
 
 /* VISUAL STEP GUIDE */
 .step-guide{position:fixed;inset:0;background:#fff;z-index:600;display:none;flex-direction:column;max-width:390px;left:50%;transform:translateX(-50%)}
@@ -294,6 +297,33 @@ function dismissItem(item){
   saveDismissed(dismissed);
 }
 
+function addToSafeList(fromAddr,ts){
+  // Parse bare email address from "Name <addr>" format
+  var email=fromAddr.replace(/.*<([^>]+)>.*/,'$1').trim().toLowerCase()||fromAddr.trim().toLowerCase();
+  var exclusions=[];
+  try{exclusions=JSON.parse(localStorage.getItem(storageKey('dm_exclusions'))||'[]');}catch(e){}
+  var already=exclusions.some(function(e){return (e.addr||'').toLowerCase()===email;});
+  if(!already){
+    exclusions.push({addr:email,name:fromAddr,addedAt:Date.now()});
+    localStorage.setItem(storageKey('dm_exclusions'),JSON.stringify(exclusions));
+  }
+  // Dismiss the alert
+  var items=getRecent();
+  var match=items.find(function(i){return i.time===ts;})||{time:ts,title_en:''};
+  dismissItem(match);
+  // Show success inside the detail screen body
+  document.getElementById('ds-body').innerHTML=
+    '<div style="padding:32px 24px;text-align:center">'
+    +'<div style="font-size:48px;margin-bottom:16px">✅</div>'
+    +'<div style="font-size:20px;font-weight:700;color:var(--gd);margin-bottom:12px">'
+    +(lang==='nl'?'Toegevoegd aan veilige lijst':'Added to safe list')+'</div>'
+    +'<div style="font-size:16px;color:#555;margin-bottom:24px">'
+    +(lang==='nl'?'Afzender toegevoegd aan veilige lijst.':'Sender added to your safe list.')+'</div>'
+    +'<button onclick="closeDetail()" style="background:var(--gd);color:#fff;border:none;border-radius:12px;padding:14px 32px;font-size:16px;font-weight:700;cursor:pointer">'
+    +(lang==='nl'?'← Terug':'← Back')+'</button>'
+    +'</div>';
+}
+
 function timeAgo(ts){
   var diff=Math.floor((Date.now()-ts)/60000);
   if(diff<1)return lang==='nl'?'Zojuist':'Just now';
@@ -385,57 +415,64 @@ function renderDetail(alerts){
   var _g=getPrimaryGuardian();
   var familyName=_g?_g.name.split(' ')[0]:(lang==='nl'?'uw familielid':'your family member');
 
-  var html='<div class="why-box">'
+  // Get first suspicious sender for safe-list shortcut
+  var lr=null;var firstFrom='';
+  try{lr=JSON.parse(localStorage.getItem(storageKey('dm_last_results'))||'null');}catch(e){}
+  if(lr&&lr.suspicious&&lr.suspicious.length)firstFrom=lr.suspicious[0].from||'';
+
+  var html=''
+
+    // ── WHY BOX ──────────────────────────────────────────
+    +'<div class="why-box">'
     +'<div class="why-label"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
     +(lang==='nl'?'Waarom is dit een probleem?':'Why is this a problem?')+'</div>'
     +'<div class="why-text">'+why+'</div>'
     +'</div>'
 
+    // ── STEP 1 — READ THE MESSAGE ─────────────────────────
+    +'<div class="step-block">'
+    +'<div class="step-hd"><div class="step-circle">1</div>'
+    +'<div class="step-title">'+(lang==='nl'?'Lees het bericht hieronder':'Read the message below')+'</div></div>'
     +buildMsgBox(a,item,title,lang)
+    +'</div>'
 
-    +'<div class="action-section">'
-    +'<div class="action-sec-label">'+(lang==='nl'?'Kies wat u wilt doen:':'Choose what to do:')+'</div>'
+    // ── STEP 2 — DECIDE WHAT TO DO ───────────────────────
+    +'<div class="step-block">'
+    +'<div class="step-hd"><div class="step-circle">2</div>'
+    +'<div class="step-title">'+(lang==='nl'?'Kies wat u wilt doen':'Choose what to do')+'</div></div>'
 
     // DELETE
     +'<button class="action-btn del" onclick="showGuide(\'delete\',\''+escTitle(title)+'\')">'
-    +'<div class="ab-ico" style="background:#FFF3CD">'
-    +'<svg viewBox="0 0 24 24" style="stroke:#7A4A00;width:26px;height:26px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>'
-    +'</div>'
-    +'<div class="ab-txt">'
-    +'<div class="ab-name">'+(lang==='nl'?'Verwijderen':'Delete')+'</div>'
-    +'<div class="ab-hint">'+(lang==='nl'?'Gooi dit bericht in de prullenbak':'Throw this message in the bin')+'</div>'
-    +'</div><span class="ab-arr">›</span></button>'
+    +'<div class="ab-ico" style="background:#FFF3CD"><svg viewBox="0 0 24 24" style="stroke:#7A4A00"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></div>'
+    +'<div class="ab-txt"><div class="ab-name">'+(lang==='nl'?'Verwijderen':'Delete this message')+'</div>'
+    +'<div class="ab-hint">'+(lang==='nl'?'Gooi dit bericht in de prullenbak — het verdwijnt uit uw inbox':'Remove it from your mailbox for good')+'</div></div>'
+    +'<span class="ab-arr">›</span></button>'
 
-    // SPAM
+    // BLOCK
     +'<button class="action-btn spam" onclick="showGuide(\'spam\',\''+escTitle(title)+'\')">'
-    +'<div class="ab-ico" style="background:#E6F1FB">'
-    +'<svg viewBox="0 0 24 24" style="stroke:#185FA5;width:26px;height:26px"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>'
-    +'</div>'
-    +'<div class="ab-txt">'
-    +'<div class="ab-name">'+(lang==='nl'?'Blokkeren':'Block sender')+'</div>'
-    +'<div class="ab-hint">'+(lang==='nl'?'Blokkeer de afzender — ze kunnen u niet meer bereiken':'Block the sender — they cannot contact you again')+'</div>'
-    +'</div><span class="ab-arr">›</span></button>'
+    +'<div class="ab-ico" style="background:#E6F1FB"><svg viewBox="0 0 24 24" style="stroke:#185FA5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>'
+    +'<div class="ab-txt"><div class="ab-name">'+(lang==='nl'?'Afzender blokkeren':'Block the sender')+'</div>'
+    +'<div class="ab-hint">'+(lang==='nl'?'Blokkeer en markeer als spam — ze kunnen u niet meer bereiken':'Mark as spam — they cannot contact you again')+'</div></div>'
+    +'<span class="ab-arr">›</span></button>'
 
-    // FAMILY
+    // SAFE LIST
+    +'<button class="action-btn safe" onclick="addToSafeList(\''+escTitle(firstFrom)+'\','+item.time+')">'
+    +'<div class="ab-ico" style="background:#C8EEE0"><svg viewBox="0 0 24 24" style="stroke:var(--gd)"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>'
+    +'<div class="ab-txt"><div class="ab-name">'+(lang==='nl'?'Dit is veilig — ik ken de afzender':'It\'s safe — I know this sender')+'</div>'
+    +'<div class="ab-hint">'+(lang==='nl'?'Voeg toe aan uw veilige lijst — dit bericht wordt niet meer als verdacht gemarkeerd':'Add to your safe list — won\'t be flagged again')+'</div></div>'
+    +'<span class="ab-arr">›</span></button>'
+
+    +'</div>'
+
+    // ── STEP 3 — CALL GUARDIAN (always visible) ───────────
+    +'<div class="step-block">'
+    +'<div class="step-hd"><div class="step-circle">3</div>'
+    +'<div class="step-title">'+(lang==='nl'?'Twijfelt u? Vraag om hulp':'Not sure? Ask for help')+'</div></div>'
     +'<button class="action-btn fam" onclick="askFamily(\''+escTitle(title)+'\')">'
-    +'<div class="ab-ico" style="background:var(--gl)">'
-    +'<svg viewBox="0 0 24 24" style="stroke:var(--gd);width:26px;height:26px"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6"/></svg>'
-    +'</div>'
-    +'<div class="ab-txt">'
-    +'<div class="ab-name">'+(lang==='nl'?'Bel '+familyName+' om hulp':'Call '+familyName+' for help')+'</div>'
-    +'<div class="ab-hint">'+(lang==='nl'?''+familyName+' kan u helpen dit op te lossen':''+familyName+' can help you fix this')+'</div>'
-    +'</div><span class="ab-arr">›</span></button>'
-
-    // PASSWORD
-    +'<button class="action-btn pwd" onclick="showGuide(\'password\',\''+escTitle(title)+'\')">'
-    +'<div class="ab-ico" style="background:var(--bg)">'
-    +'<svg viewBox="0 0 24 24" style="stroke:var(--gd);width:26px;height:26px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1" fill="var(--gd)"/></svg>'
-    +'</div>'
-    +'<div class="ab-txt">'
-    +'<div class="ab-name">'+(lang==='nl'?'Wachtwoord wijzigen':'Change password')+'</div>'
-    +'<div class="ab-hint">'+(lang==='nl'?'Stap-voor-stap uitleg met grote plaatjes':'Step-by-step guide with large pictures')+'</div>'
-    +'</div><span class="ab-arr">›</span></button>'
-
+    +'<div class="ab-ico" style="background:rgba(255,255,255,.2)"><svg viewBox="0 0 24 24" style="stroke:#fff"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6"/></svg></div>'
+    +'<div class="ab-txt"><div class="ab-name light">'+(lang==='nl'?'Bel '+familyName+' om hulp':'Call '+familyName+' for help')+'</div>'
+    +'<div class="ab-hint light">'+(lang==='nl'?familyName+' kan samen met u beslissen wat u het beste kunt doen':familyName+' can help you decide what to do')+'</div></div>'
+    +'<span class="ab-arr light">›</span></button>'
     +'</div>';
 
   document.getElementById('ds-body').innerHTML=html;
@@ -445,47 +482,34 @@ function renderDetail(alerts){
 
 function escTitle(t){return t.replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 
-function toggleEmailList(){
-  var l=document.getElementById('ds-email-list');
-  var lbl=document.getElementById('ds-see-more');
-  if(!l||!lbl)return;
-  var open=l.style.display==='block';
-  l.style.display=open?'none':'block';
-  lbl.textContent=open
-    ?('▼ '+lbl.dataset.count+' '+(lang==='nl'?'berichten — tik om te bekijken':'messages — tap to see'))
-    :('▲ '+(lang==='nl'?'Verbergen':'Hide'));
-}
-
 function buildMsgBox(a,item,title,lang){
   var isInbox=(item.title_en||'').indexOf('inbox scan')!==-1;
   var lr=null;var msgs=[];
   if(isInbox){try{lr=JSON.parse(localStorage.getItem(storageKey('dm_last_results'))||'null');}catch(e){}msgs=(lr&&lr.suspicious)||[];}
+
   var emailListHtml='';
   if(isInbox&&msgs.length){
-    emailListHtml='<div class="msg-email-list" id="ds-email-list">'
+    emailListHtml='<div class="msg-email-list">'
       +msgs.slice(0,5).map(function(m){
         var gmailLink=m.id?'https://mail.google.com/mail/u/0/#inbox/'+m.id:'https://mail.google.com';
+        var safeFrom=encodeURIComponent(m.from||'');
         return '<div class="msg-email-row">'
           +'<div class="msg-email-from">'+(m.from||'Unknown sender')+'</div>'
           +'<div class="msg-email-subject">'+(m.subject||(lang==='nl'?'Geen onderwerp':'No subject'))+'</div>'
           +'<div class="msg-email-snip">'+(m.snippet||'')+'</div>'
-          +'<a class="msg-open-btn" href="'+gmailLink+'" target="_blank">'
-          +(lang==='nl'?'Open in Gmail →':'Open in Gmail →')
-          +'</a>'
+          +'<a class="msg-open-btn" href="'+gmailLink+'" target="_blank">'+(lang==='nl'?'Open in Gmail →':'Open in Gmail →')+'</a>'
           +'</div>';
       }).join('')
-      +'<a class="msg-goto-inbox" href="inbox.html">'
-      +(lang==='nl'?'Alle verdachte berichten bekijken in Inbox →':'View all suspicious messages in Inbox →')
-      +'</a></div>';
+      +(msgs.length>5?'<a class="msg-goto-inbox" href="inbox.html">'+(lang==='nl'?'Alle verdachte berichten bekijken →':'View all suspicious messages →')+'</a>':'')
+      +'</div>';
   }
-  var clickable=isInbox&&emailListHtml;
-  return '<div class="msg-box'+(clickable?' expandable':'')+'"'+(clickable?' onclick="toggleEmailList()"':'')+'>'+
-    '<div class="msg-label">'+(lang==='nl'?'Gevonden probleem':'Problem found')+'</div>'+
-    '<div class="msg-title">'+title+'</div>'+
-    (a.count>1?'<div class="msg-count">'+(lang==='nl'?a.count+'× gevonden':a.count+'× found')+'</div>':'')+
-    (clickable?'<div class="msg-see-more" id="ds-see-more" data-count="'+msgs.length+'">▼ '+msgs.length+' '+(lang==='nl'?'berichten — tik om te bekijken':'messages — tap to see')+'</div>':'')+
-    emailListHtml+
-    '</div>';
+
+  return '<div class="msg-box">'
+    +'<div class="msg-label">'+(lang==='nl'?'Gevonden probleem':'Problem found')+'</div>'
+    +'<div class="msg-title">'+title+'</div>'
+    +(a.count>1?'<div class="msg-count">'+(lang==='nl'?a.count+'× gevonden':a.count+'× found')+'</div>':'')
+    +emailListHtml
+    +'</div>';
 }
 
 function getWhyText(item){
