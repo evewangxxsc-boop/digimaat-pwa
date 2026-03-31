@@ -177,6 +177,9 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 /* GUARDIAN LAST SEEN */
 .gc-lastseen{font-size:10px;color:var(--mu);margin-top:3px;display:flex;align-items:center;gap:4px}
 .gc-lastseen svg{width:10px;height:10px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+/* PRIMARY CONTACT */
+.gc-primary-badge{display:inline-flex;align-items:center;gap:3px;background:var(--gl);color:var(--gd);font-size:10px;font-weight:800;border-radius:6px;padding:2px 8px;margin-top:5px}
+.gc-set-primary{background:none;border:1px solid var(--br);border-radius:6px;padding:2px 9px;font-size:10px;font-weight:700;color:var(--mu);font-family:'Nunito',sans-serif;cursor:pointer;margin-top:5px}
 
 /* PAGE LOADER */
 .page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
@@ -763,7 +766,8 @@ function saveGuardian(){
   var rel=document.getElementById('guardian-rel-inp').value.trim()||'Family';
   var phone=(document.getElementById('guardian-phone-inp').value||'').trim();
   var guardians=JSON.parse(localStorage.getItem('dm_my_guardians')||'[]');
-  guardians.push({id:'g_'+Date.now(),name:name,rel:rel,phone:phone,perms:{breach:true,scam:true,inbox:false},addedAt:Date.now()});
+  var isFirst=guardians.length===0;
+  guardians.push({id:'g_'+Date.now(),name:name,rel:rel,phone:phone,perms:{breach:true,scam:true,inbox:false},isPrimary:isFirst,addedAt:Date.now()});
   localStorage.setItem('dm_my_guardians',JSON.stringify(guardians));
   document.getElementById('guardian-name-inp').value='';
   document.getElementById('guardian-rel-inp').value='';
@@ -815,11 +819,15 @@ function renderGuardiansList(){
     }else{
       lastSeenStr=lang==='nl'?'Nog niet bekeken':'Not checked yet';
     }
+    var primaryHtml=g.isPrimary
+      ?'<div class="gc-primary-badge">★ '+(lang==='nl'?'Primair contact':'Primary contact')+'</div>'
+      :'<button class="gc-set-primary" onclick="setPrimaryGuardian('+i+')">'+(lang==='nl'?'Primair instellen':'Set as primary')+'</button>';
     return '<div class="guardian-card">'
       +'<div class="gc-header">'
       +'<div class="gc-ava">'+initials+'</div>'
       +'<div style="flex:1;min-width:0"><div class="gc-name">'+g.name+'</div><div class="gc-rel">'+g.rel+'</div>'
       +'<div class="gc-lastseen"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+lastSeenStr+'</div>'
+      +primaryHtml
       +'</div>'
       +'<button class="gc-remove" onclick="removeGuardian('+i+')">'+(lang==='nl'?'Verwijderen':'Remove')+'</button>'
       +'</div>'
@@ -839,6 +847,13 @@ function permRow(guardianIdx,key,val,label){
     +'<div class="gc-perm-label">'+label+'</div>'
     +'<button class="tog'+(val?'':' off')+'" onclick="togglePerm('+guardianIdx+',\''+key+'\',this)"><div class="tok"></div></button>'
     +'</div>';
+}
+
+function setPrimaryGuardian(idx){
+  var guardians=getGuardians();
+  guardians.forEach(function(g,i){g.isPrimary=(i===idx);});
+  localStorage.setItem('dm_my_guardians',JSON.stringify(guardians));
+  renderGuardiansList();
 }
 
 function togglePerm(idx,key,btn){
