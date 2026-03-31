@@ -90,12 +90,12 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .msg-see-more{font-size:12px;font-weight:800;color:var(--gd);margin-top:8px}
 /* Suspicious email list */
 .msg-email-list{margin-top:12px;border-top:1px solid var(--br);display:block}
-.msg-email-row{padding:10px 0;border-bottom:1px solid var(--br)}
+.msg-email-row{padding:12px 0;border-bottom:1px solid var(--br)}
 .msg-email-row:last-of-type{border-bottom:none;padding-bottom:0}
-.msg-email-from{font-size:11px;font-weight:700;color:var(--mu);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg-email-subject{font-size:13px;font-weight:800;margin-bottom:3px}
-.msg-email-snip{font-size:11px;color:var(--mu);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.msg-open-btn{display:inline-block;margin-top:6px;font-size:11px;font-weight:800;color:var(--gd);background:var(--gl);border-radius:6px;padding:3px 10px;text-decoration:none}
+.msg-email-from{font-size:12px;font-weight:700;color:var(--mu);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-email-subject{font-size:15px;font-weight:800;margin-bottom:5px}
+.msg-email-snip{font-size:13px;color:#444;line-height:1.5;margin-bottom:2px}
+.msg-open-btn{display:inline-block;margin-top:6px;font-size:13px;font-weight:800;color:var(--gd);background:var(--gl);border-radius:8px;padding:6px 14px;text-decoration:none;border:1px solid var(--gm)}
 .msg-goto-inbox{display:block;margin-top:12px;text-align:center;font-size:13px;font-weight:800;color:var(--gd);padding:10px;background:var(--gl);border-radius:10px;text-decoration:none;border:1.5px solid var(--gm)}
 
 /* ACTION SECTION - VISUAL STEPS */
@@ -472,10 +472,11 @@ function buildMsgBox(a,item,title,lang){
     emailListHtml='<div class="msg-email-list">'
       +msgs.slice(0,5).map(function(m){
         var gmailLink=m.id?'https://mail.google.com/mail/u/0/#inbox/'+m.id:'https://mail.google.com';
+        var snip=m.snippet||(lang==='nl'?'(Tik op "Open in Gmail" om de inhoud te lezen)':'(Tap "Open in Gmail" to read the content)');
         return '<div class="msg-email-row">'
-          +'<div class="msg-email-from">'+(m.from||'Unknown sender')+'</div>'
-          +'<div class="msg-email-subject">'+(m.subject||(lang==='nl'?'Geen onderwerp':'No subject'))+'</div>'
-          +'<div class="msg-email-snip">'+(m.snippet||'')+'</div>'
+          +'<div class="msg-email-from">'+(lang==='nl'?'Van: ':'From: ')+(m.from||'Unknown sender')+'</div>'
+          +'<div class="msg-email-subject">'+(m.subject||(lang==='nl'?'(geen onderwerp)':'(no subject)'))+'</div>'
+          +'<div class="msg-email-snip">'+snip+'</div>'
           +'<a class="msg-open-btn" href="'+gmailLink+'" target="_blank">'
           +(lang==='nl'?'Open in Gmail →':'Open in Gmail →')
           +'</a>'
