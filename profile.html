@@ -240,23 +240,11 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 
     <!-- FAQ -->
     <div class="section">
-      <div class="sec-lbl" data-en="Questions & answers" data-nl="Vragen & antwoorden">Questions & answers</div>
-      <div id="faq-section"></div>
-    </div>
-
-    <!-- DANGER ZONE -->
-    <div class="section">
-      <div class="sec-lbl" data-en="Danger zone" data-nl="Gevarenzone">Danger zone</div>
-      <div class="danger-zone">
-        <div class="dz-header">
-          <div class="dz-title" data-en="Delete account" data-nl="Account verwijderen">Delete account</div>
-          <div class="dz-sub" data-en="This permanently deletes all your data and cannot be undone." data-nl="Dit verwijdert al uw gegevens permanent en kan niet ongedaan worden gemaakt.">This permanently deletes all your data and cannot be undone.</div>
-        </div>
-        <button class="dz-btn" onclick="deleteAccount()">
-          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-          <span data-en="Delete my account" data-nl="Mijn account verwijderen">Delete my account</span>
-        </button>
+      <div class="sec-lbl faq-toggle" id="faq-toggle" onclick="toggleFAQSection()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+        <span data-en="Questions & answers" data-nl="Vragen & antwoorden">Questions & answers</span>
+        <svg id="faq-section-chevron" viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--mu);fill:none;stroke-width:2.5;stroke-linecap:round;flex-shrink:0;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
+      <div id="faq-section" style="display:none"></div>
     </div>
 
     <!-- SIGN OUT -->
@@ -565,10 +553,16 @@ function renderFAQ(){
 function toggleFAQ(i){
   var item=document.getElementById('faq-'+i);
   var wasOpen=item.classList.contains('open');
-  // Close all
   document.querySelectorAll('.faq-item').forEach(function(el){el.classList.remove('open');});
-  // Open clicked if it was closed
   if(!wasOpen)item.classList.add('open');
+}
+
+function toggleFAQSection(){
+  var section=document.getElementById('faq-section');
+  var chevron=document.getElementById('faq-section-chevron');
+  var isHidden=section.style.display==='none';
+  section.style.display=isHidden?'block':'none';
+  if(chevron)chevron.style.transform=isHidden?'rotate(180deg)':'rotate(0deg)';
 }
 
 // ── SIGN OUT ─────────────────────────────────────────────
@@ -582,31 +576,6 @@ function signOut(){
   });
 }
 
-// ── DELETE ACCOUNT ────────────────────────────────────────
-function deleteAccount(){
-  var ok=confirm(lang==='nl'
-    ?'Weet u zeker dat u uw account wilt verwijderen? Dit verwijdert al uw gegevens permanent en kan niet ongedaan worden gemaakt.'
-    :'Are you sure you want to delete your account? This permanently deletes all your data and cannot be undone.');
-  if(!ok)return;
-  // Clear all localStorage keys
-  ['dm_user','dm_role','dm_lang','dm_api_key','dm_recent','dm_family',
-   'dm_exclusions','dm_scan_history','dm_inbox_settings','dm_share_settings',
-   'dm_prefs','dm_deleted_meta','dm_last_results','dm_wa_file'].forEach(function(k){
-    localStorage.removeItem(k);
-  });
-  // Delete Firebase account
-  var user=auth.currentUser;
-  if(user){
-    user.delete().then(function(){
-      window.location.href='register.html';
-    }).catch(function(){
-      // Re-authentication may be needed — sign out at minimum
-      auth.signOut().then(function(){window.location.href='register.html';});
-    });
-  }else{
-    window.location.href='register.html';
-  }
-}
 </script>
 </body>
 </html>
