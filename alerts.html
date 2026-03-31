@@ -364,8 +364,8 @@ function renderDetail(alerts){
   document.getElementById('ds-next').disabled=currentIdx===total-1;
 
   var why=getWhyText(item);
-  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
-  var familyName=family?family.name.split(' ')[0]:(lang==='nl'?'uw familielid':'your family member');
+  var _g=getPrimaryGuardian();
+  var familyName=_g?_g.name.split(' ')[0]:(lang==='nl'?'uw familielid':'your family member');
 
   var html='<div class="why-box">'
     +'<div class="why-label"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
@@ -562,19 +562,25 @@ function successDone(){
   else{renderMain();goTo('home.html');}
 }
 
+function getPrimaryGuardian(){
+  var guardians=[];
+  try{guardians=JSON.parse(localStorage.getItem('dm_my_guardians')||'[]');}catch(e){}
+  return guardians.find(function(g){return g.isPrimary;})||guardians[0]||null;
+}
+
 function askFamily(title){
-  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
-  if(!family||!family.phone){
-    alert(lang==='nl'?'Voeg eerst een familiecontact toe via de Familiepagina.':'Please add a family contact first on the Family page.');
+  var g=getPrimaryGuardian();
+  if(!g||!g.phone){
+    alert(lang==='nl'?'Voeg eerst een contactpersoon met telefoonnummer toe via de Familiepagina.':'Please add a guardian with a phone number on the Family page.');
     return;
   }
-  var fname=family.name.split(' ')[0];
+  var fname=g.name.split(' ')[0];
   var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
   var uname=user.name?user.name.split(' ')[0]:'Jan';
   var msg=lang==='nl'
     ?'Hoi '+fname+', DigiMaat heeft een probleem gevonden voor '+uname+': "'+title+'". Kun jij me helpen dit op te lossen? Groet, '+uname
     :'Hi '+fname+', DigiMaat found a problem for '+uname+': "'+title+'". Can you help me fix this? Thanks, '+uname;
-  var phone=family.phone.replace(/[\s\+\-\(\)]/g,'');
+  var phone=g.phone.replace(/[\s\+\-\(\)]/g,'');
   if(phone.startsWith('0'))phone='31'+phone.substring(1);
   window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
 }

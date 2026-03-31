@@ -144,10 +144,20 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .why-text{font-size:14px;color:#791F1F;line-height:1.6;font-family:'Literata',serif}
 /* Message preview */
 .msg-box{background:var(--bg);border:1px solid var(--br);border-radius:var(--rad);padding:13px 14px;margin-bottom:16px}
+.msg-box.expandable{cursor:pointer}
+.msg-box.expandable:active{opacity:.8}
 .msg-label{font-size:10px;font-weight:800;color:var(--mu);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px}
 .msg-from{font-size:12px;font-weight:700;color:var(--mu);margin-bottom:6px}
 .msg-subject{font-size:15px;font-weight:800;margin-bottom:8px}
 .msg-body{font-size:13px;color:var(--mu);line-height:1.6;font-family:'Literata',serif;white-space:pre-wrap}
+.msg-see-more{font-size:12px;font-weight:800;color:var(--gd);margin-top:6px}
+.msg-email-list{margin-top:12px;border-top:1px solid var(--br);display:none}
+.msg-email-row{padding:8px 0;border-bottom:1px solid var(--br)}
+.msg-email-row:last-of-type{border-bottom:none}
+.msg-email-from{font-size:11px;font-weight:700;color:var(--mu);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-email-subject{font-size:13px;font-weight:800;margin-bottom:2px}
+.msg-email-snip{font-size:11px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-goto-inbox{display:block;margin-top:10px;text-align:center;font-size:13px;font-weight:800;color:var(--gd);padding:9px;background:var(--gl);border-radius:8px;text-decoration:none}
 /* Actions */
 .action-label{font-size:11px;font-weight:800;color:var(--mu);letter-spacing:.4px;text-transform:uppercase;margin-bottom:10px}
 .action-grid{display:flex;flex-direction:column;gap:8px}
@@ -650,6 +660,45 @@ function closeDetail(){
 }
 function prevAlert(){var a=getAlerts();if(currentAlertIndex>0){currentAlertIndex--;renderDetailScreen(a);}}
 function nextAlert(){var a=getAlerts();if(currentAlertIndex<a.length-1){currentAlertIndex++;renderDetailScreen(a);}}
+function toggleEmailList(){
+  var l=document.getElementById('ds-email-list');
+  var lbl=document.getElementById('ds-see-more');
+  if(!l||!lbl)return;
+  var open=l.style.display==='block';
+  l.style.display=open?'none':'block';
+  lbl.textContent=open
+    ?('▼ '+lbl.dataset.count+' '+(lang==='nl'?'berichten — tik om te bekijken':'messages — tap to see'))
+    :('▲ '+(lang==='nl'?'Verbergen':'Hide'));
+}
+
+function buildProblemBox(item,title,lang){
+  var isInbox=item.title_en&&item.title_en.indexOf('inbox scan')!==-1;
+  var lr=null;var msgs=[];
+  if(isInbox){try{lr=JSON.parse(localStorage.getItem('dm_last_results')||'null');}catch(e){}msgs=(lr&&lr.suspicious)||[];}
+  var emailListHtml='';
+  if(isInbox&&msgs.length){
+    emailListHtml='<div class="msg-email-list" id="ds-email-list">'
+      +msgs.slice(0,5).map(function(m){
+        return '<div class="msg-email-row">'
+          +'<div class="msg-email-from">'+(m.from||'Unknown sender')+'</div>'
+          +'<div class="msg-email-subject">'+(m.subject||(lang==='nl'?'Geen onderwerp':'No subject'))+'</div>'
+          +'<div class="msg-email-snip">'+(m.snippet||'')+'</div>'
+          +'</div>';
+      }).join('')
+      +'<a class="msg-goto-inbox" href="inbox.html">'
+      +(lang==='nl'?'Bekijk en verwijder in Inbox →':'View & delete in Inbox →')
+      +'</a></div>';
+  }
+  var clickable=isInbox&&emailListHtml;
+  return '<div class="msg-box'+(clickable?' expandable':'')+'"'+(clickable?' onclick="toggleEmailList()"':'')+'>'+
+    '<div class="msg-label">'+(lang==='nl'?'Wat er gevonden is':'What was found')+'</div>'
+    +'<div class="msg-subject">'+title+'</div>'
+    +'<div class="msg-body" style="font-size:12px;color:var(--mu);font-family:Nunito,sans-serif">'+timeAgo(item.time)+'</div>'
+    +(clickable?'<div class="msg-see-more" id="ds-see-more" data-count="'+msgs.length+'">▼ '+msgs.length+' '+(lang==='nl'?'berichten — tik om te bekijken':'messages — tap to see')+'</div>':'')
+    +emailListHtml
+    +'</div>';
+}
+
 function renderDetailScreen(alerts){
   var item=alerts[currentAlertIndex],total=alerts.length;
   var title=lang==='nl'?item.title_nl:item.title_en;
@@ -663,9 +712,7 @@ function renderDetailScreen(alerts){
   var html='<div class="why-box">'
     +'<div class="why-title"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--r)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>&nbsp;'+(lang==='nl'?'Waarom is dit gevaarlijk?':'Why is this dangerous?')+'</div>'
     +'<div class="why-text">'+why+'</div></div>'
-    +'<div class="msg-box"><div class="msg-label">'+(lang==='nl'?'Wat er gevonden is':'What was found')+'</div>'
-    +'<div class="msg-subject">'+title+'</div>'
-    +'<div class="msg-body" style="font-size:12px;color:var(--mu);font-family:Nunito,sans-serif">'+timeAgo(item.time)+'</div></div>'
+    +buildProblemBox(item,title,lang)
     +'<div class="action-label">'+(lang==='nl'?'Wat wilt u doen?':'What would you like to do?')+'</div>'
     +'<div class="action-grid">'
     +'<div class="action-card delete" onclick="showDialog(\'delete\','+item.time+')">'
