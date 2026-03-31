@@ -57,6 +57,15 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .tok{width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:2px;right:2px;transition:right .2s}
 .tog.off{background:var(--br)}.tog.off .tok{right:22px}
 
+/* FAMILY ROLE OPTIONS */
+.role-opt{width:100%;background:var(--bg);border:1.5px solid var(--br);border-radius:var(--rads);padding:11px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;font-family:'Nunito',sans-serif;text-align:left;transition:border .15s,background .15s}
+.role-opt.selected{background:var(--gl);border-color:var(--gm)}
+.ro-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--br);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.role-opt.selected .ro-check{background:var(--g);border-color:var(--g)}
+.role-opt.selected .ro-check::after{content:'';width:6px;height:6px;background:#fff;border-radius:50%;display:block}
+.ro-title{font-size:13px;font-weight:800;color:var(--tx)}
+.ro-sub{font-size:11px;color:var(--mu);margin-top:2px}
+
 /* API KEY */
 .api-wrap{padding:13px 16px;border-bottom:1px solid var(--br)}
 .api-row{display:flex;gap:8px;align-items:center}
@@ -169,6 +178,39 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
           <div><div class="strt" data-en="Language" data-nl="Taal">Language</div>
           <div class="strs" id="lang-current">English</div></div>
           <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAMILY ROLE -->
+    <div class="section">
+      <div class="sec-lbl" data-en="Family role" data-nl="Familierol">Family role</div>
+      <div class="settings-card">
+        <div style="padding:13px 16px">
+          <div class="strs" data-en="This sets your default view on the Family page." data-nl="Dit bepaalt uw standaardweergave op de familiepagina." style="margin-bottom:12px">This sets your default view on the Family page.</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="role-opt" id="ropt-guardian" onclick="setFamilyRole('guardian')">
+              <div class="ro-check" id="ropt-guardian-check"></div>
+              <div>
+                <div class="ro-title" data-en="I protect family members" data-nl="Ik bescherm familieleden">I protect family members</div>
+                <div class="ro-sub" data-en="You look after others' safety" data-nl="U bewaakt de veiligheid van anderen">You look after others' safety</div>
+              </div>
+            </button>
+            <button class="role-opt" id="ropt-member" onclick="setFamilyRole('member')">
+              <div class="ro-check" id="ropt-member-check"></div>
+              <div>
+                <div class="ro-title" data-en="I am being looked after" data-nl="Er wordt op mij gelet">I am being looked after</div>
+                <div class="ro-sub" data-en="Family members can see your safety status" data-nl="Familieleden kunnen uw veiligheidsstatus zien">Family members can see your safety status</div>
+              </div>
+            </button>
+            <button class="role-opt" id="ropt-both" onclick="setFamilyRole('both')">
+              <div class="ro-check" id="ropt-both-check"></div>
+              <div>
+                <div class="ro-title" data-en="Both" data-nl="Beide">Both</div>
+                <div class="ro-sub" data-en="You protect others and are also being looked after" data-nl="U beschermt anderen en er wordt ook op u gelet">You protect others and are also being looked after</div>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -314,6 +356,7 @@ function initPage(user){
   if(prefs.breach_notif===false)document.getElementById('tog-breach-notif').classList.add('off');
   if(prefs.family_notif===false)document.getElementById('tog-family-notif').classList.add('off');
   setLang(lang);
+  loadFamilyRole();
   purgeExpiredDeleted();
 }
 
@@ -328,6 +371,19 @@ function updateFamilyNotifSub(){
   var family=JSON.parse(localStorage.getItem('dm_family')||'null');
   var el=document.getElementById('family-notif-sub');
   el.textContent=family?family.name:(lang==='nl'?'Geen contact verbonden':'No contact connected');
+}
+
+// ── FAMILY ROLE ───────────────────────────────────────────
+function setFamilyRole(role){
+  localStorage.setItem('dm_family_role',role);
+  ['guardian','member','both'].forEach(function(r){
+    var btn=document.getElementById('ropt-'+r);
+    if(btn)btn.classList.toggle('selected',r===role);
+  });
+}
+function loadFamilyRole(){
+  var role=localStorage.getItem('dm_family_role')||'guardian';
+  setFamilyRole(role);
 }
 
 function changeSubscription(){

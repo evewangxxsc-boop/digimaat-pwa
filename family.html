@@ -159,6 +159,25 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .nb span{font-size:9px;color:var(--mu);font-weight:700}
 .nb.on svg{stroke:var(--g)}.nb.on span{color:var(--g)}
 
+/* CONTACT BUTTONS */
+.contact-row{display:flex;gap:8px;margin-top:14px}
+.contact-btn{flex:1;border-radius:var(--rads);padding:11px 8px;text-align:center;text-decoration:none;font-size:12px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;border:none}
+.contact-btn svg{width:14px;height:14px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.contact-btn-call{background:var(--gl);color:var(--gd)}
+.contact-btn-call svg{stroke:var(--gd)}
+.contact-btn-wa{background:#E7F7EE;color:#1A7A3A}
+.contact-btn-wa svg{stroke:#1A7A3A}
+.contact-btn-phone-add{background:var(--bg);border:1.5px dashed var(--br)!important;color:var(--mu);font-size:11px}
+
+/* SHARING SUMMARY */
+.sharing-summary{background:var(--gl);border:1px solid var(--gm);border-radius:var(--rad);padding:13px 14px;margin-bottom:14px}
+.ss-title{font-size:13px;font-weight:800;color:var(--gd);margin-bottom:4px}
+.ss-sub{font-size:12px;color:var(--gd);line-height:1.5}
+
+/* GUARDIAN LAST SEEN */
+.gc-lastseen{font-size:10px;color:var(--mu);margin-top:3px;display:flex;align-items:center;gap:4px}
+.gc-lastseen svg{width:10px;height:10px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
 /* PAGE LOADER */
 .page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
 .pl-spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--gd);border-radius:50%;animation:spin .7s linear infinite}
@@ -186,11 +205,17 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   <div class="role-bar">
     <button class="role-btn active" id="role-guardian" onclick="switchRole('guardian')">
       <svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
-      <span id="role-guardian-label">I look after others</span>
+      <div style="text-align:left;min-width:0">
+        <div id="role-guardian-label" style="font-size:11px;font-weight:800;line-height:1.2">Protecting</div>
+        <div id="role-guardian-count" style="font-size:10px;font-weight:600;opacity:.85;line-height:1.2">0 members</div>
+      </div>
     </button>
     <button class="role-btn" id="role-member" onclick="switchRole('member')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>
-      <span id="role-member-label">Others look after me</span>
+      <div style="text-align:left;min-width:0">
+        <div id="role-member-label" style="font-size:11px;font-weight:800;line-height:1.2">My safety</div>
+        <div id="role-member-count" style="font-size:10px;font-weight:600;opacity:.85;line-height:1.2">0 guardians</div>
+      </div>
     </button>
   </div>
 
@@ -263,6 +288,12 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
       <div class="privacy-note">
         <svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><path d="M9 12l2 2 4-4"/></svg>
         <span data-en="Your messages are never shared. Your safety circle only sees a summary — safe or alert. You control everything." data-nl="Uw berichten worden nooit gedeeld. Uw veiligheidskring ziet alleen een samenvatting — veilig of melding. U beheert alles.">Your messages are never shared. Your safety circle only sees a summary — safe or alert. You control everything.</span>
+      </div>
+
+      <!-- SHARING SUMMARY -->
+      <div class="sharing-summary" id="sharing-summary" style="display:none">
+        <div class="ss-title" id="ss-title">Your safety circle is active</div>
+        <div class="ss-sub" id="ss-sub">You are sharing your safety status with 1 guardian. They can only see what you allow below.</div>
       </div>
 
       <!-- GUARDIANS LIST -->
@@ -340,6 +371,8 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
       data-ph-en="e.g. Daughter, Son, Neighbour"
       data-ph-nl="bijv. Dochter, Zoon, Buurman"
       placeholder="e.g. Daughter, Son, Neighbour"/>
+    <label class="field-label" data-en="Phone number (optional)" data-nl="Telefoonnummer (optioneel)">Phone number (optional)</label>
+    <input class="field-inp" type="tel" id="guardian-phone-inp" placeholder="+31 6 ..."/>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeAddGuardianModal()" data-en="Skip" data-nl="Overslaan">Skip</button>
       <button class="modal-save" onclick="saveGuardian()" data-en="Save" data-nl="Opslaan">Save</button>
@@ -375,9 +408,7 @@ function setLang(l){
   document.querySelectorAll('[data-ph-'+l+']').forEach(function(el){
     el.placeholder=el.getAttribute('data-ph-'+l);
   });
-  // Update role labels
-  document.getElementById('role-guardian-label').textContent=l==='nl'?'Ik pas op anderen':'I look after others';
-  document.getElementById('role-member-label').textContent=l==='nl'?'Anderen passen op mij':'Others look after me';
+  renderRoleLabels();
   // Update section labels
   document.getElementById('guardian-sec-lbl').textContent=l==='nl'?'Personen op wie ik let':'People I look after';
   document.getElementById('notif-sec-lbl').textContent=l==='nl'?'Meldingsinstelling':'Alert notifications';
@@ -388,6 +419,24 @@ function setLang(l){
   renderGuardiansList();
 }
 function goTo(p){window.location.href=p;}
+
+// ── ROLE LABELS WITH COUNTS ───────────────────────────────
+function renderRoleLabels(){
+  var sc=getSeniors().length;
+  var gc=getGuardians().length;
+  var glabel=document.getElementById('role-guardian-label');
+  var gcount=document.getElementById('role-guardian-count');
+  var mlabel=document.getElementById('role-member-label');
+  var mcount=document.getElementById('role-member-count');
+  if(glabel)glabel.textContent=lang==='nl'?'Bescherming':'Protecting';
+  if(gcount)gcount.textContent=sc===0
+    ?(lang==='nl'?'Nog geen leden':'No members yet')
+    :sc+' '+(lang==='nl'?'lid'+(sc===1?'':'en')+' beschermd':'member'+(sc===1?'':'s')+' protected');
+  if(mlabel)mlabel.textContent=lang==='nl'?'Mijn veiligheid':'My safety';
+  if(mcount)mcount.textContent=gc===0
+    ?(lang==='nl'?'Geen voogden':'No guardians yet')
+    :(lang==='nl'?'Gedeeld met '+gc+' voogd'+(gc===1?'':'en'):'Shared with '+gc+' guardian'+(gc===1?'':'s'));
+}
 
 // ── INIT ─────────────────────────────────────────────────
 var currentRole='guardian';
@@ -401,6 +450,7 @@ function initPage(){
   if(prefs.inbox)document.getElementById('tog-inbox').classList.remove('off');
   switchRole(currentRole,true);
   setLang(lang);
+  renderRoleLabels();
 }
 
 // ── ROLE SWITCH ───────────────────────────────────────────
@@ -503,6 +553,7 @@ function renderStatusGrid(){
     +'</div>';
 
   grid.innerHTML=html;
+  renderRoleLabels();
 }
 
 // ── SENIOR DETAIL MODAL ───────────────────────────────────
@@ -539,8 +590,41 @@ function openSeniorDetail(id){
     html+='<div style="font-size:13px;color:var(--mu)">'+(lang==='nl'?'Nog geen activiteit.':'No activity yet.')+'</div>';
   }
 
+  // Contact section
+  var phone=s.phone||'';
+  html+='<div style="border-top:1px solid var(--br);padding-top:14px;margin-top:4px">';
+  html+='<div style="font-size:11px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">'+(lang==='nl'?'Contacteer '+s.name.split(' ')[0]:'Contact '+s.name.split(' ')[0])+'</div>';
+  if(phone){
+    html+='<div class="contact-row">'
+      +'<a href="tel:'+phone+'" class="contact-btn contact-btn-call"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.22 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.29 6.29l1.28-1.28a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'+(lang==='nl'?'Bellen':'Call')+'</a>'
+      +'<a href="https://wa.me/'+phone.replace(/[^0-9]/g,'')+'" target="_blank" class="contact-btn contact-btn-wa"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>WhatsApp</a>'
+      +'</div>';
+  }else{
+    html+='<button class="contact-btn contact-btn-phone-add" style="width:100%" onclick="addPhoneToSenior(\''+s.id+'\')">'
+      +(lang==='nl'?'+ Telefoonnummer toevoegen om te kunnen bellen':'+ Add phone number to enable calling')
+      +'</button>';
+  }
+  html+='</div>';
+
+  // Record that guardian checked this senior (for mutual visibility)
+  s.lastGuardianCheck=Date.now();
+  var seniors=getSeniors();
+  var idx=seniors.findIndex(function(x){return x.id===s.id;});
+  if(idx>=0){seniors[idx].lastGuardianCheck=Date.now();saveSeniors(seniors);}
+
   document.getElementById('modal-timeline').innerHTML=html;
   document.getElementById('detail-modal').classList.add('show');
+}
+
+function addPhoneToSenior(id){
+  var phone=prompt(lang==='nl'?'Voer telefoonnummer in (bijv. +31612345678):':'Enter phone number (e.g. +31612345678):','');
+  if(!phone||!phone.trim())return;
+  var seniors=getSeniors();
+  var s=seniors.find(function(x){return x.id===id;});
+  if(s){s.phone=phone.trim();saveSeniors(seniors);}
+  // Reopen detail with updated info
+  closeDetailModal();
+  setTimeout(function(){openSeniorDetail(id);},100);
 }
 
 function closeDetailModal(e){
@@ -677,11 +761,13 @@ function closeAddGuardianModal(e){
 function saveGuardian(){
   var name=document.getElementById('guardian-name-inp').value.trim()||'Guardian';
   var rel=document.getElementById('guardian-rel-inp').value.trim()||'Family';
+  var phone=(document.getElementById('guardian-phone-inp').value||'').trim();
   var guardians=JSON.parse(localStorage.getItem('dm_my_guardians')||'[]');
-  guardians.push({id:'g_'+Date.now(),name:name,rel:rel,perms:{breach:true,scam:true,inbox:false}});
+  guardians.push({id:'g_'+Date.now(),name:name,rel:rel,phone:phone,perms:{breach:true,scam:true,inbox:false},addedAt:Date.now()});
   localStorage.setItem('dm_my_guardians',JSON.stringify(guardians));
   document.getElementById('guardian-name-inp').value='';
   document.getElementById('guardian-rel-inp').value='';
+  document.getElementById('guardian-phone-inp').value='';
   closeAddGuardianModal();
 }
 
@@ -693,30 +779,59 @@ function getGuardians(){
 function renderGuardiansList(){
   var guardians=getGuardians();
   var el=document.getElementById('guardians-list');
+  var summaryEl=document.getElementById('sharing-summary');
+  var ssTitleEl=document.getElementById('ss-title');
+  var ssSubEl=document.getElementById('ss-sub');
 
   if(!guardians.length){
+    if(summaryEl)summaryEl.style.display='none';
     el.innerHTML='<div class="empty-state">'
       +'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>'
       +'<p>'+(lang==='nl'?'Nog niemand in uw veiligheidskring. Voer een code in om iemand toe te voegen.':'No one in your safety circle yet. Enter a code below to add someone.')+'</p>'
       +'</div>';
+    renderRoleLabels();
     return;
+  }
+
+  // Show sharing summary banner
+  if(summaryEl){
+    summaryEl.style.display='block';
+    var gc=guardians.length;
+    if(ssTitleEl)ssTitleEl.textContent=lang==='nl'?'Uw veiligheidskring is actief':'Your safety circle is active';
+    if(ssSubEl)ssSubEl.textContent=lang==='nl'
+      ?'U deelt uw veiligheidsstatus met '+gc+' voogd'+(gc===1?'':'en')+'. Zij zien alleen wat u hieronder toestaat.'
+      :'You are sharing your safety status with '+gc+' guardian'+(gc===1?'':'s')+'. They can only see what you allow below.';
   }
 
   el.innerHTML=guardians.map(function(g,i){
     var initials=g.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+    // Mutual visibility: show when this guardian last checked
+    var lastSeenStr='';
+    if(g.lastChecked){
+      var diff=Math.floor((Date.now()-g.lastChecked)/60000);
+      lastSeenStr=diff<60
+        ?(lang==='nl'?'Gezien '+diff+' min geleden':'Checked '+diff+' min ago')
+        :(lang==='nl'?'Gezien '+Math.floor(diff/60)+' uur geleden':'Checked '+Math.floor(diff/60)+' hr ago');
+    }else{
+      lastSeenStr=lang==='nl'?'Nog niet bekeken':'Not checked yet';
+    }
     return '<div class="guardian-card">'
       +'<div class="gc-header">'
       +'<div class="gc-ava">'+initials+'</div>'
-      +'<div><div class="gc-name">'+g.name+'</div><div class="gc-rel">'+g.rel+'</div></div>'
+      +'<div style="flex:1;min-width:0"><div class="gc-name">'+g.name+'</div><div class="gc-rel">'+g.rel+'</div>'
+      +'<div class="gc-lastseen"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+lastSeenStr+'</div>'
+      +'</div>'
       +'<button class="gc-remove" onclick="removeGuardian('+i+')">'+(lang==='nl'?'Verwijderen':'Remove')+'</button>'
       +'</div>'
       +'<div class="gc-perms">'
-      +'<div style="font-size:11px;font-weight:800;color:var(--mu);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">'+(lang==='nl'?'Wat zij kunnen zien':'What they can see')+'</div>'
+      +'<div style="font-size:11px;font-weight:800;color:var(--mu);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">'+(lang==='nl'?'Wat zij mogen zien':'What they can see')+'</div>'
       +permRow(i,'breach',g.perms.breach,lang==='nl'?'Datalekken':'Breach alerts')
       +permRow(i,'scam',g.perms.scam,lang==='nl'?'Scam checks':'Scam checks')
       +permRow(i,'inbox',g.perms.inbox,lang==='nl'?'Inbox scans':'Inbox scans')
       +'</div></div>';
   }).join('');
+
+  renderRoleLabels();
 }
 
 function permRow(guardianIdx,key,val,label){
