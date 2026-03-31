@@ -797,62 +797,14 @@ function startScan(source){
 
 // ── WHATSAPP REAL SCAN ────────────────────────────────────
 function renderWAResults(){
-  // Run Layer 1 rules against real WA messages
-  var NL_PATTERNS=[
-    // Dutch patterns
-    {re:/belastingdienst/i,                         tag_en:'Fake tax authority',          tag_nl:'Nep Belastingdienst'},
-    {re:/digid/i,                                   tag_en:'Fake DigiD',                  tag_nl:'Nep DigiD'},
-    {re:/geblokkeerd/i,                             tag_en:'Urgency tactic',              tag_nl:'Urgentietactiek'},
-    {re:/klik hier/i,                               tag_en:'Click-here tactic',           tag_nl:'Klik-hier tactiek'},
-    {re:/secure-login|login-secure/i,               tag_en:'Suspicious domain',           tag_nl:'Verdacht domein'},
-    {re:/\bing\b.*rekening|\bing\b.*account/i,      tag_en:'Bank impersonation',          tag_nl:'Bankimitatie'},
-    {re:/rabobank/i,                                tag_en:'Bank impersonation',          tag_nl:'Bankimitatie'},
-    {re:/abn.?amro/i,                               tag_en:'Bank impersonation',          tag_nl:'Bankimitatie'},
-    {re:/gewonnen|winnaar/i,                        tag_en:'Prize scam',                  tag_nl:'Prijsoplichting'},
-    {re:/betaal.*nu|direct.*betalen/i,              tag_en:'Payment pressure',            tag_nl:'Betalingsdruk'},
-    {re:/pin.*invoer|uw.*pin|pincode/i,             tag_en:'PIN request',                 tag_nl:'Pincodeaanvraag'},
-    {re:/postnl.*pakket|pakket.*mislukt/i,          tag_en:'Fake PostNL',                 tag_nl:'Nep PostNL'},
-    {re:/achterstallig/i,                           tag_en:'Overdue payment',             tag_nl:'Achterstallige betaling'},
-    {re:/uw wachtwoord.*verlopen|wachtwoord.*reset/i,tag_en:'Credential phishing',        tag_nl:'Inloggegevens phishing'},
-    {re:/bevestig.*uw.*gegevens|uw.*gegevens.*bevestig/i,tag_en:'Data confirmation scam',tag_nl:'Gegevensbevestigingsscam'},
-    {re:/dhl.*pakket|fedex.*pakket|ups.*pakket/i,  tag_en:'Fake delivery',               tag_nl:'Nep bezorging'},
-    // English patterns
-    {re:/click here/i,                              tag_en:'Click-here tactic',           tag_nl:'Klik-hier tactiek'},
-    {re:/verify.*account|account.*verify|confirm.*identity/i,tag_en:'Account verification scam',tag_nl:'Verificatiescam'},
-    {re:/urgent.*action|action.*required|immediate.*action/i,tag_en:'Urgency tactic',    tag_nl:'Urgentietactiek'},
-    {re:/your account.*suspended|account.*blocked|account.*compromised/i,tag_en:'Urgency tactic',tag_nl:'Urgentietactiek'},
-    {re:/unusual.*activity|suspicious.*activity/i, tag_en:'Account security scam',       tag_nl:'Accountbeveiligingsscam'},
-    {re:/you have won|you['']ve been selected|congratulations.*prize/i,tag_en:'Prize scam',tag_nl:'Prijsoplichting'},
-    {re:/claim your prize|free gift|free reward/i, tag_en:'Prize scam',                  tag_nl:'Prijsoplichting'},
-    {re:/pay now|payment (due|overdue|failed|declined)/i,tag_en:'Payment pressure',      tag_nl:'Betalingsdruk'},
-    {re:/invoice.*overdue|overdue.*invoice/i,       tag_en:'Overdue payment',             tag_nl:'Achterstallige betaling'},
-    {re:/bank.*transfer|wire.*transfer/i,           tag_en:'Financial fraud',             tag_nl:'Financiële fraude'},
-    {re:/your password.*expired|reset.*your password/i,tag_en:'Credential phishing',     tag_nl:'Inloggegevens phishing'},
-    {re:/update.*payment|payment.*information.*update/i,tag_en:'Payment update scam',    tag_nl:'Betalingsscam'},
-    {re:/package.*could not.*deliver|delivery.*failed|parcel.*held/i,tag_en:'Fake delivery',tag_nl:'Nep bezorging'},
-    {re:/dhl|fedex|ups.*delivery/i,                tag_en:'Fake delivery',               tag_nl:'Nep bezorging'},
-    {re:/hmrc|irs.*refund|tax.*refund/i,            tag_en:'Fake tax authority',          tag_nl:'Nep belastingdienst'},
-    {re:/inheritance|next of kin|million.*transfer/i,tag_en:'Advance fee scam',          tag_nl:'Voorschot-fraude'},
-    {re:/bitcoin.*invest|crypto.*profit|guaranteed.*return/i,tag_en:'Crypto scam',       tag_nl:'Cryptoscam'},
-    {re:/\.tk|\.xyz|\.top|login-verify|secure-verify/i,tag_en:'Suspicious domain',       tag_nl:'Verdacht domein'},
-    {re:/https?:\/\/(bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly|rb\.gy|shorturl\.at|1kx\.in|cutt\.ly|is\.gd|v\.gd|tiny\.cc)\//i,tag_en:'Shortened URL — destination hidden',tag_nl:'Verkorte URL — bestemming verborgen'},
-    {re:/\b(get now|act now|claim now|apply now|nu verkrijgen|nu claimen|nu aanvragen)\b/i,tag_en:'Urgency tactic',                tag_nl:'Urgentietactiek'},
-    {re:/\b(credit card|personal loan|pre.?approved|exclusive offer|lening aanvragen|krediet)\b/i,tag_en:'Unsolicited financial offer',tag_nl:'Ongewenst financieel aanbod'},
-  ];
   var excl=getExclusions().map(function(e){return e.addr.toLowerCase();});
   var suspicious=[];var warnings=[];var safeCount=0;
 
   waMessages.forEach(function(msg){
     if(excl.some(function(a){return msg.sender.toLowerCase().includes(a);})){return;}
-    var score=0;var tags_en=[];var tags_nl=[];
-    NL_PATTERNS.forEach(function(p){
-      if(p.re.test(msg.text)){
-        score++;
-        if(tags_en.indexOf(p.tag_en)===-1){tags_en.push(p.tag_en);tags_nl.push(p.tag_nl);}
-      }
-    });
-    if(score>=2){suspicious.push({title:msg.text.substring(0,60)+'…',from:msg.sender,tags_en:tags_en,tags_nl:tags_nl});}
-    else if(score===1){warnings.push({title:msg.text.substring(0,60)+'…',from:msg.sender,tags_en:tags_en,tags_nl:tags_nl});}
+    var result=runInboxDetection(msg.text);
+    if(result.score>=4){suspicious.push({title:msg.text.substring(0,60)+'…',from:msg.sender,tags_en:result.flags_en,tags_nl:result.flags_nl});}
+    else if(result.score>=2){warnings.push({title:msg.text.substring(0,60)+'…',from:msg.sender,tags_en:result.flags_en,tags_nl:result.flags_nl});}
     else{safeCount++;}
   });
 
@@ -890,78 +842,110 @@ function callGmailAPI(){
   });
 }
 
-function processGmailMessages(messages){
-  var NL_PATTERNS=[
-    // Dutch patterns
-    {re:/belastingdienst/i,                          tag_en:'Fake tax authority',          tag_nl:'Nep Belastingdienst'},
-    {re:/digid/i,                                    tag_en:'Fake DigiD',                  tag_nl:'Nep DigiD'},
-    {re:/geblokkeerd/i,                              tag_en:'Urgency tactic',              tag_nl:'Urgentietactiek'},
-    {re:/klik hier/i,                                tag_en:'Click-here tactic',           tag_nl:'Klik-hier tactiek'},
-    {re:/secure-login|login-secure/i,                tag_en:'Suspicious domain',           tag_nl:'Verdacht domein'},
-    {re:/\bing\b.*rekening|\bing\b.*account/i,       tag_en:'Bank impersonation',          tag_nl:'Bankimitatie'},
-    {re:/rabobank/i,                                 tag_en:'Bank impersonation',          tag_nl:'Bankimitatie'},
-    {re:/abn.?amro/i,                                tag_en:'Bank impersonation',          tag_nl:'Bankimitatie'},
-    {re:/gewonnen|winnaar/i,                         tag_en:'Prize scam',                  tag_nl:'Prijsoplichting'},
-    {re:/betaal.*nu|direct.*betalen/i,               tag_en:'Payment pressure',            tag_nl:'Betalingsdruk'},
-    {re:/uw.*pin|pincode/i,                          tag_en:'PIN request',                 tag_nl:'Pincodeaanvraag'},
-    {re:/postnl.*pakket|pakket.*mislukt/i,           tag_en:'Fake PostNL',                 tag_nl:'Nep PostNL'},
-    {re:/achterstallig/i,                            tag_en:'Overdue payment',             tag_nl:'Achterstallige betaling'},
-    {re:/uw wachtwoord.*verlopen|wachtwoord.*reset/i,tag_en:'Credential phishing',         tag_nl:'Inloggegevens phishing'},
-    {re:/bevestig.*uw.*gegevens|uw.*gegevens.*bevestig/i,tag_en:'Data confirmation scam', tag_nl:'Gegevensbevestigingsscam'},
-    {re:/dhl.*pakket|fedex.*pakket|ups.*pakket/i,   tag_en:'Fake delivery',               tag_nl:'Nep bezorging'},
-    // English patterns
-    {re:/click here/i,                               tag_en:'Click-here tactic',           tag_nl:'Klik-hier tactiek'},
-    {re:/verify.*account|account.*verify|confirm.*identity/i,tag_en:'Account verification scam',tag_nl:'Verificatiescam'},
-    {re:/urgent.*action|action.*required|immediate.*action/i,tag_en:'Urgency tactic',     tag_nl:'Urgentietactiek'},
-    {re:/your account.*suspended|account.*blocked|account.*compromised/i,tag_en:'Urgency tactic',tag_nl:'Urgentietactiek'},
-    {re:/unusual.*activity|suspicious.*activity/i,  tag_en:'Account security scam',       tag_nl:'Accountbeveiligingsscam'},
-    {re:/you have won|you['']ve been selected|congratulations.*prize/i,tag_en:'Prize scam',tag_nl:'Prijsoplichting'},
-    {re:/claim your prize|free gift|free reward/i,  tag_en:'Prize scam',                  tag_nl:'Prijsoplichting'},
-    {re:/pay now|payment (due|overdue|failed|declined)/i,tag_en:'Payment pressure',       tag_nl:'Betalingsdruk'},
-    {re:/invoice.*overdue|overdue.*invoice/i,        tag_en:'Overdue payment',             tag_nl:'Achterstallige betaling'},
-    {re:/bank.*transfer|wire.*transfer/i,            tag_en:'Financial fraud',             tag_nl:'Financiële fraude'},
-    {re:/your password.*expired|reset.*your password/i,tag_en:'Credential phishing',      tag_nl:'Inloggegevens phishing'},
-    {re:/update.*payment|payment.*information.*update/i,tag_en:'Payment update scam',     tag_nl:'Betalingsscam'},
-    {re:/package.*could not.*deliver|delivery.*failed|parcel.*held/i,tag_en:'Fake delivery',tag_nl:'Nep bezorging'},
-    {re:/dhl|fedex|ups.*delivery/i,                 tag_en:'Fake delivery',               tag_nl:'Nep bezorging'},
-    {re:/hmrc|irs.*refund|tax.*refund/i,             tag_en:'Fake tax authority',          tag_nl:'Nep belastingdienst'},
-    {re:/inheritance|next of kin|million.*transfer/i,tag_en:'Advance fee scam',           tag_nl:'Voorschot-fraude'},
-    {re:/bitcoin.*invest|crypto.*profit|guaranteed.*return/i,tag_en:'Crypto scam',        tag_nl:'Cryptoscam'},
-    {re:/\.tk|\.xyz|\.top|secure-login|login-verify|login-secure/i,tag_en:'Suspicious domain',tag_nl:'Verdacht domein'},
-    {re:/https?:\/\/(bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly|rb\.gy|shorturl\.at|1kx\.in|cutt\.ly|is\.gd|v\.gd|tiny\.cc)\//i,tag_en:'Shortened URL — destination hidden',tag_nl:'Verkorte URL — bestemming verborgen'},
-    {re:/\b(get now|act now|claim now|apply now|nu verkrijgen|nu claimen|nu aanvragen)\b/i,tag_en:'Urgency tactic',tag_nl:'Urgentietactiek'},
-    {re:/\b(credit card|personal loan|pre.?approved|exclusive offer|lening aanvragen|krediet)\b/i,tag_en:'Unsolicited financial offer',tag_nl:'Ongewenst financieel aanbod'},
-  ];
+// ── SHARED DETECTION ENGINE (mirrors scam.html) ──────────
+var INBOX_NL_RULES=[
+  // Government impersonation
+  {pattern:/belastingdienst/i,          flag_en:'Fake tax authority',        flag_nl:'Nep Belastingdienst',  weight:3},
+  {pattern:/digid/i,                    flag_en:'Fake DigiD',                flag_nl:'Nep DigiD',            weight:3},
+  {pattern:/rijksoverheid/i,            flag_en:'Fake government',           flag_nl:'Nep overheid',         weight:2},
+  {pattern:/cjib/i,                     flag_en:'Fake CJIB',                 flag_nl:'Nep CJIB',             weight:3},
+  {pattern:/douane/i,                   flag_en:'Fake customs',              flag_nl:'Nep douane',           weight:2},
+  // Bank impersonation
+  {pattern:/\bing\b/i,                  flag_en:'Bank impersonation (ING)',  flag_nl:'Bankimitatie (ING)',    weight:2},
+  {pattern:/rabobank/i,                 flag_en:'Bank impersonation (Rabo)', flag_nl:'Bankimitatie (Rabo)',   weight:2},
+  {pattern:/abn.?amro/i,               flag_en:'Bank impersonation (ABN)',  flag_nl:'Bankimitatie (ABN)',    weight:2},
+  {pattern:/bunq/i,                     flag_en:'Bank impersonation (bunq)', flag_nl:'Bankimitatie (bunq)',   weight:2},
+  {pattern:/bankhelp/i,                 flag_en:'Fake bank helpdesk',        flag_nl:'Nep bankhelpddesk',    weight:3},
+  // Parcel / delivery
+  {pattern:/postnl/i,                   flag_en:'Fake PostNL',               flag_nl:'Nep PostNL',           weight:2},
+  {pattern:/dhl/i,                      flag_en:'Fake DHL',                  flag_nl:'Nep DHL',              weight:1},
+  {pattern:/pakket.*vast|vast.*pakket/i,flag_en:'Fake parcel hold',          flag_nl:'Nep pakket melding',   weight:2},
+  // Urgency / pressure tactics
+  {pattern:/geblokkeerd|geblokkeerde/i, flag_en:'Urgency: account blocked',  flag_nl:'Urgentie: geblokkeerd',weight:2},
+  {pattern:/direct.*actie|actie.*direct/i,flag_en:'Urgency tactic',         flag_nl:'Urgentietactiek',      weight:2},
+  {pattern:/24 uur|binnen.*uur/i,       flag_en:'Time pressure',             flag_nl:'Tijdsdruk',            weight:2},
+  {pattern:/verloopt.*morgen|morgen.*verloopt/i,flag_en:'Expiry pressure',   flag_nl:'Verloopdruk',          weight:2},
+  {pattern:/klik hier|klik op de link/i,flag_en:'Click-here tactic',        flag_nl:'Klik-hier tactiek',    weight:1},
+  // Suspicious domains
+  {pattern:/secure-login|login-secure/i,flag_en:'Suspicious domain',        flag_nl:'Verdacht domein',      weight:3},
+  {pattern:/verify-account|account-verify/i,flag_en:'Suspicious domain',    flag_nl:'Verdacht domein',      weight:3},
+  {pattern:/\.tk|\.xyz|\.top|\.pw|\.cc/i,flag_en:'Suspicious domain extension',flag_nl:'Verdacht domein',  weight:2},
+  {pattern:/\b(ing|rabobank|abn|sns|belastingdienst|digid|postnl)\b[a-z0-9\-]*\.(net|com|org|info|biz|click|online|site|live)/i,flag_en:'Bank/authority impersonation domain',flag_nl:'Nep bank/overheidsdomein',weight:4},
+  // Prize / lottery scams
+  {pattern:/gewonnen|winnaar|prijs/i,   flag_en:'Prize scam',                flag_nl:'Prijsoplichting',      weight:2},
+  {pattern:/gratis.*iphone|gratis.*samsung/i,flag_en:'Free phone scam',     flag_nl:'Gratis telefoon scam', weight:3},
+  // Payment requests
+  {pattern:/betaal.*nu|nu.*betalen/i,   flag_en:'Payment pressure',          flag_nl:'Betalingsdruk',        weight:2},
+  {pattern:/incasso|deurwaarder/i,      flag_en:'Fake debt collection',      flag_nl:'Nep deurwaarder',      weight:2},
+  // Personal info requests
+  {pattern:/uw.*pin|pincode.*invoer/i,  flag_en:'PIN code request',          flag_nl:'Pincodeaanvraag',      weight:3},
+  {pattern:/bsn.?nummer|burgerservice/i,flag_en:'BSN number request',       flag_nl:'BSN-nummerverzoek',    weight:3},
+  {pattern:/bankrekening.*nummer/i,     flag_en:'Bank account request',      flag_nl:'Bankrekeningverzoek',  weight:2},
+];
 
+var INBOX_SEMANTIC_RULES=[
+  {combo:[/\b(credit card|loan|mortgage|lening|hypotheek|krediet)\b/i,/\b(get now|apply now|act now|limited offer|exclusive offer|pre.?approved|nu aanvragen|direct beschikbaar)\b/i],flag_en:'Unsolicited financial offer',flag_nl:'Ongewenst financieel aanbod',weight:3},
+  {pattern:/\b(get now|act now|claim now|apply now|nu verkrijgen|nu claimen|nu aanvragen)\b/i,flag_en:'Urgency tactic',flag_nl:'Urgentietactiek',weight:2},
+  {pattern:/https?:\/\/(bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly|rb\.gy|shorturl\.at|1kx\.in|cutt\.ly|is\.gd|v\.gd|tiny\.cc)\//i,flag_en:'Shortened URL — destination hidden',flag_nl:'Verkorte URL — bestemming verborgen',weight:3},
+  {pattern:/\b(grandson|granddaughter|grandchild|kleinkind|kleinzoon|kleindochter)\b/i,flag_en:'Family impersonation',flag_nl:'Familie-imitatie',weight:2},
+  {combo:[/\b(son|daughter|grandson|granddaughter|nephew|niece|grandchild|kid|child|mama|papa|opa|oma|mom|dad)\b/i,/\b(accident|crash|arrested|jail|hospital|trouble|emergency|hurt|injured|ongeluk|ziekenhuis|gevangenis|gearresteerd)\b/i,/\b(money|cash|send|\$|€|pay|transfer|venmo|cashapp|zelle|paypal|wire|geld|sturen|betalen|overmaken)\b/i],flag_en:'Grandparent scam — fake family emergency',flag_nl:'Opa/oma-scam — nep familienood',weight:5},
+  {combo:[/\b(send|transfer|wire|pay|give|need|stuur|overmaak|betaal|geef)\b/i,/(\$|€|£|\d+\s*(dollar|euro|pound|usd|eur))/i],flag_en:'Money transfer request',flag_nl:'Geldverzoek',weight:3},
+  {pattern:/\b(cashapp|cash app|venmo|zelle|western union|moneygram|bitcoin|crypto|gift card|google play card|itunes card|cadeaukaart)\b/i,flag_en:'Untraceable payment method',flag_nl:'Niet-traceerbare betaalmethode',weight:4},
+  {combo:[/\b(urgent|emergency|immediately|right now|asap|hurry|quickly|please help|help me|dringend|nu meteen|direct|snel)\b/i,/\b(money|cash|send|pay|transfer|geld|sturen|betalen)\b/i],flag_en:'Urgent money request',flag_nl:'Dringend geldverzoek',weight:4},
+  {combo:[/\b(love you|miss you|soulmate|destiny|met online|dating|hou van je|mis je|online ontmoet)\b/i,/\b(money|send|transfer|investment|emergency|ticket|visa|geld|sturen|investering|noodsituatie)\b/i],flag_en:'Romance scam pattern',flag_nl:'Romantische oplichting',weight:4},
+  {combo:[/\b(microsoft|apple|google|windows|computer|laptop|device|virus|hacked|malware|computer)\b/i,/\b(call|contact|support|helpdesk|technician|bel|support|bellen|technicus)\b/i,/(\+?\d[\d\s\-\(\)]{7,})/],flag_en:'Tech support scam',flag_nl:'Tech-ondersteuningsscam',weight:4},
+  {pattern:/\b(your computer|uw computer|pc has been|virus detected|hacked|remote access|teamviewer|anydesk)\b/i,flag_en:'Tech support scam',flag_nl:'Tech-ondersteuningsscam',weight:3},
+  {combo:[/\b(million|inheritance|lottery|won|winner|selected|chosen|miljoen|erfenis|loterij|gewonnen|winnaar|gekozen)\b/i,/\b(fee|tax|charge|transfer|release|vergoeding|belasting|kosten|vrijgave)\b/i],flag_en:'Advance fee scam',flag_nl:'Voorschot-oplichting',weight:4},
+  {pattern:/\b(nigerian|prince|royal family|un representative|diplomat|agent|barrister)\b.*\b(money|million|fund|inheritance)\b/i,flag_en:'419 advance fee scam',flag_nl:'Voorschot-oplichting',weight:5},
+  {combo:[/\b(invest|investment|profit|return|crypto|bitcoin|trading|forex|stock|investeer|winst|rendement|handel)\b/i,/\b(guaranteed|100%|risk.?free|double|triple|gegarandeerd|risicovrij|verdubbelen)\b/i],flag_en:'Investment scam',flag_nl:'Investeringsfraude',weight:4},
+  {combo:[/\b(verify|confirm|update|validate|suspended|blocked|verifieer|bevestig|bijwerken|geblokkeerd)\b/i,/\b(account|password|login|credential|wachtwoord|inloggen|toegang)\b/i,/\b(click|tap|visit|go to|klik|bezoek|ga naar)\b/i],flag_en:'Credential phishing',flag_nl:'Inloggegevens phishing',weight:4},
+  {combo:[/\b(parcel|package|delivery|shipment|pakket|bezorging|levering)\b/i,/\b(fee|customs|pay|charge|vergoeding|douane|betaal|kosten)\b/i],flag_en:'Fake delivery fee',flag_nl:'Nep bezorgkosten',weight:3},
+  {pattern:/\b(do not tell|don't tell|keep this secret|between us|vertel niemand|hou dit geheim|tussen ons)\b/i,flag_en:'Secrecy request — major red flag',flag_nl:'Geheimhoudingsverzoek — grote waarschuwing',weight:4},
+  {combo:[/\b(new (phone|number)|different number|lost (my )?(phone|number)|nieuw (telefoonnummer|nummer)|ander nummer|telefoon kwijt)\b/i,/\b(this is|it\'s me|it is me|dit is|ik ben)\b/i],flag_en:'New number impersonation',flag_nl:'Nieuw nummer imitatie',weight:3},
+];
+
+function runInboxDetection(text){
+  var score=0;var flags_en=[];var flags_nl=[];
+  INBOX_NL_RULES.forEach(function(rule){
+    if(rule.pattern.test(text)){
+      score+=rule.weight;
+      if(flags_en.indexOf(rule.flag_en)===-1){flags_en.push(rule.flag_en);flags_nl.push(rule.flag_nl);}
+    }
+  });
+  INBOX_SEMANTIC_RULES.forEach(function(rule){
+    var matched=false;
+    if(rule.pattern){matched=rule.pattern.test(text);}
+    else if(rule.combo){matched=rule.combo.every(function(p){return p.test(text);});}
+    if(matched){
+      score+=rule.weight;
+      if(flags_en.indexOf(rule.flag_en)===-1){flags_en.push(rule.flag_en);flags_nl.push(rule.flag_nl);}
+    }
+  });
+  return {score:score,flags_en:flags_en,flags_nl:flags_nl};
+}
+
+function processGmailMessages(messages){
   var excl=getExclusions().map(function(e){return e.addr.toLowerCase();});
   var suspicious=[];var warnings=[];var safeCount=0;
 
   messages.forEach(function(msg){
-    // Skip excluded senders
     var fromLower=(msg.from||'').toLowerCase();
     if(excl.some(function(a){return fromLower.includes(a);}))return;
 
-    // Check subject + snippet + from address
     var text=(msg.subject||'')+' '+(msg.snippet||'')+' '+(msg.from||'');
-    var score=0;var tags_en=[];var tags_nl=[];
-
-    NL_PATTERNS.forEach(function(p){
-      if(p.re.test(text)){
-        score++;
-        if(tags_en.indexOf(p.tag_en)===-1){tags_en.push(p.tag_en);tags_nl.push(p.tag_nl);}
-      }
-    });
+    var result=runInboxDetection(text);
 
     var item={
       title:msg.subject||'(no subject)',
       from:msg.from||'Unknown',
-      fullText:'Subject: '+(msg.subject||'')+'\\n\\nFrom: '+(msg.from||'')+'\\n\\n'+msg.snippet,
-      tags_en:tags_en,tags_nl:tags_nl,
-      date:msg.date||''
+      fullText:'Subject: '+(msg.subject||'')+'\n\nFrom: '+(msg.from||'')+'\n\n'+msg.snippet,
+      tags_en:result.flags_en,tags_nl:result.flags_nl,
+      date:msg.date||'',
+      id:msg.id||''
     };
 
-    if(score>=2)suspicious.push(item);
-    else if(score===1)warnings.push(item);
+    if(result.score>=4)suspicious.push(item);
+    else if(result.score>=2)warnings.push(item);
     else safeCount++;
   });
 
