@@ -373,6 +373,10 @@ var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
 
+// PER-USER STORAGE KEY
+var currentUID='';
+function storageKey(key){return currentUID?currentUID+'_'+key:key;}
+
 // LANGUAGE
 var lang=localStorage.getItem('dm_lang')||'en';
 function setLang(l){
@@ -453,7 +457,7 @@ function setAvatar(user){
 // Each item: {type, title_en, title_nl, time, severity}
 // severity: 'r'=red, 'a'=amber, 'g'=green
 function getRecent(){
-  try{return JSON.parse(localStorage.getItem('dm_recent')||'[]');}catch(e){return[];}
+  try{return JSON.parse(localStorage.getItem(storageKey('dm_recent'))||'[]');}catch(e){return[];}
 }
 
 function timeAgo(ts){
@@ -491,7 +495,7 @@ function renderRecent(){
 // PRIMARY GUARDIAN HELPER
 function getPrimaryGuardian(){
   var guardians=[];
-  try{guardians=JSON.parse(localStorage.getItem('dm_my_guardians')||'[]');}catch(e){}
+  try{guardians=JSON.parse(localStorage.getItem(storageKey('dm_my_guardians'))||'[]');}catch(e){}
   return guardians.find(function(g){return g.isPrimary;})||guardians[0]||null;
 }
 
@@ -525,12 +529,12 @@ function addRecent(type,title_en,title_nl,severity){
   var items=getRecent();
   items.unshift({type:type,title_en:title_en,title_nl:title_nl,time:Date.now(),severity:severity||'g'});
   if(items.length>20)items=items.slice(0,20);
-  localStorage.setItem('dm_recent',JSON.stringify(items));
+  localStorage.setItem(storageKey('dm_recent'),JSON.stringify(items));
 }
 
 // FAMILY CONNECTION STATUS
 function updateFamilySub(){
-  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
+  var family=JSON.parse(localStorage.getItem(storageKey('dm_family'))||'null');
   var subEl=document.getElementById('family-sub');
   if(family&&family.name){
     subEl.textContent=family.name+(lang==='nl'?' verbonden':' connected');
@@ -543,12 +547,13 @@ function updateFamilySub(){
 
 // INIT — wait for Firebase auth
 auth.onAuthStateChanged(function(user){
+  currentUID=user?user.uid:'';
   if(!user){
     window.location.href='register.html';
     return;
   }
   // First-time user — send to onboarding
-  if(localStorage.getItem('dm_onboarded')!=='true'){
+  if(localStorage.getItem(storageKey('dm_onboarded'))!=='true'){
     window.location.href='onboarding.html';
     return;
   }
@@ -588,15 +593,15 @@ auth.onAuthStateChanged(function(user){
 // ══ ALERT RESOLUTION ENGINE ══════════════════════════════
 function getAlerts(){
   var items=getRecent();
-  var dismissed=JSON.parse(localStorage.getItem('dm_dismissed_alerts')||'[]');
+  var dismissed=JSON.parse(localStorage.getItem(storageKey('dm_dismissed_alerts'))||'[]');
   return items.filter(function(item){
     return (item.severity==='r'||item.severity==='a')&&dismissed.indexOf(item.time)===-1;
   });
 }
 function dismissAlert(time){
-  var dismissed=JSON.parse(localStorage.getItem('dm_dismissed_alerts')||'[]');
+  var dismissed=JSON.parse(localStorage.getItem(storageKey('dm_dismissed_alerts'))||'[]');
   dismissed.push(time);
-  localStorage.setItem('dm_dismissed_alerts',JSON.stringify(dismissed));
+  localStorage.setItem(storageKey('dm_dismissed_alerts'),JSON.stringify(dismissed));
 }
 function getWhyDangerous(item){
   var t=(lang==='nl'?item.title_nl:item.title_en).toLowerCase();
@@ -674,7 +679,7 @@ function toggleEmailList(){
 function buildProblemBox(item,title,lang){
   var isInbox=item.title_en&&item.title_en.indexOf('inbox scan')!==-1;
   var lr=null;var msgs=[];
-  if(isInbox){try{lr=JSON.parse(localStorage.getItem('dm_last_results')||'null');}catch(e){}msgs=(lr&&lr.suspicious)||[];}
+  if(isInbox){try{lr=JSON.parse(localStorage.getItem(storageKey('dm_last_results'))||'null');}catch(e){}msgs=(lr&&lr.suspicious)||[];}
   var emailListHtml='';
   if(isInbox&&msgs.length){
     emailListHtml='<div class="msg-email-list" id="ds-email-list">'

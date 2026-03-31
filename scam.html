@@ -314,16 +314,22 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
+
+// PER-USER STORAGE KEY
+var currentUID='';
+function storageKey(key){return currentUID?currentUID+'_'+key:key;}
+
 auth.onAuthStateChanged(function(user){
+  currentUID=user?user.uid:'';
   if(!user){window.location.href='register.html';return;}
   document.getElementById('page-loader').style.display='none';
   document.getElementById('app').style.display='flex';
   setLang(localStorage.getItem('dm_lang')||'en');
 
   // Check for prefilled message from Inbox Scan
-  var prefill=localStorage.getItem('dm_scam_prefill');
+  var prefill=localStorage.getItem(storageKey('dm_scam_prefill'));
   if(prefill){
-    localStorage.removeItem('dm_scam_prefill'); // clear immediately
+    localStorage.removeItem(storageKey('dm_scam_prefill')); // clear immediately
     document.getElementById('msg-input').value=prefill;
     // Show a brief notice then auto-run
     var notice=document.createElement('div');
@@ -344,7 +350,7 @@ auth.onAuthStateChanged(function(user){
 // ── CLIENT-SIDE RATE LIMIT (mirrors server, protects UX) ──
 function getClaudeUsage(){
   try{
-    var u=JSON.parse(localStorage.getItem('dm_claude_usage')||'{}');
+    var u=JSON.parse(localStorage.getItem(storageKey('dm_claude_usage'))||'{}');
     var today=new Date().toISOString().slice(0,10);
     if(u.date!==today)return{date:today,count:0};
     return u;
@@ -353,7 +359,7 @@ function getClaudeUsage(){
 function incrementClaudeUsage(){
   var u=getClaudeUsage();
   u.count=(u.count||0)+1;
-  localStorage.setItem('dm_claude_usage',JSON.stringify(u));
+  localStorage.setItem(storageKey('dm_claude_usage'),JSON.stringify(u));
 }
 
 // LANGUAGE
@@ -377,10 +383,10 @@ function goTo(p){window.location.href=p;}
 
 // RECENT
 function addRecent(type,en,nl,sev){
-  var items=[];try{items=JSON.parse(localStorage.getItem('dm_recent')||'[]');}catch(e){}
+  var items=[];try{items=JSON.parse(localStorage.getItem(storageKey('dm_recent'))||'[]');}catch(e){}
   items.unshift({type:type,title_en:en,title_nl:nl,time:Date.now(),severity:sev});
   if(items.length>20)items=items.slice(0,20);
-  localStorage.setItem('dm_recent',JSON.stringify(items));
+  localStorage.setItem(storageKey('dm_recent'),JSON.stringify(items));
 }
 
 // LAYER HIGHLIGHT

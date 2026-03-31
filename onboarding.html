@@ -296,10 +296,16 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
+
+// PER-USER STORAGE KEY
+var currentUID='';
+function storageKey(key){return currentUID?currentUID+'_'+key:key;}
+
 auth.onAuthStateChanged(function(user){
+  currentUID=user?user.uid:'';
   if(!user){window.location.href='register.html';return;}
   // If already onboarded, skip to home
-  if(localStorage.getItem('dm_onboarded')==='true'){
+  if(localStorage.getItem(storageKey('dm_onboarded'))==='true'){
     window.location.href='home.html';return;
   }
   // Pre-fill name from Firebase user
@@ -339,7 +345,7 @@ function setLang(l){
 
 function goTo(p){
   // Mark as onboarded before leaving
-  localStorage.setItem('dm_onboarded','true');
+  localStorage.setItem(storageKey('dm_onboarded'),'true');
   window.location.href=p;
 }
 
@@ -384,7 +390,7 @@ function updateNav(){
 }
 
 function finishOnboarding(dest){
-  localStorage.setItem('dm_onboarded','true');
+  localStorage.setItem(storageKey('dm_onboarded'),'true');
   window.location.href=dest||'home.html';
 }
 
@@ -395,7 +401,7 @@ function nextSlide(){
     var phone=document.getElementById('ob-phone').value.trim();
     var rel=document.getElementById('ob-rel').value.trim();
     if(name&&phone){
-      localStorage.setItem('dm_family',JSON.stringify({name:name,phone:phone,rel:rel,city:''}));
+      localStorage.setItem(storageKey('dm_family'),JSON.stringify({name:name,phone:phone,rel:rel,city:''}));
     }
   }
   if(currentSlide<TOTAL-1){

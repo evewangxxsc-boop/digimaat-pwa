@@ -231,7 +231,13 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
+
+// PER-USER STORAGE KEY
+var currentUID='';
+function storageKey(key){return currentUID?currentUID+'_'+key:key;}
+
 auth.onAuthStateChanged(function(user){
+  currentUID=user?user.uid:'';
   if(!user){window.location.href='register.html';return;}
   document.getElementById('page-loader').style.display='none';
   document.getElementById('app').style.display='flex';
@@ -250,9 +256,9 @@ function setLang(l){
 function goTo(p){window.location.href=p;}
 
 // ── DATA ─────────────────────────────────────────────────
-function getRecent(){try{return JSON.parse(localStorage.getItem('dm_recent')||'[]');}catch(e){return[];}}
-function getDismissed(){try{return JSON.parse(localStorage.getItem('dm_dismissed_alerts')||'[]');}catch(e){return[];}}
-function saveDismissed(d){localStorage.setItem('dm_dismissed_alerts',JSON.stringify(d));}
+function getRecent(){try{return JSON.parse(localStorage.getItem(storageKey('dm_recent'))||'[]');}catch(e){return[];}}
+function getDismissed(){try{return JSON.parse(localStorage.getItem(storageKey('dm_dismissed_alerts'))||'[]');}catch(e){return[];}}
+function saveDismissed(d){localStorage.setItem(storageKey('dm_dismissed_alerts'),JSON.stringify(d));}
 
 // DEDUPLICATE — group by normalised title, keep highest severity
 function getUniqueAlerts(){
@@ -453,7 +459,7 @@ function toggleEmailList(){
 function buildMsgBox(a,item,title,lang){
   var isInbox=(item.title_en||'').indexOf('inbox scan')!==-1;
   var lr=null;var msgs=[];
-  if(isInbox){try{lr=JSON.parse(localStorage.getItem('dm_last_results')||'null');}catch(e){}msgs=(lr&&lr.suspicious)||[];}
+  if(isInbox){try{lr=JSON.parse(localStorage.getItem(storageKey('dm_last_results'))||'null');}catch(e){}msgs=(lr&&lr.suspicious)||[];}
   var emailListHtml='';
   if(isInbox&&msgs.length){
     emailListHtml='<div class="msg-email-list" id="ds-email-list">'
@@ -615,7 +621,7 @@ function successDone(){
 
 function getPrimaryGuardian(){
   var guardians=[];
-  try{guardians=JSON.parse(localStorage.getItem('dm_my_guardians')||'[]');}catch(e){}
+  try{guardians=JSON.parse(localStorage.getItem(storageKey('dm_my_guardians'))||'[]');}catch(e){}
   return guardians.find(function(g){return g.isPrimary;})||guardians[0]||null;
 }
 

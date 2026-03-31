@@ -288,7 +288,13 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
+
+// PER-USER STORAGE KEY
+var currentUID='';
+function storageKey(key){return currentUID?currentUID+'_'+key:key;}
+
 auth.onAuthStateChanged(function(user){
+  currentUID=user?user.uid:'';
   if(!user){window.location.href='register.html';return;}
   document.getElementById('page-loader').style.display='none';
   document.getElementById('app').style.display='flex';
@@ -356,21 +362,21 @@ function togglePref(key,btn){
   localStorage.setItem('dm_prefs',JSON.stringify(prefs));
 }
 function updateFamilyNotifSub(){
-  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
+  var family=JSON.parse(localStorage.getItem(storageKey('dm_family'))||'null');
   var el=document.getElementById('family-notif-sub');
   el.textContent=family?family.name:(lang==='nl'?'Geen contact verbonden':'No contact connected');
 }
 
 // ── FAMILY ROLE ───────────────────────────────────────────
 function setFamilyRole(role){
-  localStorage.setItem('dm_family_role',role);
+  localStorage.setItem(storageKey('dm_family_role'),role);
   ['guardian','member','both'].forEach(function(r){
     var btn=document.getElementById('ropt-'+r);
     if(btn)btn.classList.toggle('selected',r===role);
   });
 }
 function loadFamilyRole(){
-  var role=localStorage.getItem('dm_family_role')||'guardian';
+  var role=localStorage.getItem(storageKey('dm_family_role'))||'guardian';
   setFamilyRole(role);
 }
 
@@ -388,7 +394,7 @@ var DATA_CATEGORIES=[
 ];
 
 function getItemCount(key){
-  try{var d=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(d)?d.length:0;}catch(e){return 0;}
+  try{var d=JSON.parse(localStorage.getItem(storageKey(key))||'[]');return Array.isArray(d)?d.length:0;}catch(e){return 0;}
 }
 function getDeletedMeta(){
   try{return JSON.parse(localStorage.getItem('dm_deleted_meta')||'{}');}catch(e){return{};}
@@ -401,7 +407,7 @@ function purgeExpiredDeleted(){
   var THIRTY_DAYS=30*24*60*60*1000;
   Object.keys(meta).forEach(function(key){
     if(now-meta[key].deletedAt>THIRTY_DAYS){
-      localStorage.removeItem(key+'_deleted');
+      localStorage.removeItem(storageKey(key)+'_deleted');
       delete meta[key];
     }
   });
@@ -416,9 +422,9 @@ function softDelete(key){
     :'Are you sure you want to delete these '+count+' items? They will be permanently deleted after 30 days. You can restore them before then.');
   if(!confirmed)return;
   // Move data to _deleted key
-  var data=localStorage.getItem(key);
-  localStorage.setItem(key+'_deleted',data||'[]');
-  localStorage.removeItem(key);
+  var data=localStorage.getItem(storageKey(key));
+  localStorage.setItem(storageKey(key)+'_deleted',data||'[]');
+  localStorage.removeItem(storageKey(key));
   // Record deletion timestamp
   var meta=getDeletedMeta();
   meta[key]={deletedAt:Date.now(),count:count};
@@ -428,10 +434,10 @@ function softDelete(key){
 }
 
 function restoreData(key){
-  var deleted=localStorage.getItem(key+'_deleted');
+  var deleted=localStorage.getItem(storageKey(key)+'_deleted');
   if(!deleted)return;
-  localStorage.setItem(key,deleted);
-  localStorage.removeItem(key+'_deleted');
+  localStorage.setItem(storageKey(key),deleted);
+  localStorage.removeItem(storageKey(key)+'_deleted');
   var meta=getDeletedMeta();
   delete meta[key];
   saveDeletedMeta(meta);

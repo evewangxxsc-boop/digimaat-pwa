@@ -458,7 +458,13 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
+
+// PER-USER STORAGE KEY
+var currentUID='';
+function storageKey(key){return currentUID?currentUID+'_'+key:key;}
+
 auth.onAuthStateChanged(function(user){
+  currentUID=user?user.uid:'';
   if(!user){window.location.href='register.html';return;}
   document.getElementById('page-loader').style.display='none';
   document.getElementById('app').style.display='flex';
@@ -495,17 +501,17 @@ function initPage(){
   document.getElementById('gmail-to').value=today.toISOString().split('T')[0];
   document.getElementById('gmail-from').value=past.toISOString().split('T')[0];
   // Load saved settings
-  var settings=JSON.parse(localStorage.getItem('dm_inbox_settings')||'{}');
+  var settings=JSON.parse(localStorage.getItem(storageKey('dm_inbox_settings'))||'{}');
   if(settings.autoscan===false)document.getElementById('tog-autoscan').classList.add('off');
   if(settings.unknown)document.getElementById('tog-unknown').classList.remove('off');
   if(settings.notif){
     document.getElementById('tog-notif').classList.remove('off');
   }
   // Load gmail connection
-  var gmailUser=localStorage.getItem('dm_gmail_user');
+  var gmailUser=localStorage.getItem(storageKey('dm_gmail_user'));
   if(gmailUser){setGmailConnected(gmailUser);}
   // Load WA file
-  var waFile=localStorage.getItem('dm_wa_file');
+  var waFile=localStorage.getItem(storageKey('dm_wa_file'));
   if(waFile){setWAReady(waFile);}
   setLang(lang);
 }
@@ -513,18 +519,18 @@ function initPage(){
 // ── SETTINGS TOGGLES ─────────────────────────────────────
 function toggleSetting(key,btn){
   btn.classList.toggle('off');
-  var settings=JSON.parse(localStorage.getItem('dm_inbox_settings')||'{}');
+  var settings=JSON.parse(localStorage.getItem(storageKey('dm_inbox_settings'))||'{}');
   settings[key]=!btn.classList.contains('off');
-  localStorage.setItem('dm_inbox_settings',JSON.stringify(settings));
+  localStorage.setItem(storageKey('dm_inbox_settings'),JSON.stringify(settings));
 }
 
 // ── NOTIFICATION TOGGLE ──────────────────────────────────
 function toggleNotif(btn){
   btn.classList.toggle('off');
   var on=!btn.classList.contains('off');
-  var settings=JSON.parse(localStorage.getItem('dm_inbox_settings')||'{}');
+  var settings=JSON.parse(localStorage.getItem(storageKey('dm_inbox_settings'))||'{}');
   settings.notif=on;
-  localStorage.setItem('dm_inbox_settings',JSON.stringify(settings));
+  localStorage.setItem(storageKey('dm_inbox_settings'),JSON.stringify(settings));
   if(on){requestNotifPermission();}
   updateNotifStatus();
 }
@@ -541,9 +547,9 @@ function requestNotifPermission(){
     Notification.requestPermission().then(function(p){
       if(p==='denied'){
         document.getElementById('tog-notif').classList.add('off');
-        var settings=JSON.parse(localStorage.getItem('dm_inbox_settings')||'{}');
+        var settings=JSON.parse(localStorage.getItem(storageKey('dm_inbox_settings'))||'{}');
         settings.notif=false;
-        localStorage.setItem('dm_inbox_settings',JSON.stringify(settings));
+        localStorage.setItem(storageKey('dm_inbox_settings'),JSON.stringify(settings));
         updateNotifStatus();
         alert(lang==='nl'?'Meldingen zijn geblokkeerd. Sta meldingen toe in uw browserinstellingen.':'Notifications are blocked. Please allow notifications in your browser settings.');
       }
@@ -551,7 +557,7 @@ function requestNotifPermission(){
   }
 }
 function sendPushNotif(title,body){
-  var settings=JSON.parse(localStorage.getItem('dm_inbox_settings')||'{}');
+  var settings=JSON.parse(localStorage.getItem(storageKey('dm_inbox_settings'))||'{}');
   if(!settings.notif)return;
   if('Notification' in window&&Notification.permission==='granted'){
     new Notification(title,{body:body,icon:'icons/icon192.png'});
@@ -573,8 +579,8 @@ function toggleGmail(){
     btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M5 12h14M12 5l7 7-7 7"/></svg><span>'+(lang==='nl'?'Verbinden':'Connect')+'</span>';
     body.classList.remove('show');
     sub.textContent=lang==='nl'?'Niet verbonden':'Not connected';
-    localStorage.removeItem('dm_gmail_user');
-    localStorage.removeItem('dm_gmail_auth_code');
+    localStorage.removeItem(storageKey('dm_gmail_user'));
+    localStorage.removeItem(storageKey('dm_gmail_auth_code'));
   }else{
     launchGmailOAuth();
   }
@@ -582,7 +588,7 @@ function toggleGmail(){
 
 function launchGmailOAuth(){
   var state=Math.random().toString(36).substring(2);
-  localStorage.setItem('dm_gmail_oauth_state',state);
+  localStorage.setItem(storageKey('dm_gmail_oauth_state'),state);
   var params=new URLSearchParams({
     client_id:GMAIL_CLIENT_ID,
     redirect_uri:GMAIL_REDIRECT,
@@ -600,14 +606,14 @@ function launchGmailOAuth(){
       window.removeEventListener('message',listener);
       if(popup)popup.close();
       var code=event.data.code;
-      if(event.data.state!==localStorage.getItem('dm_gmail_oauth_state')){
+      if(event.data.state!==localStorage.getItem(storageKey('dm_gmail_oauth_state'))){
         alert(lang==='nl'?'Beveiligingsfout. Probeer opnieuw.':'Security error. Please try again.');
         return;
       }
-      localStorage.setItem('dm_gmail_auth_code',code);
+      localStorage.setItem(storageKey('dm_gmail_auth_code'),code);
       var user=JSON.parse(localStorage.getItem('dm_user')||'{}');
       setGmailConnected(user.email||'Gmail account');
-      localStorage.setItem('dm_gmail_user',user.email||'Gmail account');
+      localStorage.setItem(storageKey('dm_gmail_user'),user.email||'Gmail account');
     }
   };
   window.addEventListener('message',listener);
@@ -656,7 +662,7 @@ function handleWAFile(event){
     document.getElementById('wa-file-name').textContent=(lang==='nl'?'Bestand geladen: ':'File loaded: ')+fname+' ('+msgs.length+' '+(lang==='nl'?'berichten':'messages')+')';
     document.getElementById('wa-file-name').classList.add('show');
     document.getElementById('wa-scan-btn').disabled=msgs.length===0;
-    localStorage.setItem('dm_wa_file',fname);
+    localStorage.setItem(storageKey('dm_wa_file'),fname);
     event.target.value='';
   };
   reader.readAsText(file);
@@ -669,9 +675,9 @@ function setWAReady(fname){
 
 // ── EXCLUSION LIST ────────────────────────────────────────
 function getExclusions(){
-  try{return JSON.parse(localStorage.getItem('dm_exclusions')||'[]');}catch(e){return[];}
+  try{return JSON.parse(localStorage.getItem(storageKey('dm_exclusions'))||'[]');}catch(e){return[];}
 }
-function saveExclusions(list){localStorage.setItem('dm_exclusions',JSON.stringify(list));}
+function saveExclusions(list){localStorage.setItem(storageKey('dm_exclusions'),JSON.stringify(list));}
 function renderExclList(){
   var list=getExclusions();
   var el=document.getElementById('excl-list');
@@ -813,7 +819,7 @@ function renderWAResults(){
 
 // ── REAL GMAIL API CALL ────────────────────────────────────
 function callGmailAPI(){
-  var code=localStorage.getItem('dm_gmail_auth_code');
+  var code=localStorage.getItem(storageKey('dm_gmail_auth_code'));
   if(!code){renderDemoResults();return;}
 
   var fromDate=document.getElementById('gmail-from').value;
@@ -833,7 +839,7 @@ function callGmailAPI(){
       return;
     }
     // Clear auth code after use — one-time use only
-    localStorage.removeItem('dm_gmail_auth_code');
+    localStorage.removeItem(storageKey('dm_gmail_auth_code'));
     processGmailMessages(data.messages||[]);
   })
   .catch(function(err){
@@ -978,7 +984,7 @@ function renderDemoResults(){
 
 function saveAndShowResults(suspicious,warnings,safeCount){
   // Save current results for "view last"
-  localStorage.setItem('dm_last_results',JSON.stringify({suspicious:suspicious,warnings:warnings,safe:safeCount}));
+  localStorage.setItem(storageKey('dm_last_results'),JSON.stringify({suspicious:suspicious,warnings:warnings,safe:safeCount}));
   // Write to home recent
   addRecent(suspicious.length+' '+(lang==='nl'?'verdachte berichten gevonden':'suspicious messages found'),
     suspicious.length+' suspicious messages found in inbox scan',
@@ -993,7 +999,7 @@ function saveAndShowResults(suspicious,warnings,safeCount){
 }
 
 function showLastResults(){
-  var r=JSON.parse(localStorage.getItem('dm_last_results')||'null');
+  var r=JSON.parse(localStorage.getItem(storageKey('dm_last_results'))||'null');
   if(!r)return;
   renderResults(r.suspicious,r.warnings,r.safe);
   showView('results');
@@ -1083,7 +1089,7 @@ function openCurrentInScam(){
   var data=(window._inboxItems||{})[_currentItemKey];
   if(!data)return;
   var text=data.item.fullText||data.item.title;
-  localStorage.setItem('dm_scam_prefill',text);
+  localStorage.setItem(storageKey('dm_scam_prefill'),text);
   window.location.href='scam.html';
 }
 
@@ -1099,16 +1105,16 @@ function openInGmail(){
 }
 
 function openInScam(encodedText){
-  localStorage.setItem('dm_scam_prefill',decodeURIComponent(encodedText));
+  localStorage.setItem(storageKey('dm_scam_prefill'),decodeURIComponent(encodedText));
   window.location.href='scam.html';
 }
 
 // RECENT ACTIVITY WRITER
 function addRecent(text,en,nl,sev){
-  var items=[];try{items=JSON.parse(localStorage.getItem('dm_recent')||'[]');}catch(e){}
+  var items=[];try{items=JSON.parse(localStorage.getItem(storageKey('dm_recent'))||'[]');}catch(e){}
   items.unshift({type:'inbox',title_en:en,title_nl:nl,time:Date.now(),severity:sev});
   if(items.length>20)items=items.slice(0,20);
-  localStorage.setItem('dm_recent',JSON.stringify(items));
+  localStorage.setItem(storageKey('dm_recent'),JSON.stringify(items));
 }
 </script>
 </body>

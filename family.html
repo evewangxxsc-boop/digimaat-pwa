@@ -389,7 +389,13 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
+
+// PER-USER STORAGE KEY
+var currentUID='';
+function storageKey(key){return currentUID?currentUID+'_'+key:key;}
+
 auth.onAuthStateChanged(function(user){
+  currentUID=user?user.uid:'';
   if(!user){window.location.href='register.html';return;}
   document.getElementById('page-loader').style.display='none';
   document.getElementById('app').style.display='flex';
@@ -445,9 +451,9 @@ function renderRoleLabels(){
 var currentRole='guardian';
 function initPage(){
   lang=localStorage.getItem('dm_lang')||'en';
-  currentRole=localStorage.getItem('dm_family_role')||'guardian';
+  currentRole=localStorage.getItem(storageKey('dm_family_role'))||'guardian';
   // Load notification prefs
-  var prefs=JSON.parse(localStorage.getItem('dm_guardian_notifs')||'{"breach":true,"scam":true,"inbox":false}');
+  var prefs=JSON.parse(localStorage.getItem(storageKey('dm_guardian_notifs'))||'{"breach":true,"scam":true,"inbox":false}');
   if(!prefs.breach)document.getElementById('tog-breach').classList.add('off');
   if(!prefs.scam)document.getElementById('tog-scam').classList.add('off');
   if(prefs.inbox)document.getElementById('tog-inbox').classList.remove('off');
@@ -459,7 +465,7 @@ function initPage(){
 // ── ROLE SWITCH ───────────────────────────────────────────
 function switchRole(role,silent){
   currentRole=role;
-  if(!silent)localStorage.setItem('dm_family_role',role);
+  if(!silent)localStorage.setItem(storageKey('dm_family_role'),role);
   document.getElementById('role-guardian').classList.toggle('active',role==='guardian');
   document.getElementById('role-member').classList.toggle('active',role==='member');
   document.getElementById('view-guardian').classList.toggle('active',role==='guardian');
@@ -471,18 +477,18 @@ function switchRole(role,silent){
 // ── NOTIFICATION TOGGLES ──────────────────────────────────
 function toggleNotif(key,btn){
   btn.classList.toggle('off');
-  var prefs=JSON.parse(localStorage.getItem('dm_guardian_notifs')||'{"breach":true,"scam":true,"inbox":false}');
+  var prefs=JSON.parse(localStorage.getItem(storageKey('dm_guardian_notifs'))||'{"breach":true,"scam":true,"inbox":false}');
   prefs[key]=!btn.classList.contains('off');
-  localStorage.setItem('dm_guardian_notifs',JSON.stringify(prefs));
+  localStorage.setItem(storageKey('dm_guardian_notifs'),JSON.stringify(prefs));
 }
 
 // ── DEMO SENIOR DATA ──────────────────────────────────────
 // In V1 we seed demo seniors if none exist
 // Real data comes from invite code connections
 function getSeniors(){
-  try{return JSON.parse(localStorage.getItem('dm_seniors')||'[]');}catch(e){return[];}
+  try{return JSON.parse(localStorage.getItem(storageKey('dm_seniors'))||'[]');}catch(e){return[];}
 }
-function saveSeniors(s){localStorage.setItem('dm_seniors',JSON.stringify(s));}
+function saveSeniors(s){localStorage.setItem(storageKey('dm_seniors'),JSON.stringify(s));}
 
 function seedDemoSeniors(){
   var existing=getSeniors();
@@ -647,9 +653,9 @@ function generateCode(){
   activeCode=code;
   codeExpiry=expiry;
   // Store so member can look it up
-  var codes=JSON.parse(localStorage.getItem('dm_invite_codes')||'[]');
+  var codes=JSON.parse(localStorage.getItem(storageKey('dm_invite_codes'))||'[]');
   codes.push({code:code,expiry:expiry,used:false});
-  localStorage.setItem('dm_invite_codes',JSON.stringify(codes));
+  localStorage.setItem(storageKey('dm_invite_codes'),JSON.stringify(codes));
 
   var expiryStr=lang==='nl'?'Verloopt over 24 uur':'Expires in 24 hours';
   var html='<div class="code-display">'
@@ -722,7 +728,7 @@ function getEnteredCode(){
 
 function verifyCode(){
   var entered=getEnteredCode();
-  var codes=JSON.parse(localStorage.getItem('dm_invite_codes')||'[]');
+  var codes=JSON.parse(localStorage.getItem(storageKey('dm_invite_codes'))||'[]');
   var match=codes.find(function(c){
     return c.code===entered&&!c.used&&c.expiry>Date.now();
   });
@@ -742,7 +748,7 @@ function verifyCode(){
 
   // Mark code as used
   match.used=true;
-  localStorage.setItem('dm_invite_codes',JSON.stringify(codes));
+  localStorage.setItem(storageKey('dm_invite_codes'),JSON.stringify(codes));
 
   // Clear inputs
   for(var i=0;i<6;i++){document.getElementById('ci'+i).value='';}
@@ -765,10 +771,10 @@ function saveGuardian(){
   var name=document.getElementById('guardian-name-inp').value.trim()||'Guardian';
   var rel=document.getElementById('guardian-rel-inp').value.trim()||'Family';
   var phone=(document.getElementById('guardian-phone-inp').value||'').trim();
-  var guardians=JSON.parse(localStorage.getItem('dm_my_guardians')||'[]');
+  var guardians=JSON.parse(localStorage.getItem(storageKey('dm_my_guardians'))||'[]');
   var isFirst=guardians.length===0;
   guardians.push({id:'g_'+Date.now(),name:name,rel:rel,phone:phone,perms:{breach:true,scam:true,inbox:false},isPrimary:isFirst,addedAt:Date.now()});
-  localStorage.setItem('dm_my_guardians',JSON.stringify(guardians));
+  localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(guardians));
   document.getElementById('guardian-name-inp').value='';
   document.getElementById('guardian-rel-inp').value='';
   document.getElementById('guardian-phone-inp').value='';
@@ -777,7 +783,7 @@ function saveGuardian(){
 
 // ── MEMBER VIEW — GUARDIANS LIST ──────────────────────────
 function getGuardians(){
-  try{return JSON.parse(localStorage.getItem('dm_my_guardians')||'[]');}catch(e){return[];}
+  try{return JSON.parse(localStorage.getItem(storageKey('dm_my_guardians'))||'[]');}catch(e){return[];}
 }
 
 function renderGuardiansList(){
@@ -852,7 +858,7 @@ function permRow(guardianIdx,key,val,label){
 function setPrimaryGuardian(idx){
   var guardians=getGuardians();
   guardians.forEach(function(g,i){g.isPrimary=(i===idx);});
-  localStorage.setItem('dm_my_guardians',JSON.stringify(guardians));
+  localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(guardians));
   renderGuardiansList();
 }
 
@@ -860,7 +866,7 @@ function togglePerm(idx,key,btn){
   btn.classList.toggle('off');
   var guardians=getGuardians();
   guardians[idx].perms[key]=!btn.classList.contains('off');
-  localStorage.setItem('dm_my_guardians',JSON.stringify(guardians));
+  localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(guardians));
 }
 
 function removeGuardian(idx){
@@ -868,7 +874,7 @@ function removeGuardian(idx){
   if(!ok)return;
   var guardians=getGuardians();
   guardians.splice(idx,1);
-  localStorage.setItem('dm_my_guardians',JSON.stringify(guardians));
+  localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(guardians));
   renderGuardiansList();
 }
 </script>

@@ -227,7 +227,13 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
+
+// PER-USER STORAGE KEY
+var currentUID='';
+function storageKey(key){return currentUID?currentUID+'_'+key:key;}
+
 auth.onAuthStateChanged(function(user){
+  currentUID=user?user.uid:'';
   if(!user){window.location.href='register.html';return;}
   document.getElementById('page-loader').style.display='none';
   document.getElementById('app').style.display='flex';
@@ -258,10 +264,10 @@ function goTo(p){window.location.href=p;}
 // RECENT ACTIVITY
 function addRecent(type,title_en,title_nl,severity){
   var items=[];
-  try{items=JSON.parse(localStorage.getItem('dm_recent')||'[]');}catch(e){}
+  try{items=JSON.parse(localStorage.getItem(storageKey('dm_recent'))||'[]');}catch(e){}
   items.unshift({type:type,title_en:title_en,title_nl:title_nl,time:Date.now(),severity:severity});
   if(items.length>20)items=items.slice(0,20);
-  localStorage.setItem('dm_recent',JSON.stringify(items));
+  localStorage.setItem(storageKey('dm_recent'),JSON.stringify(items));
 }
 
 // VOICE INPUT
@@ -402,7 +408,7 @@ function renderBreaches(sources, email, totalFound){
     +'</div></div>';
 
   // Family notification
-  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
+  var family=JSON.parse(localStorage.getItem(storageKey('dm_family'))||'null');
   if(family&&family.name){
     html+='<div class="family-note">'
       +'<svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="4"/><path d="M2 20c0-4 2.686-6 6-6"/><circle cx="18" cy="9" r="3"/><path d="M14 20c0-3 1.79-4 4-4"/></svg>'
