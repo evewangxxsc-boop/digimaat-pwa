@@ -581,6 +581,7 @@ function toggleGmail(){
     sub.textContent=lang==='nl'?'Niet verbonden':'Not connected';
     localStorage.removeItem(storageKey('dm_gmail_user'));
     localStorage.removeItem(storageKey('dm_gmail_auth_code'));
+    localStorage.removeItem(storageKey('dm_gmail_access_token'));
   }else{
     launchGmailOAuth();
   }
@@ -820,32 +821,63 @@ function renderWAResults(){
 // ── REAL GMAIL API CALL ────────────────────────────────────
 function callGmailAPI(){
   var code=localStorage.getItem(storageKey('dm_gmail_auth_code'));
-  if(!code){renderDemoResults();return;}
+  var storedToken=localStorage.getItem(storageKey('dm_gmail_access_token'));
+
+  // No credentials at all — fall back to demo
+  if(!code && !storedToken){renderDemoResults();return;}
 
   var fromDate=document.getElementById('gmail-from').value;
   var toDate=document.getElementById('gmail-to').value;
   var unknownOnly=!document.getElementById('tog-unknown').classList.contains('off');
 
+  // Prefer stored access token; fall back to one-time auth code
+  var body={dateFrom:fromDate,dateTo:toDate,unknownOnly:unknownOnly};
+  if(storedToken){body.access_token=storedToken;}
+  else{body.code=code;}
+
   fetch('/api/gmail-scan',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({code:code,dateFrom:fromDate,dateTo:toDate,unknownOnly:unknownOnly})
+    body:JSON.stringify(body)
   })
   .then(function(r){return r.json();})
   .then(function(data){
     if(data.error){
-      console.warn('Gmail API error:',data.error);
-      renderDemoResults();
+      // If stored token is expired, clear it and force re-auth
+      if(storedToken){
+        localStorage.removeItem(storageKey('dm_gmail_access_token'));
+        localStorage.removeItem(storageKey('dm_gmail_user'));
+        setGmailDisconnected();
+        alert(lang==='nl'?'Gmail-verbinding verlopen. Verbind opnieuw.':'Gmail connection expired. Please reconnect.');
+      }else{
+        console.warn('Gmail API error:',data.error);
+        renderDemoResults();
+      }
       return;
     }
-    // Clear auth code after use — one-time use only
-    localStorage.removeItem(storageKey('dm_gmail_auth_code'));
+    // If server returned a fresh token, store it for future scans
+    if(data.access_token){
+      localStorage.setItem(storageKey('dm_gmail_access_token'),data.access_token);
+    }
+    // Consume one-time auth code (now replaced by stored token)
+    if(code){localStorage.removeItem(storageKey('dm_gmail_auth_code'));}
     processGmailMessages(data.messages||[]);
   })
   .catch(function(err){
     console.warn('Gmail fetch error:',err);
     renderDemoResults();
   });
+}
+
+function setGmailDisconnected(){
+  var btn=document.getElementById('btn-gmail-connect');
+  var body=document.getElementById('gmail-conn-body');
+  var sub=document.getElementById('gmail-conn-sub');
+  if(btn){btn.className='conn-btn off';btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M5 12h14M12 5l7 7-7 7"/></svg><span>'+(lang==='nl'?'Verbinden':'Connect')+'</span>';}
+  if(body)body.classList.remove('show');
+  if(sub)sub.textContent=lang==='nl'?'Niet verbonden':'Not connected';
+  localStorage.removeItem(storageKey('dm_gmail_user'));
+  localStorage.removeItem(storageKey('dm_gmail_access_token'));
 }
 
 // ── SHARED DETECTION ENGINE (mirrors scam.html) ──────────

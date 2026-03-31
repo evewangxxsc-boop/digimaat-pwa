@@ -33,35 +33,41 @@ export default async function handler(req, res) {
     return res.status(400).send('Missing code');
   }
 
-  // ── POST: Fetch Gmail messages using the auth code ──────────
+  // ── POST: Fetch Gmail messages using auth code OR stored access token ──
   if (req.method === 'POST') {
-    const { code, dateFrom, dateTo } = req.body;
+    const { code, access_token: storedToken, dateFrom, dateTo } = req.body;
 
-    if (!code) return res.status(400).json({ error: 'Missing authorization code' });
+    if (!code && !storedToken) return res.status(400).json({ error: 'Missing authorization code or access token' });
 
     try {
-      // Exchange code for access token
-      const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          code,
-          client_id:     process.env.GOOGLE_CLIENT_ID,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET,
-          redirect_uri:  'https://digimaat-pwa.vercel.app/api/gmail-scan',
-          grant_type:    'authorization_code',
-        }),
-      });
+      let accessToken = storedToken || null;
+      let newToken = null;
 
-      const tokenData = await tokenRes.json();
-      if (!tokenData.access_token) {
-        return res.status(401).json({ error: 'Token exchange failed', detail: tokenData.error_description });
+      if (code) {
+        // Exchange one-time auth code for access token
+        const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            code,
+            client_id:     process.env.GOOGLE_CLIENT_ID,
+            client_secret: process.env.GOOGLE_CLIENT_SECRET,
+            redirect_uri:  'https://digimaat-pwa.vercel.app/api/gmail-scan',
+            grant_type:    'authorization_code',
+          }),
+        });
+
+        const tokenData = await tokenRes.json();
+        if (!tokenData.access_token) {
+          return res.status(401).json({ error: 'Token exchange failed', detail: tokenData.error_description });
+        }
+        accessToken = tokenData.access_token;
+        newToken = accessToken; // will be returned to browser for storage
       }
 
-      const accessToken = tokenData.access_token;
-
       // Build Gmail search query with date range
-      let query = 'in:inbox -category:promotions -category:updates';
+      // Scan all inbox tabs — scam emails often land in Promotions/Updates
+      let query = 'in:inbox';
       if (dateFrom) query += ` after:${dateFrom.replace(/-/g,'/')}`;
       if (dateTo)   query += ` before:${dateTo.replace(/-/g,'/')}`;
 
@@ -96,8 +102,10 @@ export default async function handler(req, res) {
         })
       );
 
-      // Token discarded here — never returned to browser
-      return res.status(200).json({ messages, total: listData.resultSizeEstimate || messages.length });
+      // Return token if freshly exchanged so browser can store it for reuse
+      const resp = { messages, total: listData.resultSizeEstimate || messages.length };
+      if (newToken) resp.access_token = newToken;
+      return res.status(200).json(resp);
 
     } catch (err) {
       console.error('Gmail scan error:', err);
