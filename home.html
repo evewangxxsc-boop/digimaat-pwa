@@ -480,15 +480,17 @@ function renderRecent(){
 
 // EMERGENCY BUTTON
 function updateEmergencyBtn(){
-  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
+  var guardians=[];
+  try{guardians=JSON.parse(localStorage.getItem('dm_my_guardians')||'[]');}catch(e){}
+  var g=guardians[0];
   var btn=document.getElementById('emergency-btn');
   var nameEl=document.getElementById('eb-name');
   var hintEl=document.getElementById('eb-hint');
-  if(family&&family.name&&family.phone){
+  if(g&&g.name){
     btn.classList.remove('no-contact');
-    nameEl.textContent=family.name.split(' ')[0];
-    hintEl.textContent=lang==='nl'?'Tik om te bellen':'Tap to call';
-    btn.title=family.phone;
+    nameEl.textContent=g.name.split(' ')[0];
+    hintEl.textContent=g.phone?(lang==='nl'?'Tik om te bellen':'Tap to call'):(lang==='nl'?'Geen nummer opgegeven':'No number added');
+    if(g.phone)btn.title=g.phone;
   }else{
     btn.classList.add('no-contact');
     nameEl.textContent=lang==='nl'?'Contact toevoegen':'Add contact';
@@ -497,9 +499,11 @@ function updateEmergencyBtn(){
 }
 
 function emergencyCall(){
-  var family=JSON.parse(localStorage.getItem('dm_family')||'null');
-  if(family&&family.phone){
-    window.location.href='tel:'+family.phone.replace(/\s/g,'');
+  var guardians=[];
+  try{guardians=JSON.parse(localStorage.getItem('dm_my_guardians')||'[]');}catch(e){}
+  var g=guardians[0];
+  if(g&&g.phone){
+    window.location.href='tel:'+g.phone.replace(/\s/g,'');
   }else{
     window.location.href='family.html';
   }

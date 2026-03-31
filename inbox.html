@@ -114,18 +114,6 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .add-excl-btn:hover{border-color:var(--g)}
 .add-excl-btn svg{width:14px;height:14px;stroke:var(--g);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 
-/* SCAN HISTORY */
-.hist-card{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);overflow:hidden;box-shadow:var(--sh)}
-.hist-hd{padding:13px 16px;border-bottom:1px solid var(--br)}
-.hist-title{font-size:15px;font-weight:800}
-.hist-empty{padding:18px;text-align:center;font-size:13px;color:var(--mu)}
-.hist-row{padding:11px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--br);cursor:pointer}
-.hist-row:last-child{border-bottom:none}
-.hdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.hinfo{flex:1}
-.hdate{font-size:13px;font-weight:700}
-.hcounts{font-size:11px;color:var(--mu);margin-top:2px}
-.harr{width:14px;height:14px;stroke:var(--br);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* SCANNING VIEW */
 .progress-wrap{background:var(--card);border-radius:var(--rad);border:1px solid var(--br);padding:24px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;box-shadow:var(--sh)}
@@ -362,13 +350,6 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
       </button>
     </div>
 
-    <!-- SCAN HISTORY -->
-    <div class="sec-lbl" data-en="Scan history" data-nl="Scangeschiedenis">Scan history</div>
-    <div class="hist-card">
-      <div class="hist-hd"><div class="hist-title" data-en="Previous scans" data-nl="Vorige scans">Previous scans</div></div>
-      <div id="hist-list"></div>
-    </div>
-
   </div><!-- /view-settings -->
 
   <!-- ══ VIEW: SCANNING ══ -->
@@ -497,7 +478,6 @@ function setLang(l){
   });
   updateNotifStatus();
   renderExclList();
-  renderHistory();
 }
 function goTo(p){window.location.href=p;}
 function showView(name){
@@ -727,29 +707,6 @@ function saveExclusion(){
   closeModal();
 }
 
-// ── SCAN HISTORY ─────────────────────────────────────────
-function getScanHistory(){
-  try{return JSON.parse(localStorage.getItem('dm_scan_history')||'[]');}catch(e){return[];}
-}
-function renderHistory(){
-  var hist=getScanHistory();
-  var el=document.getElementById('hist-list');
-  if(!hist.length){
-    el.innerHTML='<div class="hist-empty">'+(lang==='nl'?'Nog geen scans uitgevoerd.':'No scans run yet.')+'</div>';
-    return;
-  }
-  el.innerHTML=hist.slice(0,5).map(function(h){
-    var d=new Date(h.time);
-    var dateStr=d.toLocaleDateString(lang==='nl'?'nl-NL':'en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-    var dotColor=h.suspicious>0?'var(--r)':h.warnings>0?'var(--am)':'#3B6D11';
-    return '<div class="hist-row" onclick="showLastResults()">'
-      +'<div class="hdot" style="background:'+dotColor+'"></div>'
-      +'<div class="hinfo"><div class="hdate">'+dateStr+'</div>'
-      +'<div class="hcounts">'+h.suspicious+' '+(lang==='nl'?'verdacht':'suspicious')+' · '+h.warnings+' '+(lang==='nl'?'waarschuwingen':'warnings')+' · '+h.safe+' '+(lang==='nl'?'veilig':'safe')+'</div></div>'
-      +'<svg class="harr" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>'
-      +'</div>';
-  }).join('');
-}
 
 // ── SCANNING ANIMATION ────────────────────────────────────
 var GMAIL_STEPS=[
@@ -1036,11 +993,6 @@ function renderDemoResults(){
 }
 
 function saveAndShowResults(suspicious,warnings,safeCount){
-  // Save to history
-  var hist=getScanHistory();
-  hist.unshift({time:Date.now(),suspicious:suspicious.length,warnings:warnings.length,safe:safeCount});
-  if(hist.length>10)hist=hist.slice(0,10);
-  localStorage.setItem('dm_scan_history',JSON.stringify(hist));
   // Save current results for "view last"
   localStorage.setItem('dm_last_results',JSON.stringify({suspicious:suspicious,warnings:warnings,safe:safeCount}));
   // Write to home recent
