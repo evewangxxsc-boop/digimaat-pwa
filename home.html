@@ -280,10 +280,9 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
     <!-- ALERT LIST (shown when alerts exist) -->
     <div id="alert-list-section"></div>
 
-    <!-- RECENT (shown when safe) -->
+    <!-- ALERTS BUTTON (always shown) -->
     <div id="safe-section">
-      <div class="sec-label" data-en="Recent activity" data-nl="Recente activiteit">Recent activity</div>
-      <div class="recent-list" id="recent-list"></div>
+      <div id="alerts-btn-wrap"></div>
     </div>
 
   </div><!-- /body -->
@@ -628,24 +627,32 @@ function renderAlertView(){
   var banner=document.getElementById('smart-banner');
   var alertSection=document.getElementById('alert-list-section');
   var safeSection=document.getElementById('safe-section');
-  var statusBanner=document.querySelector('.status-banner');
+  var wrap=document.getElementById('alerts-btn-wrap');
+  if(banner)banner.innerHTML='';
+  if(alertSection)alertSection.innerHTML='';
+  if(safeSection)safeSection.style.display='block';
+
   if(alerts.length===0){
-    if(statusBanner)statusBanner.style.display='flex';
-    if(banner)banner.innerHTML='';
-    if(alertSection)alertSection.innerHTML='';
-    if(safeSection)safeSection.style.display='block';
-    renderRecent();
+    // Green "all clear" alerts button
+    if(wrap)wrap.innerHTML=
+      '<div onclick="goTo(\'alerts.html\')" style="margin:12px 18px 0;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;background:var(--gl);border:2px solid var(--gm);-webkit-tap-highlight-color:transparent">'
+      +'<div style="width:40px;height:40px;border-radius:10px;background:var(--gm);display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+      +'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--gd)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:15px;font-weight:800;color:var(--gd)">'+(lang==='nl'?'Geen meldingen':'No alerts')+'</div>'
+      +'<div style="font-size:12px;color:var(--gd);opacity:.7;margin-top:2px">'+(lang==='nl'?'Alles is veilig — tik om te bekijken':'Everything looks safe — tap to view')+'</div>'
+      +'</div>'
+      +'<span style="font-size:24px;color:var(--gd);font-weight:700;opacity:.5">›</span>'
+      +'</div>';
   }else{
-    if(statusBanner)statusBanner.style.display='flex';
-    if(safeSection)safeSection.style.display='none';
-    if(alertSection)alertSection.innerHTML='';
-    if(banner)banner.innerHTML=
+    // Amber "N alerts need attention" button
+    if(wrap)wrap.innerHTML=
       '<div onclick="goTo(\'alerts.html\')" style="margin:12px 18px 0;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;background:#FAEEDA;border:2px solid #FAC775;-webkit-tap-highlight-color:transparent">'
       +'<div style="width:40px;height:40px;border-radius:10px;background:#FAC775;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
       +'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7A4A00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>'
       +'<div style="flex:1">'
-      +'<div style="font-size:15px;font-weight:800;color:#7A4A00">'+(lang==="nl"?alerts.length+" melding"+(alerts.length>1?"en":"")+" vereisen aandacht":alerts.length+" alert"+(alerts.length>1?"s":"")+" need attention")+'</div>'
-      +'<div style="font-size:12px;color:#AA6800;margin-top:2px">'+(lang==="nl"?"Tik hier om te bekijken en op te lossen":"Tap here to review and fix them")+'</div>'
+      +'<div style="font-size:15px;font-weight:800;color:#7A4A00">'+(lang==='nl'?alerts.length+' melding'+(alerts.length>1?'en':'')+' vereisen aandacht':alerts.length+' alert'+(alerts.length>1?'s':'')+' need attention')+'</div>'
+      +'<div style="font-size:12px;color:#AA6800;margin-top:2px">'+(lang==='nl'?'Tik hier om te bekijken en op te lossen':'Tap here to review and fix them')+'</div>'
       +'</div>'
       +'<span style="font-size:24px;color:#BA7517;font-weight:700">›</span>'
       +'</div>';
