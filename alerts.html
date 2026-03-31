@@ -89,7 +89,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .msg-count{font-size:12px;color:var(--am);font-weight:700}
 .msg-see-more{font-size:12px;font-weight:800;color:var(--gd);margin-top:8px}
 /* Suspicious email list */
-.msg-email-list{margin-top:12px;border-top:1px solid var(--br);display:none}
+.msg-email-list{margin-top:12px;border-top:1px solid var(--br);display:block}
 .msg-email-row{padding:10px 0;border-bottom:1px solid var(--br)}
 .msg-email-row:last-of-type{border-bottom:none;padding-bottom:0}
 .msg-email-from{font-size:11px;font-weight:700;color:var(--mu);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -441,6 +441,13 @@ function renderDetail(alerts){
   document.getElementById('ds-body').innerHTML=html;
   document.getElementById('ds-body').scrollTop=0;
   pendingItem=item;
+  // Cache inbox emails so showGuide() can inject direct Gmail links
+  currentGuideEmails=[];
+  if((item.title_en||'').indexOf('inbox scan')!==-1){
+    var _lr=null;
+    try{_lr=JSON.parse(localStorage.getItem(storageKey('dm_last_results'))||'null');}catch(e){}
+    currentGuideEmails=(_lr&&_lr.suspicious)||[];
+  }
 }
 
 function escTitle(t){return t.replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
@@ -462,7 +469,7 @@ function buildMsgBox(a,item,title,lang){
   if(isInbox){try{lr=JSON.parse(localStorage.getItem(storageKey('dm_last_results'))||'null');}catch(e){}msgs=(lr&&lr.suspicious)||[];}
   var emailListHtml='';
   if(isInbox&&msgs.length){
-    emailListHtml='<div class="msg-email-list" id="ds-email-list">'
+    emailListHtml='<div class="msg-email-list">'
       +msgs.slice(0,5).map(function(m){
         var gmailLink=m.id?'https://mail.google.com/mail/u/0/#inbox/'+m.id:'https://mail.google.com';
         return '<div class="msg-email-row">'
@@ -474,16 +481,13 @@ function buildMsgBox(a,item,title,lang){
           +'</a>'
           +'</div>';
       }).join('')
-      +'<a class="msg-goto-inbox" href="inbox.html">'
-      +(lang==='nl'?'Alle verdachte berichten bekijken in Inbox →':'View all suspicious messages in Inbox →')
-      +'</a></div>';
+      +(msgs.length>5?'<a class="msg-goto-inbox" href="inbox.html">'+(lang==='nl'?'Alle verdachte berichten bekijken →':'View all suspicious messages →')+'</a>':'')
+      +'</div>';
   }
-  var clickable=isInbox&&emailListHtml;
-  return '<div class="msg-box'+(clickable?' expandable':'')+'"'+(clickable?' onclick="toggleEmailList()"':'')+'>'+
+  return '<div class="msg-box">'+
     '<div class="msg-label">'+(lang==='nl'?'Gevonden probleem':'Problem found')+'</div>'+
     '<div class="msg-title">'+title+'</div>'+
     (a.count>1?'<div class="msg-count">'+(lang==='nl'?a.count+'× gevonden':a.count+'× found')+'</div>':'')+
-    (clickable?'<div class="msg-see-more" id="ds-see-more" data-count="'+msgs.length+'">▼ '+msgs.length+' '+(lang==='nl'?'berichten — tik om te bekijken':'messages — tap to see')+'</div>':'')+
     emailListHtml+
     '</div>';
 }
@@ -555,6 +559,7 @@ var GUIDES={
 
 var currentGuideAction=null;
 var currentGuideTitle=null;
+var currentGuideEmails=[];
 
 function showGuide(action,title){
   currentGuideAction=action;
@@ -562,6 +567,29 @@ function showGuide(action,title){
   var guide=GUIDES[action][lang];
   document.getElementById('sg-title').textContent=guide.title;
   var html='';
+
+  // For delete/spam: show direct Gmail links at the top so user can open the email first
+  if((action==='delete'||action==='spam')&&currentGuideEmails.length){
+    html+='<div style="background:#FFF8EC;border:1.5px solid var(--aml);border-radius:14px;padding:14px 14px 6px;margin-bottom:18px">'
+      +'<div style="font-size:13px;font-weight:800;color:var(--am);margin-bottom:10px">'
+      +(lang==='nl'?'Stap 1 — Open de verdachte e-mail in Gmail:':'Step 1 — Open the suspicious email in Gmail:')
+      +'</div>'
+      +currentGuideEmails.slice(0,5).map(function(m){
+        var link=m.id?'https://mail.google.com/mail/u/0/#inbox/'+m.id:'https://mail.google.com';
+        return '<a href="'+link+'" target="_blank" style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--aml);border-radius:10px;padding:10px 12px;margin-bottom:8px;text-decoration:none">'
+          +'<div style="flex:1;min-width:0">'
+          +'<div style="font-size:11px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(m.from||'Unknown sender')+'</div>'
+          +'<div style="font-size:14px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(m.subject||(lang==='nl'?'Geen onderwerp':'No subject'))+'</div>'
+          +'</div>'
+          +'<div style="background:var(--gd);color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:800;flex-shrink:0">'+(lang==='nl'?'Open →':'Open →')+'</div>'
+          +'</a>';
+      }).join('')
+      +'<div style="font-size:12px;color:var(--mu);margin-bottom:10px;line-height:1.5">'
+      +(lang==='nl'?'Na het openen van de e-mail, volg dan de stappen hieronder:':'After opening the email, follow the steps below:')
+      +'</div>'
+      +'</div>';
+  }
+
   guide.steps.forEach(function(step){
     html+='<div class="sg-step">'
       +'<div class="sg-num">'+step.n+'</div>'
