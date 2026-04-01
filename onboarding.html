@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#0F6E56"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <link rel="manifest" href="/manifest.json"/>
 <link rel="apple-touch-icon" href="/icons/icon192.png"/>
@@ -29,13 +30,13 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .lbtn.on{background:var(--g);color:#fff}
 
 /* SLIDES CONTAINER */
-.slides{flex:1;display:flex;overflow:hidden;position:relative}
-.slide{min-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:56px 24px 0;transition:transform .4s cubic-bezier(.4,0,.2,1);text-align:center}
+.slides{flex:1;display:flex;overflow:hidden;position:relative;touch-action:pan-y}
+.slide{min-width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:56px 24px 130px;transition:transform .35s cubic-bezier(.4,0,.2,1);text-align:center;-webkit-overflow-scrolling:touch;will-change:transform}
 
 /* PROGRESS DOTS */
 .dots{display:flex;gap:8px;justify-content:center;padding:20px 0 16px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--br);transition:all .3s}
-.dot.on{width:24px;border-radius:4px;background:var(--g)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--br);transition:all .25s;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dot.on{width:24px;border-radius:5px;background:var(--g)}
 
 /* ILLUSTRATION */
 .illo{width:180px;height:180px;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;border-radius:50%}
@@ -74,17 +75,19 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .alt-btn svg{width:18px;height:18px;stroke:var(--g);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 
 /* BOTTOM BAR */
-.bottom-bar{padding:16px 24px calc(env(safe-area-inset-bottom,0px) + 16px);background:var(--bg)}
-.next-btn{background:var(--g);color:#fff;border:none;border-radius:var(--rads);padding:16px;font-size:17px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
-.next-btn:hover{background:var(--gd)}
-.next-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.back-link{text-align:center;margin-top:10px;font-size:13px;color:var(--mu);cursor:pointer}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;max-width:390px;margin:0 auto;padding:12px 24px calc(env(safe-area-inset-bottom,0px) + 12px);background:var(--bg);border-top:1px solid var(--br);z-index:50;transform:translateZ(0)}
+.next-btn{background:var(--g);color:#fff;border:none;border-radius:14px;padding:16px;font-size:18px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;height:54px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;touch-action:manipulation}
+.next-btn:active{background:var(--gd)}
+.next-btn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.back-link{text-align:center;margin-top:8px;font-size:13px;color:var(--mu);cursor:pointer;touch-action:manipulation}
 .back-link span{text-decoration:underline}
 
 /* PAGE LOADER */
-.page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;transform:translateZ(0)}
 .pl-spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Mobile performance */
+button,a{touch-action:manipulation}
 </style>
 </head>
 <body>
@@ -98,9 +101,9 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 
   <!-- PROGRESS DOTS -->
   <div class="dots">
-    <div class="dot on" id="dot-0"></div>
-    <div class="dot" id="dot-1"></div>
-    <div class="dot" id="dot-2"></div>
+    <div class="dot on" id="dot-0" onclick="skipToSlide(0)"></div>
+    <div class="dot" id="dot-1" onclick="skipToSlide(1)"></div>
+    <div class="dot" id="dot-2" onclick="skipToSlide(2)"></div>
   </div>
 
   <!-- SLIDES -->
@@ -436,7 +439,32 @@ document.querySelectorAll('.slide').forEach(function(s,i){
   s.style.width='100%';
   s.style.height='100%';
   s.style.overflowY='auto';
+  s.style.webkitOverflowScrolling='touch';
 });
+
+// Swipe to navigate (iOS Safari)
+(function(){
+  var el=document.getElementById('slides');
+  var startX=0,startY=0,moved=false;
+  el.addEventListener('touchstart',function(e){
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    moved=false;
+  },{passive:true});
+  el.addEventListener('touchmove',function(e){
+    moved=true;
+  },{passive:true});
+  el.addEventListener('touchend',function(e){
+    if(!moved)return;
+    var dx=startX-e.changedTouches[0].clientX;
+    var dy=startY-e.changedTouches[0].clientY;
+    // Only trigger if horizontal swipe is dominant
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>50){
+      if(dx>0)nextSlide();
+      else prevSlide();
+    }
+  },{passive:true});
+})();
 </script>
 </body>
 </html>
