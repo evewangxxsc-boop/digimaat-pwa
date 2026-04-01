@@ -280,6 +280,14 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
     <!-- ALERT LIST (shown when alerts exist) -->
     <div id="alert-list-section"></div>
 
+    <!-- SETTINGS BUTTON -->
+    <div style="padding:0 18px;margin-bottom:12px">
+      <button onclick="goTo('profile.html')" style="width:100%;background:#fff;border:1.5px solid var(--br);border-radius:var(--rads);padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:'Nunito',sans-serif;-webkit-tap-highlight-color:transparent">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--mu)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span id="settings-btn-lbl" style="font-size:14px;font-weight:700;color:var(--mu)" data-en="Settings &amp; Support" data-nl="Instellingen &amp; Ondersteuning">Settings &amp; Support</span>
+      </button>
+    </div>
+
     <!-- ALERTS BUTTON (always shown) -->
     <div id="safe-section">
       <div id="alerts-btn-wrap"></div>
@@ -341,6 +349,10 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span data-en="Home" data-nl="Home">Home</span>
     </button>
+    <button class="nb" onclick="goTo('breach.html')">
+      <svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span data-en="Breach" data-nl="Lek">Breach</span>
+    </button>
     <button class="nb" onclick="goTo('inbox.html')">
       <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       <span data-en="Inbox" data-nl="Inbox">Inbox</span>
@@ -352,10 +364,6 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
     <button class="nb" onclick="goTo('family.html')">
       <svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="4"/><path d="M2 20c0-4 2.686-6 6-6s6 2 6 6"/><circle cx="18" cy="9" r="3"/></svg>
       <span data-en="Family" data-nl="Familie">Family</span>
-    </button>
-    <button class="nb" onclick="goTo('profile.html')">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7"/></svg>
-      <span data-en="Profile" data-nl="Profiel">Profile</span>
     </button>
   </nav>
 
