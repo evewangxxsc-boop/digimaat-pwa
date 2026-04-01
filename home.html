@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#0F6E56"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <link rel="manifest" href="/manifest.json"/>
@@ -83,7 +84,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .empty-recent svg{width:32px;height:32px;stroke:var(--br);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 8px;display:block}
 
 /* EMERGENCY BUTTON */
-.emergency-btn{display:flex;align-items:center;gap:14px;background:var(--r);color:#fff;border:none;border-radius:var(--rads);padding:16px 16px;font-family:'Nunito',sans-serif;font-size:17px;font-weight:800;cursor:pointer;width:100%;text-align:left;transition:transform .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 18px rgba(163,45,45,.30)}
+.emergency-btn{display:flex;align-items:center;gap:14px;background:var(--r);color:#fff;border:none;border-radius:var(--rads);padding:16px 16px;font-family:'Nunito',sans-serif;font-size:17px;font-weight:800;cursor:pointer;width:100%;text-align:left;transition:transform .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 18px rgba(163,45,45,.30);transform:translateZ(0)}
 .emergency-btn:active{transform:scale(.98);box-shadow:0 2px 8px rgba(163,45,45,.2)}
 .emergency-btn.no-contact{background:#fff;border:1.5px solid var(--br);box-shadow:none;color:var(--mu)}
 .emergency-btn.no-contact .eb-ico-wrap{background:var(--bg)}
@@ -94,7 +95,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .eb-ico-wrap{position:relative;width:50px;height:50px;flex-shrink:0}
 .eb-ico-circle{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
 .eb-ico-circle svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.eb-pulse{position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.35);animation:eb-pulse 3s ease-out infinite}
+.eb-pulse{position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.35);animation:eb-pulse 3s ease-out infinite;will-change:transform}
 @keyframes eb-pulse{0%{transform:scale(1);opacity:.7}70%{transform:scale(1.6);opacity:0}100%{transform:scale(1.6);opacity:0}}
 .emergency-btn.no-contact .eb-pulse{animation:none}
 .eb-label{flex:1;line-height:1.3}
@@ -103,7 +104,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .eb-arr{font-size:22px;font-weight:700;opacity:.7;flex-shrink:0}
 
 /* BOTTOM NAV */
-.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateZ(0);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;-webkit-tap-highlight-color:transparent}
 .nb svg{width:21px;height:21px;stroke:var(--mu);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:stroke .15s}
 .nb span{font-size:9px;color:var(--mu);font-weight:700;transition:color .15s}
@@ -136,7 +137,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .fix-btn{background:var(--r);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;flex-shrink:0;white-space:nowrap}
 
 /* FULL SCREEN DETAIL */
-.detail-screen{position:fixed;inset:0;background:#fff;z-index:500;display:none;flex-direction:column;max-width:390px;left:50%;transform:translateX(-50%)}
+.detail-screen{position:fixed;inset:0;background:#fff;z-index:500;display:none;flex-direction:column;max-width:390px;left:50%;transform:translateX(-50%) translateZ(0)}
 .detail-screen.show{display:flex}
 .ds-topbar{background:var(--r);padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .ds-close{background:none;border:none;cursor:pointer;padding:0}
@@ -145,7 +146,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .ds-nav{display:flex;gap:6px}
 .ds-nav-btn{background:rgba(255,255,255,.2);border:none;border-radius:6px;padding:5px 10px;color:#fff;font-size:12px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer}
 .ds-nav-btn:disabled{opacity:.3;cursor:default}
-.ds-body{flex:1;overflow-y:auto;padding:18px 18px 20px}
+.ds-body{flex:1;overflow-y:auto;padding:18px 18px 20px;-webkit-overflow-scrolling:touch}
 /* WHY DANGEROUS box */
 .why-box{background:var(--rl);border-radius:var(--rad);padding:14px 16px;margin-bottom:16px}
 .why-title{font-size:13px;font-weight:800;color:var(--r);margin-bottom:6px;display:flex;align-items:center;gap:6px}
@@ -184,7 +185,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .ac-chev{width:16px;height:16px;stroke:var(--br);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* CONFIRMATION SCREEN */
-.confirm-screen{position:fixed;inset:0;background:var(--gd);z-index:600;display:none;flex-direction:column;align-items:center;justify-content:center;max-width:390px;left:50%;transform:translateX(-50%);padding:32px 28px;text-align:center}
+.confirm-screen{position:fixed;inset:0;background:var(--gd);z-index:600;display:none;flex-direction:column;align-items:center;justify-content:center;max-width:390px;left:50%;transform:translateX(-50%) translateZ(0);padding:32px 28px;text-align:center}
 .confirm-screen.show{display:flex}
 .confirm-ico{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;margin-bottom:22px}
 .confirm-ico svg{width:40px;height:40px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
@@ -205,6 +206,8 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px}
 .page-loader .spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Mobile performance */
+button,a{touch-action:manipulation}
 </style>
 </head>
 <body>

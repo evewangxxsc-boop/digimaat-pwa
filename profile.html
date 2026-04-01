@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#0F6E56"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <title>DigiMaat — Profile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -32,7 +33,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .lbtn.on{background:rgba(255,255,255,.3);color:#fff}
 
 /* BODY */
-.body{flex:1;overflow-y:auto;padding:0 0 100px}
+.body{flex:1;overflow-y:auto;padding:0 0 100px;-webkit-overflow-scrolling:touch}
 
 /* PROFILE HEADER */
 .profile-header{background:var(--gd);padding:24px 20px 22px;display:flex;flex-direction:column;align-items:center;gap:9px}
@@ -115,22 +116,24 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .signout-btn svg{width:17px;height:17px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* TOAST */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--tx);color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:20px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;z-index:999;font-family:'Nunito',sans-serif}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateZ(0);background:var(--tx);color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:20px;opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;z-index:999;font-family:'Nunito',sans-serif}
 .toast.show{opacity:1}
 .toast.success{background:var(--gd)}
 .toast.warn{background:var(--am)}
 
 /* BOTTOM NAV */
-.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateZ(0);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
 .nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif}
 .nb svg{width:21px;height:21px;stroke:var(--mu);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .nb span{font-size:9px;color:var(--mu);font-weight:700}
 .nb.on svg{stroke:var(--g)}.nb.on span{color:var(--g)}
 
 /* PAGE LOADER */
-.page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.page-loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;transform:translateZ(0)}
 .pl-spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Mobile performance */
+button,a{touch-action:manipulation}
 </style>
 </head>
 <body>
