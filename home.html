@@ -83,15 +83,24 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .empty-recent svg{width:32px;height:32px;stroke:var(--br);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 8px;display:block}
 
 /* EMERGENCY BUTTON */
-.emergency-btn{position:fixed;bottom:72px;right:calc(50% - 185px);z-index:200;display:flex;align-items:center;gap:8px;background:var(--r);color:#fff;border:none;border-radius:30px;padding:11px 16px 11px 13px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(163,45,45,.35);transition:transform .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent}
-.emergency-btn:active{transform:scale(.96);box-shadow:0 2px 8px rgba(163,45,45,.3)}
-.emergency-btn svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.emergency-btn .eb-label{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
-.emergency-btn .eb-name{font-size:13px;font-weight:800}
-.emergency-btn .eb-hint{font-size:10px;font-weight:600;opacity:.85}
-/* No contact state */
-.emergency-btn.no-contact{background:var(--mu)}
-.emergency-btn.no-contact{box-shadow:0 4px 16px rgba(107,107,101,.25)}
+.emergency-btn{display:flex;align-items:center;gap:14px;background:var(--r);color:#fff;border:none;border-radius:var(--rads);padding:16px 16px;font-family:'Nunito',sans-serif;font-size:17px;font-weight:800;cursor:pointer;width:100%;text-align:left;transition:transform .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 18px rgba(163,45,45,.30)}
+.emergency-btn:active{transform:scale(.98);box-shadow:0 2px 8px rgba(163,45,45,.2)}
+.emergency-btn.no-contact{background:#fff;border:1.5px solid var(--br);box-shadow:none;color:var(--mu)}
+.emergency-btn.no-contact .eb-ico-wrap{background:var(--bg)}
+.emergency-btn.no-contact .eb-ico-wrap svg{stroke:var(--mu)}
+.emergency-btn.no-contact .eb-name{color:var(--mu)}
+.emergency-btn.no-contact .eb-hint{color:var(--mu);opacity:.6}
+.emergency-btn.no-contact .eb-arr{color:var(--br)}
+.eb-ico-wrap{position:relative;width:50px;height:50px;flex-shrink:0}
+.eb-ico-circle{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+.eb-ico-circle svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.eb-pulse{position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.35);animation:eb-pulse 3s ease-out infinite}
+@keyframes eb-pulse{0%{transform:scale(1);opacity:.7}70%{transform:scale(1.6);opacity:0}100%{transform:scale(1.6);opacity:0}}
+.emergency-btn.no-contact .eb-pulse{animation:none}
+.eb-label{flex:1;line-height:1.3}
+.eb-name{font-size:17px;font-weight:800;display:block}
+.eb-hint{font-size:12px;font-weight:600;opacity:.85;display:block;margin-top:2px}
+.eb-arr{font-size:22px;font-weight:700;opacity:.7;flex-shrink:0}
 
 /* BOTTOM NAV */
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:390px;background:#fff;border-top:1px solid var(--br);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
@@ -280,6 +289,23 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
     <!-- ALERT LIST (shown when alerts exist) -->
     <div id="alert-list-section"></div>
 
+    <!-- EMERGENCY CONTACT BUTTON -->
+    <div style="padding:0 18px;margin-bottom:10px">
+      <button class="emergency-btn" id="emergency-btn" onclick="emergencyCall()">
+        <div class="eb-ico-wrap">
+          <div class="eb-pulse"></div>
+          <div class="eb-ico-circle">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          </div>
+        </div>
+        <div class="eb-label">
+          <span class="eb-name" id="eb-name">Add emergency contact</span>
+          <span class="eb-hint" id="eb-hint" data-en="Tap to call for help" data-nl="Tik om hulp te bellen">Tap to call for help</span>
+        </div>
+        <span class="eb-arr">›</span>
+      </button>
+    </div>
+
     <!-- SETTINGS BUTTON -->
     <div style="padding:0 18px;margin-bottom:12px">
       <button onclick="goTo('profile.html')" style="width:100%;background:#fff;border:1.5px solid var(--br);border-radius:var(--rads);padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:'Nunito',sans-serif;-webkit-tap-highlight-color:transparent">
@@ -335,14 +361,6 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   </div>
 
   <!-- BOTTOM NAV -->
-<!-- EMERGENCY CONTACT BUTTON -->
-<button class="emergency-btn" id="emergency-btn" onclick="emergencyCall()">
-  <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-  <div class="eb-label">
-    <span class="eb-name" id="eb-name">Add contact</span>
-    <span class="eb-hint" id="eb-hint">Tap to call for help</span>
-  </div>
-</button>
 
   <nav class="bnav">
     <button class="nb on" onclick="goTo('home.html')">
@@ -514,13 +532,13 @@ function updateEmergencyBtn(){
   var hintEl=document.getElementById('eb-hint');
   if(g&&g.name){
     btn.classList.remove('no-contact');
-    nameEl.textContent=g.name.split(' ')[0];
-    hintEl.textContent=g.phone?(lang==='nl'?'Tik om te bellen':'Tap to call'):(lang==='nl'?'Geen nummer opgegeven':'No number added');
+    nameEl.textContent=g.name;
+    hintEl.textContent=g.phone?(lang==='nl'?'Tik om hulp te bellen':'Tap to call for help'):(lang==='nl'?'Geen nummer opgegeven':'No phone number added');
     if(g.phone)btn.title=g.phone;
   }else{
     btn.classList.add('no-contact');
-    nameEl.textContent=lang==='nl'?'Contact toevoegen':'Add contact';
-    hintEl.textContent=lang==='nl'?'Tik om in te stellen':'Tap to set up';
+    nameEl.textContent=lang==='nl'?'Noodcontact instellen':'Set up emergency contact';
+    hintEl.textContent=lang==='nl'?'Tik om een contact toe te voegen':'Tap to add a contact';
   }
 }
 
