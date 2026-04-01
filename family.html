@@ -54,8 +54,12 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 
 /* STATUS GRID — Guardian view */
 .status-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
-.status-card{background:var(--card);border-radius:var(--rad);border:1.5px solid var(--br);padding:14px;cursor:pointer;transition:transform .15s;box-shadow:var(--sh)}
-.status-card:active{transform:scale(.97)}
+.sc-swipe-wrap{position:relative;overflow:hidden;border-radius:var(--rad)}
+.sc-del-bg{position:absolute;right:0;top:0;bottom:0;width:64px;background:#D32F2F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border-radius:0 var(--rad) var(--rad) 0}
+.sc-del-bg svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.sc-del-bg span{font-size:9px;font-weight:800;color:#fff}
+.status-card{background:var(--card);border-radius:var(--rad);border:1.5px solid var(--br);padding:14px;cursor:pointer;transition:transform .25s ease;box-shadow:var(--sh);position:relative;z-index:1;will-change:transform;margin-bottom:0}
+.status-card:active{opacity:.9}
 .sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .sc-ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0}
 .sc-badge{width:10px;height:10px;border-radius:50%;border:2px solid #fff}
@@ -541,7 +545,12 @@ function renderStatusGrid(){
     var diff=Math.floor((Date.now()-s.lastActive)/60000);
     var lastStr=diff<60?(lang==='nl'?diff+' min geleden':diff+' min ago'):(lang==='nl'?Math.floor(diff/60)+' uur geleden':Math.floor(diff/60)+' hr ago');
 
-    html+='<div class="status-card '+cardClass+'" onclick="openSeniorDetail(\''+s.id+'\')">'
+    html+='<div class="sc-swipe-wrap" id="scwrap-'+s.id+'">'
+      +'<div class="sc-del-bg" onclick="confirmRemoveSenior(\''+s.id+'\')">'
+      +'<svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>'
+      +'<span>'+(lang==='nl'?'Wissen':'Remove')+'</span>'
+      +'</div>'
+      +'<div class="status-card '+cardClass+'" id="sccard-'+s.id+'" onclick="openSeniorDetail(\''+s.id+'\')">'
       +'<div class="sc-top">'
       +'<div class="sc-ava" style="background:'+color+'">'+initials+'</div>'
       +'<div class="sc-badge" style="background:'+dotColor+'"></div>'
@@ -552,6 +561,7 @@ function renderStatusGrid(){
       +'<svg viewBox="0 0 24 24" style="stroke:'+statusColor+'">'+statusIcon+'</svg>'
       +statusText+'</div>'
       +'<div class="sc-last">'+lastStr+'</div>'
+      +'</div>'
       +'</div>';
   });
 
@@ -563,6 +573,57 @@ function renderStatusGrid(){
 
   grid.innerHTML=html;
   renderRoleLabels();
+  initSeniorSwipe();
+}
+
+function initSeniorSwipe(){
+  var SNAP=64,THRESH=80;
+  document.querySelectorAll('.sc-swipe-wrap').forEach(function(wrap){
+    var card=wrap.querySelector('.status-card');
+    if(!card)return;
+    var startX=0,startY=0,dx=0,open=false,dragging=false,cancelled=false;
+    wrap.addEventListener('touchstart',function(e){
+      startX=e.touches[0].clientX;startY=e.touches[0].clientY;
+      dx=open?-SNAP:0;dragging=true;cancelled=false;
+      card.style.transition='none';
+    },{passive:true});
+    wrap.addEventListener('touchmove',function(e){
+      if(!dragging||cancelled)return;
+      var mx=e.touches[0].clientX-startX;
+      var my=e.touches[0].clientY-startY;
+      if(!open&&Math.abs(my)>Math.abs(mx)&&Math.abs(my)>8){cancelled=true;return;}
+      dx=Math.max(-SNAP,Math.min(0,(open?-SNAP:0)+mx));
+      card.style.transform='translateX('+dx+'px)';
+    },{passive:true});
+    wrap.addEventListener('touchend',function(){
+      if(!dragging)return;dragging=false;
+      card.style.transition='transform .25s ease';
+      if(cancelled){card.style.transform='translateX('+(open?-SNAP:0)+'px)';return;}
+      if(dx<-(open?SNAP-20:THRESH)){card.style.transform='translateX(-'+SNAP+'px)';open=true;}
+      else{card.style.transform='translateX(0)';open=false;}
+    });
+  });
+  // Tap elsewhere to close
+  document.addEventListener('touchstart',function(e){
+    document.querySelectorAll('.sc-swipe-wrap .status-card').forEach(function(c){
+      if(!c.closest('.sc-swipe-wrap').contains(e.target)&&c.style.transform==='translateX(-64px)'){
+        c.style.transition='transform .25s ease';c.style.transform='translateX(0)';
+      }
+    });
+  },{passive:true});
+}
+
+function confirmRemoveSenior(id){
+  var seniors=getSeniors();
+  var s=seniors.find(function(x){return x.id===id;});
+  if(!s)return;
+  var msg=lang==='nl'
+    ?'Weet u zeker dat u '+s.name+' uit uw kring wilt verwijderen?'
+    :'Are you sure you want to remove '+s.name+' from your circle?';
+  if(confirm(msg)){
+    saveSeniors(seniors.filter(function(x){return x.id!==id;}));
+    renderStatusGrid();
+  }
 }
 
 // ── SENIOR DETAIL MODAL ───────────────────────────────────
