@@ -88,6 +88,9 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 @keyframes spin{to{transform:rotate(360deg)}}
 /* Mobile performance */
 button,a{touch-action:manipulation}
+/* Large text */
+html.large-text{font-size:118%}
+html.xl-text{font-size:135%}
 </style>
 </head>
 <body>
@@ -104,6 +107,7 @@ button,a{touch-action:manipulation}
     <div class="dot on" id="dot-0" onclick="skipToSlide(0)"></div>
     <div class="dot" id="dot-1" onclick="skipToSlide(1)"></div>
     <div class="dot" id="dot-2" onclick="skipToSlide(2)"></div>
+    <div class="dot" id="dot-3" onclick="skipToSlide(3)"></div>
   </div>
 
   <!-- SLIDES -->
@@ -160,8 +164,38 @@ button,a{touch-action:manipulation}
       </div>
     </div>
 
-    <!-- SCREEN 2: ADD FAMILY CONTACT -->
+    <!-- SCREEN 2: FONT SIZE -->
     <div class="slide" id="slide-1">
+      <div class="illo" style="background:#FFF8E1">
+        <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="90" cy="90" r="90" fill="#FFF8E1"/>
+          <text x="22" y="118" font-size="72" font-weight="900" fill="#E65100" opacity="0.75" font-family="Georgia,serif">Aa</text>
+          <text x="108" y="105" font-size="38" font-weight="900" fill="#F57C00" opacity="0.55" font-family="Georgia,serif">Aa</text>
+        </svg>
+      </div>
+      <div class="slide-title" data-en="How big should the text be?" data-nl="Hoe groot wilt u de tekst?">How big should the text be?</div>
+      <div class="slide-sub" data-en="Choose what feels most comfortable. You can change this any time in Settings." data-nl="Kies wat het prettigst leest. U kunt dit altijd wijzigen via Instellingen.">Choose what feels most comfortable. You can change this any time in Settings.</div>
+      <div style="display:flex;flex-direction:column;gap:10px;width:100%;margin-top:8px">
+        <div id="fs-normal" onclick="selectFontSize('normal')" style="background:#fff;border:2px solid var(--br);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:3px;touch-action:manipulation">
+          <div style="font-size:14px;font-weight:800" data-en="Normal" data-nl="Normaal">Normal</div>
+          <div style="font-size:12px;color:var(--mu)" data-en="Standard text size" data-nl="Standaard tekstgrootte">Standard text size</div>
+        </div>
+        <div id="fs-large" onclick="selectFontSize('large')" style="background:#fff;border:2px solid var(--gd);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:3px;touch-action:manipulation">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:16px;font-weight:800" data-en="Large" data-nl="Groot">Large</span>
+            <span style="background:var(--gd);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px" data-en="Recommended" data-nl="Aanbevolen">Recommended</span>
+          </div>
+          <div style="font-size:13px;color:var(--mu)" data-en="Comfortable for most people" data-nl="Prettig voor de meeste mensen">Comfortable for most people</div>
+        </div>
+        <div id="fs-xl" onclick="selectFontSize('xl')" style="background:#fff;border:2px solid var(--br);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:3px;touch-action:manipulation">
+          <div style="font-size:18px;font-weight:800" data-en="Extra Large" data-nl="Extra groot">Extra Large</div>
+          <div style="font-size:14px;color:var(--mu)" data-en="For the easiest reading" data-nl="Voor het gemakkelijkste lezen">For the easiest reading</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: ADD FAMILY CONTACT -->
+    <div class="slide" id="slide-2">
       <div class="illo" style="background:#EDE8FB">
         <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
           <circle cx="90" cy="90" r="90" fill="#EDE8FB"/>
@@ -195,11 +229,11 @@ button,a{touch-action:manipulation}
           <input type="text" id="ob-rel" data-ph-en="e.g. Daughter, Son, Neighbour" data-ph-nl="bijv. Dochter, Zoon, Buurman" placeholder="e.g. Daughter"/>
         </div>
       </div>
-      <span class="skip-link" onclick="skipToSlide(2)" data-en="Skip for now — I'll do this later" data-nl="Nu overslaan — ik doe dit later">Skip for now — I'll do this later</span>
+      <span class="skip-link" onclick="skipToSlide(3)" data-en="Skip for now — I'll do this later" data-nl="Nu overslaan — ik doe dit later">Skip for now — I'll do this later</span>
     </div>
 
-    <!-- SCREEN 3: HOW IT WORKS + WHAT HAPPENS -->
-    <div class="slide" id="slide-2" style="justify-content:flex-start;padding-top:52px;overflow-y:auto">
+    <!-- SCREEN 4: HOW IT WORKS + WHAT HAPPENS -->
+    <div class="slide" id="slide-3" style="justify-content:flex-start;padding-top:52px;overflow-y:auto">
 
       <div class="slide-tag" data-en="How DigiMaat works" data-nl="Hoe DigiMaat werkt">How DigiMaat works</div>
       <h1 class="slide-title" style="font-size:22px;margin-bottom:6px">
@@ -315,12 +349,15 @@ auth.onAuthStateChanged(function(user){
   var stored=JSON.parse(localStorage.getItem('dm_user')||'{}');
   document.getElementById('page-loader').style.display='none';
   document.getElementById('app').style.display='flex';
+  var prefs=JSON.parse(localStorage.getItem('dm_prefs')||'{}');
+  if(prefs.large_text)document.documentElement.classList.add('large-text');
+  if(prefs.text_scale==='xl')document.documentElement.classList.add('xl-text');
   setLang(localStorage.getItem('dm_lang')||'en');
 });
 
 var lang='en';
 var currentSlide=0;
-var TOTAL=3;
+var TOTAL=4;
 
 function setLang(l){
   lang=l;
@@ -359,17 +396,17 @@ function updateNav(){
   }
   // Update next button label
   var nextLabel=document.getElementById('next-label');
-  if(currentSlide===0){
+  if(currentSlide===0||currentSlide===1){
     nextLabel.textContent=lang==='nl'?'Volgende':'Next';
     document.getElementById('next-btn').style.display='flex';
-  }else if(currentSlide===1){
+  }else if(currentSlide===2){
     var name=document.getElementById('ob-name')?document.getElementById('ob-name').value.trim():'';
     nextLabel.textContent=name
       ?(lang==='nl'?'Opslaan & doorgaan':'Save & continue')
       :(lang==='nl'?'Overslaan':'Skip');
     document.getElementById('next-btn').style.display='flex';
   }else{
-    // Screen 3 — show two action buttons instead of next
+    // Screen 4 — show two action buttons instead of next
     document.getElementById('next-btn').style.display='none';
     // Render action buttons if not already there
     if(!document.getElementById('s3-actions')){
@@ -398,7 +435,7 @@ function finishOnboarding(dest){
 }
 
 function nextSlide(){
-  if(currentSlide===1){
+  if(currentSlide===2){
     // Save family contact if filled in
     var name=document.getElementById('ob-name').value.trim();
     var phone=document.getElementById('ob-phone').value.trim();
@@ -430,6 +467,27 @@ function moveSlides(){
     s.style.transform='translateX('+(i*100+offset)+'%)';
   });
   updateNav();
+}
+
+function selectFontSize(size){
+  var prefs=JSON.parse(localStorage.getItem('dm_prefs')||'{}');
+  var ids=['fs-normal','fs-large','fs-xl'];
+  ids.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.style.borderColor=id==='fs-'+size?'var(--gd)':'var(--br)';
+  });
+  if(size==='normal'){
+    prefs.large_text=false;prefs.text_scale='normal';
+    document.documentElement.classList.remove('large-text','xl-text');
+  }else if(size==='large'){
+    prefs.large_text=true;prefs.text_scale='large';
+    document.documentElement.classList.add('large-text');
+    document.documentElement.classList.remove('xl-text');
+  }else{
+    prefs.large_text=true;prefs.text_scale='xl';
+    document.documentElement.classList.add('large-text','xl-text');
+  }
+  localStorage.setItem('dm_prefs',JSON.stringify(prefs));
 }
 
 // Init slide positions

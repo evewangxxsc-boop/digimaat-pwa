@@ -134,6 +134,9 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 @keyframes spin{to{transform:rotate(360deg)}}
 /* Mobile performance */
 button,a{touch-action:manipulation}
+/* Large text */
+html.large-text{font-size:118%}
+html.xl-text{font-size:135%}
 </style>
 </head>
 <body>
@@ -301,6 +304,9 @@ auth.onAuthStateChanged(function(user){
   if(!user){window.location.href='register.html';return;}
   document.getElementById('page-loader').style.display='none';
   document.getElementById('app').style.display='flex';
+  var prefs=JSON.parse(localStorage.getItem('dm_prefs')||'{}');
+  if(prefs.large_text)document.documentElement.classList.add('large-text');
+  if(prefs.text_scale==='xl')document.documentElement.classList.add('xl-text');
   initPage(user);
 });
 
@@ -363,6 +369,10 @@ function togglePref(key,btn){
   var prefs=JSON.parse(localStorage.getItem('dm_prefs')||'{}');
   prefs[key]=!btn.classList.contains('off');
   localStorage.setItem('dm_prefs',JSON.stringify(prefs));
+  if(key==='large_text'){
+    document.documentElement.classList.toggle('large-text',prefs[key]);
+    if(!prefs[key])document.documentElement.classList.remove('xl-text');
+  }
 }
 function updateFamilyNotifSub(){
   var family=JSON.parse(localStorage.getItem(storageKey('dm_family'))||'null');

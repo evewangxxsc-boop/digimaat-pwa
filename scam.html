@@ -179,6 +179,9 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .page-loader .spin{width:32px;height:32px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
 /* Mobile performance */
 button,a{touch-action:manipulation}
+/* Large text */
+html.large-text{font-size:118%}
+html.xl-text{font-size:135%}
 </style>
 </head>
 <body>
@@ -327,6 +330,9 @@ auth.onAuthStateChanged(function(user){
   if(!user){window.location.href='register.html';return;}
   document.getElementById('page-loader').style.display='none';
   document.getElementById('app').style.display='flex';
+  var prefs=JSON.parse(localStorage.getItem('dm_prefs')||'{}');
+  if(prefs.large_text)document.documentElement.classList.add('large-text');
+  if(prefs.text_scale==='xl')document.documentElement.classList.add('xl-text');
   setLang(localStorage.getItem('dm_lang')||'en');
 
   // Check for prefilled message from Inbox Scan
