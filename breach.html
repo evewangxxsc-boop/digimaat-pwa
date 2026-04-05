@@ -245,8 +245,6 @@ auth.onAuthStateChanged(function(user){
   setLang(localStorage.getItem('dm_lang')||'en');
 });
 
-// BREACHDIRECTORY API KEY
-var RAPIDAPI_KEY='620c4cc0c2msh8e4924f7470d579p1bc218jsn8c41503d3542';
 
 // LANGUAGE
 var lang='en';
@@ -313,29 +311,24 @@ function runCheck(){
   document.getElementById('loading-state').classList.add('show');
   document.getElementById('result-area').innerHTML='';
 
-  // BreachDirectory API — searches by email directly
-  fetch('https://breachdirectory.p.rapidapi.com/?func=auto&term='+encodeURIComponent(email),{
-    method:'GET',
-    headers:{
-      'x-rapidapi-key': RAPIDAPI_KEY,
-      'x-rapidapi-host':'breachdirectory.p.rapidapi.com'
-    }
-  })
+  // XposedOrNot API — no key required
+  fetch('https://api.xposedornot.com/v1/check-email/'+encodeURIComponent(email))
   .then(function(res){
+    if(res.status===404){renderSafe(email);return null;}
     if(!res.ok){throw new Error('api_error');}
     return res.json();
   })
   .then(function(data){
-    // BreachDirectory returns: {found: number, result: [...sources]}
-    if(!data.found || data.found===0 || !data.result || data.result.length===0){
+    if(!data)return;
+    if(!data.breaches||data.breaches.length===0){
       renderSafe(email);
     }else{
-      renderBreaches(data.result, email, data.found);
+      renderBreaches(data.breaches, email, data.breaches.length);
     }
   })
   .catch(function(err){
-    console.warn('BreachDirectory error:', err);
-    renderDemo(email);
+    console.warn('XposedOrNot error:', err);
+    renderError();
   })
   .finally(function(){
     document.getElementById('check-btn').disabled=false;
@@ -377,24 +370,28 @@ function renderBreaches(sources, email, totalFound){
       :'Your email appeared in <strong>'+totalFound+' data breach'+(totalFound>1?'es':'')+'</strong>. Please change your passwords for the services below as soon as possible.')
     +'</div></div></div>';
 
-  // Show up to 6 breach sources
+  // Show up to 6 breaches
   var show=sources.slice(0,6);
   html+='<div class="breach-list">';
-  show.forEach(function(source){
-    // BreachDirectory result format: {sources: ["LinkedIn"], password: "hash...", sha1: "..."}
-    var name=Array.isArray(source.sources)?source.sources.join(', '):(source.sources||'Unknown source');
-    var hasPassword=source.password&&source.password.length>0;
+  show.forEach(function(b){
+    // XposedOrNot format: {breach, domain, xposed_date, xposed_data: [...]}
+    var name=b.breach||b.domain||'Unknown';
+    var domain=b.domain?'<span style="font-size:11px;color:var(--mu)">'+b.domain+'</span>':'';
+    var date=b.xposed_date?'<span style="font-size:11px;color:var(--mu)"> · '+b.xposed_date+'</span>':'';
+    var types=Array.isArray(b.xposed_data)&&b.xposed_data.length
+      ?b.xposed_data
+      :['Email'];
     html+='<div class="breach-item">'
       +'<div class="breach-ico"><svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/>'
       +'<line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>'
-      +'<div>'
+      +'<div style="flex:1;min-width:0">'
       +'<div class="breach-name">'+name+'</div>'
-      +(hasPassword?'<div class="breach-types"><span class="btag">'+(lang==='nl'?'Wachtwoord uitgelekt':'Password exposed')+'</span>'
-        +'<span class="btag">Email</span></div>':'<div class="breach-types"><span class="btag">Email</span></div>')
+      +'<div>'+domain+date+'</div>'
+      +'<div class="breach-types">'+types.slice(0,4).map(function(t){return '<span class="btag">'+t+'</span>';}).join('')+'</div>'
       +'</div></div>';
   });
   if(sources.length>6){
-    html+='<div class="more-badge">+ '+(sources.length-6)+' '+(lang==='nl'?'meer bronnen':'more sources')+'</div>';
+    html+='<div class="more-badge">+ '+(sources.length-6)+' '+(lang==='nl'?'meer lekken':'more breaches')+'</div>';
   }
   html+='</div>';
 
@@ -423,20 +420,18 @@ function renderBreaches(sources, email, totalFound){
   scrollToResult();
 }
 
-// RENDER: DEMO FALLBACK
-function renderDemo(email){
-  var demoSources=[
-    {sources:['LinkedIn'],password:'hashed_pw_1'},
-    {sources:['Adobe'],password:'hashed_pw_2'},
-    {sources:['Dropbox'],password:''}
-  ];
-  renderBreaches(demoSources,email,3);
-  var badge=document.createElement('div');
-  badge.className='demo-badge';
-  badge.textContent=lang==='nl'
-    ?'⚠ De live API was niet bereikbaar. Dit zijn voorbeeldresultaten voor demonstratiedoeleinden.'
-    :'⚠ The live API was unreachable. These are example results for demonstration purposes.';
-  document.getElementById('result-area').appendChild(badge);
+// RENDER: ERROR
+function renderError(){
+  document.getElementById('result-area').innerHTML=
+    '<div class="result-warn">'
+    +'<div class="result-head"><div class="rh-dot"></div>'
+    +'<div class="rh-label">'+(lang==='nl'?'Kon niet verbinden':'Could not connect')+'</div></div>'
+    +'<div class="result-body"><div class="result-text">'
+    +(lang==='nl'
+      ?'Er is een fout opgetreden bij het controleren. Controleer uw internetverbinding en probeer het opnieuw.'
+      :'Something went wrong while checking. Please check your internet connection and try again.')
+    +'</div></div></div>';
+  scrollToResult();
 }
 
 function scrollToResult(){
