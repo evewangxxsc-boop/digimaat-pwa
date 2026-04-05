@@ -75,6 +75,10 @@ html,body{min-height:100%;background:var(--bg);font-family:'Nunito',sans-serif;c
 .toast.show{opacity:1}
 .toast.err{background:var(--r)}
 .overlay{position:fixed;inset:0;background:rgba(255,255,255,.82);display:none;align-items:center;justify-content:center;z-index:500;flex-direction:column;gap:12px}
+.pw-strength{display:flex;align-items:center;gap:8px;margin-top:4px;margin-bottom:4px}
+.pw-bar{flex:1;height:4px;background:var(--br);border-radius:2px;overflow:hidden}
+.pw-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0}
+.pw-label{font-size:11px;font-weight:700;white-space:nowrap}
 .overlay.show{display:flex}
 .big-spin{width:36px;height:36px;border:3px solid var(--gl);border-top-color:var(--g);border-radius:50%;animation:spin .7s linear infinite}
 .ovtxt{font-size:14px;font-weight:700;color:var(--gd);font-family:'Nunito',sans-serif}
@@ -129,9 +133,17 @@ html,body{min-height:100%;background:var(--bg);font-family:'Nunito',sans-serif;c
     </div>
     <div class="fl">
       <label data-en="Password" data-nl="Wachtwoord">Password</label>
-      <input class="fi" type="password" id="inp-password" placeholder="At least 6 characters" autocomplete="new-password" data-ph-en="At least 6 characters" data-ph-nl="Minimaal 6 tekens"/>
+      <input class="fi" type="password" id="inp-password" placeholder="At least 8 characters" autocomplete="new-password" data-ph-en="At least 8 characters" data-ph-nl="Minimaal 8 tekens"/>
+      <div class="pw-strength" id="pw-strength" style="display:none">
+        <div class="pw-bar"><div class="pw-fill" id="pw-fill"></div></div>
+        <span class="pw-label" id="pw-label"></span>
+      </div>
       <div class="ferr" id="err-password"></div>
     </div>
+    <label style="display:flex;align-items:center;gap:8px;margin:4px 0 14px;cursor:pointer">
+      <input type="checkbox" id="remember-me" checked style="width:18px;height:18px;accent-color:var(--g)"/>
+      <span style="font-size:13px;font-weight:700" data-en="Remember me" data-nl="Onthoud mij">Remember me</span>
+    </label>
     <div class="vind" id="vind">
       <div class="waves"><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div><div class="wv"></div></div>
       <span data-en="Listening…" data-nl="Aan het luisteren…">Listening…</span>
@@ -244,11 +256,21 @@ function registerWithEmail(){
   var ok=true;
   if(!name){fErr('name',lang==='nl'?'Vul uw naam in.':'Please enter your name.');ok=false;}
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){fErr('email',lang==='nl'?'Voer een geldig e-mailadres in.':'Please enter a valid email.');ok=false;}
-  if(pw.length<6){fErr('password',lang==='nl'?'Minimaal 6 tekens.':'At least 6 characters required.');ok=false;}
+  var pwErrors=[];
+  if(pw.length<8) pwErrors.push(lang==='nl'?'Minimaal 8 tekens':'At least 8 characters');
+  if(!/[A-Z]/.test(pw)) pwErrors.push(lang==='nl'?'Eén hoofdletter':'One uppercase letter');
+  if(!/[0-9]/.test(pw)) pwErrors.push(lang==='nl'?'Eén cijfer':'One number');
+  if(!/[^A-Za-z0-9]/.test(pw)) pwErrors.push(lang==='nl'?'Eén speciaal teken (!@#$...)':'One special character (!@#$...)');
+  if(pwErrors.length>0){fErr('password',pwErrors.join(' · '));ok=false;}
   if(!ok)return;
   document.getElementById('btn-register').disabled=true;
   showOv(lang==='nl'?'Account aanmaken…':'Creating your account…');
-  auth.createUserWithEmailAndPassword(email,pw).then(function(c){
+  var persistence=document.getElementById('remember-me').checked
+    ?firebase.auth.Auth.Persistence.LOCAL
+    :firebase.auth.Auth.Persistence.SESSION;
+  auth.setPersistence(persistence).then(function(){
+    return auth.createUserWithEmailAndPassword(email,pw);
+  }).then(function(c){
     return c.user.updateProfile({displayName:name}).then(function(){
       localStorage.setItem('dm_user',JSON.stringify({name:name,email:email,photo:'',uid:c.user.uid}));
       toast(lang==='nl'?'Welkom, '+name+'!':'Welcome, '+name+'!');
@@ -273,7 +295,12 @@ function signInWithEmail(){
   if(!ok)return;
   document.getElementById('btn-signin').disabled=true;
   showOv(lang==='nl'?'Inloggen…':'Signing in…');
-  auth.signInWithEmailAndPassword(email,pw).then(function(c){
+  var persistence=document.getElementById('remember-me').checked
+    ?firebase.auth.Auth.Persistence.LOCAL
+    :firebase.auth.Auth.Persistence.SESSION;
+  auth.setPersistence(persistence).then(function(){
+    return auth.signInWithEmailAndPassword(email,pw);
+  }).then(function(c){
     var u=c.user;
     localStorage.setItem('dm_user',JSON.stringify({name:u.displayName||email.split('@')[0],email:u.email,photo:u.photoURL||'',uid:u.uid}));
     localStorage.setItem(u.uid+'_dm_onboarded','true');
@@ -305,6 +332,29 @@ function startVoice(inputId,btnId,demoEn,demoNl){
   }else{setTimeout(function(){inp.value=demoVal;cleanup();},2000);}
   function cleanup(){btn.classList.remove('listening');ind.classList.remove('show');activeRec=null;}
 }
+
+// PASSWORD STRENGTH METER
+document.getElementById('inp-password').addEventListener('input',function(){
+  var pw=this.value;
+  var el=document.getElementById('pw-strength');
+  var fill=document.getElementById('pw-fill');
+  var label=document.getElementById('pw-label');
+  if(!pw){el.style.display='none';return;}
+  el.style.display='flex';
+  var score=0;
+  if(pw.length>=8)score++;
+  if(/[A-Z]/.test(pw))score++;
+  if(/[0-9]/.test(pw))score++;
+  if(/[^A-Za-z0-9]/.test(pw))score++;
+  var pct=['0%','25%','50%','75%','100%'][score];
+  var color=['var(--r)','var(--r)','var(--am)','var(--g)','var(--gd)'][score];
+  var labels_en=['Very weak','Weak','Fair','Good','Strong'];
+  var labels_nl=['Zeer zwak','Zwak','Redelijk','Goed','Sterk'];
+  fill.style.width=pct;
+  fill.style.background=color;
+  label.textContent=(lang==='nl'?labels_nl:labels_en)[score];
+  label.style.color=color;
+});
 
 // AUTO-REDIRECT IF ALREADY LOGGED IN
 auth.onAuthStateChanged(function(user){
