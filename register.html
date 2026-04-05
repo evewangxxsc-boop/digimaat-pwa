@@ -203,8 +203,10 @@ function eMsg(code){return((ERRS[code]||{en:'Something went wrong.',nl:'Er ging 
 // NAVIGATE
 function goHome(role){
   localStorage.setItem('dm_role',role||'senior');
-  // New user — show onboarding; returning user — go to home
-  if(localStorage.getItem('dm_onboarded')==='true'){
+  var stored=JSON.parse(localStorage.getItem('dm_user')||'{}');
+  var uid=stored.uid||'';
+  var onboardKey=uid?uid+'_dm_onboarded':'dm_onboarded';
+  if(localStorage.getItem(onboardKey)==='true'){
     window.location.href='home.html';
   }else{
     window.location.href='onboarding.html';
@@ -220,7 +222,15 @@ function signInWithGoogle(){
     var u=r.user;
     localStorage.setItem('dm_user',JSON.stringify({name:u.displayName||'User',email:u.email,photo:u.photoURL||'',uid:u.uid}));
     toast(lang==='nl'?'Welkom, '+u.displayName+'!':'Welcome, '+u.displayName+'!');
-    setTimeout(function(){goHome('senior');},900);
+    var isNew=r.additionalUserInfo&&r.additionalUserInfo.isNewUser;
+    setTimeout(function(){
+      if(isNew){
+        window.location.href='onboarding.html';
+      }else{
+        localStorage.setItem(u.uid+'_dm_onboarded','true');
+        window.location.href='home.html';
+      }
+    },900);
   }).catch(function(err){hideOv();toast(eMsg(err.code),true);})
   .finally(function(){document.getElementById('btn-google').disabled=false;hideOv();});
 }
@@ -266,8 +276,9 @@ function signInWithEmail(){
   auth.signInWithEmailAndPassword(email,pw).then(function(c){
     var u=c.user;
     localStorage.setItem('dm_user',JSON.stringify({name:u.displayName||email.split('@')[0],email:u.email,photo:u.photoURL||'',uid:u.uid}));
+    localStorage.setItem(u.uid+'_dm_onboarded','true');
     toast(lang==='nl'?'Welkom terug!':'Welcome back!');
-    setTimeout(function(){goHome('senior');},900);
+    setTimeout(function(){window.location.href='home.html';},900);
   }).catch(function(err){
     hideOv();
     if(err.code==='auth/user-not-found'||err.code==='auth/invalid-credential')fErr('email',eMsg('auth/user-not-found'));
