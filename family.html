@@ -489,6 +489,11 @@ function renderRoleLabels(){
 // ── INIT ─────────────────────────────────────────────────
 var currentRole='guardian';
 function initPage(){
+  // Purge old demo data if present
+  var seniors=getSeniors();
+  if(seniors.length>0&&seniors[0].id==='demo1'){
+    localStorage.removeItem(storageKey('dm_seniors'));
+  }
   lang=localStorage.getItem('dm_lang')||'en';
   currentRole=localStorage.getItem(storageKey('dm_family_role'))||'guardian';
   // Load notification prefs
@@ -521,48 +526,29 @@ function toggleNotif(key,btn){
   localStorage.setItem(storageKey('dm_guardian_notifs'),JSON.stringify(prefs));
 }
 
-// ── DEMO SENIOR DATA ──────────────────────────────────────
-// In V1 we seed demo seniors if none exist
-// Real data comes from invite code connections
+// ── SENIOR DATA ───────────────────────────────────────────
 function getSeniors(){
   try{return JSON.parse(localStorage.getItem(storageKey('dm_seniors'))||'[]');}catch(e){return[];}
 }
 function saveSeniors(s){localStorage.setItem(storageKey('dm_seniors'),JSON.stringify(s));}
 
-function seedDemoSeniors(){
-  var existing=getSeniors();
-  if(existing.length>0)return;
-  var demo=[
-    {
-      id:'demo1',name:'Maria de Boer',rel:'Mother',
-      status:'alert',lastActive:Date.now()-3600000*2,
-      activity:[
-        {title_en:'Data breach detected — LinkedIn',title_nl:'Datalek gedetecteerd — LinkedIn',time:Date.now()-3600000*2,severity:'r'},
-        {title_en:'3 suspicious emails found',title_nl:'3 verdachte e-mails gevonden',time:Date.now()-3600000*26,severity:'a'},
-      ],
-      perms:{breach:true,scam:true,inbox:true}
-    },
-    {
-      id:'demo2',name:'Jan de Boer',rel:'Father',
-      status:'safe',lastActive:Date.now()-3600000*5,
-      activity:[
-        {title_en:'Message checked — safe',title_nl:'Bericht gecontroleerd — veilig',time:Date.now()-3600000*5,severity:'g'},
-        {title_en:'Breach check — no leaks found',title_nl:'Lek check — geen lekken gevonden',time:Date.now()-3600000*48,severity:'g'},
-      ],
-      perms:{breach:true,scam:true,inbox:false}
-    }
-  ];
-  saveSeniors(demo);
-}
-
 // ── GUARDIAN VIEW — STATUS GRID ───────────────────────────
 var AVATAR_COLORS=['#0F6E56','#185FA5','#7A4A00','#A32D2D','#5B44C1'];
 
 function renderStatusGrid(){
-  seedDemoSeniors();
   var seniors=getSeniors();
   var grid=document.getElementById('status-grid');
   var html='';
+
+  if(seniors.length===0){
+    html='<div class="add-card" onclick="generateCode()" style="grid-column:1/-1">'
+      +'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/><circle cx="12" cy="12" r="10"/></svg>'
+      +'<span>'+(lang==='nl'?'Genereer een code om\niemand toe te voegen':'Generate a code to\nadd someone')+'</span>'
+      +'</div>';
+    grid.innerHTML=html;
+    renderRoleLabels();
+    return;
+  }
 
   seniors.forEach(function(s,i){
     var initials=s.name.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();
@@ -1043,33 +1029,31 @@ function loadGuardianMembers(){
 function renderGuardianView(members){
   var el=document.getElementById('status-grid');
   if(!el)return;
-  if(!members||members.length===0)return;
-  var html='';
-  members.forEach(function(m){
-    var initials=(m.elderlyName||m.elderlyEmail||'?').split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  var localSeniors=members.map(function(m){
     var lastEvent=m.recentEvents&&m.recentEvents[0];
-    var statusClass='sc-safe',statusText=lang==='nl'?'Veilig':'Safe',statusColor='var(--gd)';
-    if(lastEvent&&lastEvent.severity==='r'){statusClass='sc-alert';statusText=lang==='nl'?'Waarschuwing':'Warning';statusColor='var(--r)';}
-    var lastTime=lastEvent&&lastEvent.timestamp?timeAgo(lastEvent.timestamp.toDate()):'—';
-    html+='<div class="sc-swipe-wrap"><div class="status-card '+statusClass+'">'
-      +'<div class="sc-top">'
-      +'<div class="sc-ava" style="background:var(--gd)">'+initials+'</div>'
-      +'<div class="sc-badge" style="background:'+statusColor+'"></div>'
-      +'</div>'
-      +'<div class="sc-name">'+((m.elderlyName||m.elderlyEmail)||'?')+'</div>'
-      +'<div class="sc-rel">Family</div>'
-      +'<div class="sc-status" style="color:'+statusColor+'">'
-      +'<svg viewBox="0 0 24 24" style="stroke:'+statusColor+'"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>'
-      +statusText+'</div>'
-      +'<div class="sc-last">'+lastTime+'</div>'
-      +'</div></div>';
+    var status='safe';
+    if(lastEvent&&lastEvent.severity==='r')status='alert';
+    else if(lastEvent&&lastEvent.severity==='a')status='warn';
+    return {
+      id:m._docId,
+      name:m.elderlyName||m.elderlyEmail||'?',
+      rel:'Family',
+      status:status,
+      lastActive:lastEvent&&lastEvent.timestamp?lastEvent.timestamp.toDate().getTime():Date.now(),
+      activity:(m.recentEvents||[]).map(function(e){
+        return {
+          title_en:e.title_en||'',
+          title_nl:e.title_nl||'',
+          time:e.timestamp?e.timestamp.toDate().getTime():Date.now(),
+          severity:e.severity||'g'
+        };
+      }),
+      perms:{breach:true,scam:true,inbox:false},
+      firestoreUid:m.elderlyUid
+    };
   });
-  html+='<div class="add-card" onclick="generateCode()">'
-    +'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
-    +'<span>'+(lang==='nl'?'Familielid\ntoevoegen':'Add family\nmember')+'</span>'
-    +'</div>';
-  el.innerHTML=html;
-  initSeniorSwipe();
+  saveSeniors(localSeniors);
+  renderStatusGrid();
 }
 
 function timeAgo(date){
