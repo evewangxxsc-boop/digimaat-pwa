@@ -296,14 +296,21 @@ html.xl-text .btag,html.xl-text .vh,html.xl-text .ferr,html.xl-text .powered-bad
         </div>
       </div>
 
-      <!-- GENERATE INVITE CODE -->
-      <div class="sec-lbl" id="invite-sec-lbl">Invite someone to your circle</div>
-      <div class="invite-card">
-        <div class="invite-title" data-en="Add a family member to watch over" data-nl="Voeg een familielid toe om op te passen">Add a family member to watch over</div>
-        <div class="invite-sub" data-en="Generate a 6-digit code and share it with the person you want to look after. They enter the code on their DigiMaat app." data-nl="Genereer een 6-cijferige code en deel deze met de persoon op wie u wilt letten. Zij voeren de code in op hun DigiMaat-app.">Generate a 6-digit code and share it with the person you want to look after. They enter the code on their DigiMaat app.</div>
-        <div id="code-section">
-          <button class="btn-verify" onclick="generateCode()" id="gen-code-btn" style="margin-bottom:0" data-en="Generate invite code" data-nl="Uitnodigingscode genereren">Generate invite code</button>
+      <!-- ENTER CODE (guardian enters code from elderly) -->
+      <div class="sec-lbl" id="enter-code-sec-lbl">Add someone to my safety circle</div>
+      <div class="enter-code-card">
+        <div class="invite-title" data-en="Enter the 6-digit code from the person you want to look after." data-nl="Voer de 6-cijferige code in van de persoon op wie u wilt letten.">Enter the 6-digit code from the person you want to look after.</div>
+        <div class="invite-sub" data-en="Ask the person you care for to open their DigiMaat app and generate a code. Enter it below." data-nl="Vraag de persoon voor wie u zorgt hun DigiMaat-app te openen en een code te genereren. Voer deze hieronder in.">Ask the person you care for to open their DigiMaat app and generate a code. Enter it below.</div>
+        <div class="code-inputs" id="code-inputs">
+          <input class="code-inp" type="number" maxlength="1" id="ci0" oninput="codeInput(0,this)" onkeydown="codeKey(0,event)"/>
+          <input class="code-inp" type="number" maxlength="1" id="ci1" oninput="codeInput(1,this)" onkeydown="codeKey(1,event)"/>
+          <input class="code-inp" type="number" maxlength="1" id="ci2" oninput="codeInput(2,this)" onkeydown="codeKey(2,event)"/>
+          <input class="code-inp" type="number" maxlength="1" id="ci3" oninput="codeInput(3,this)" onkeydown="codeKey(3,event)"/>
+          <input class="code-inp" type="number" maxlength="1" id="ci4" oninput="codeInput(4,this)" onkeydown="codeKey(4,event)"/>
+          <input class="code-inp" type="number" maxlength="1" id="ci5" oninput="codeInput(5,this)" onkeydown="codeKey(5,event)"/>
         </div>
+        <div id="code-error" style="font-size:12px;color:var(--r);font-weight:700;margin-bottom:10px;display:none"></div>
+        <button class="btn-verify" id="verify-btn" onclick="verifyCode()" disabled data-en="Connect" data-nl="Verbinden">Connect</button>
       </div>
 
     </div><!-- /guardian view -->
@@ -326,21 +333,14 @@ html.xl-text .btag,html.xl-text .vh,html.xl-text .ferr,html.xl-text .powered-bad
       <div class="sec-lbl" id="member-sec-lbl">People looking after me</div>
       <div id="guardians-list"></div>
 
-      <!-- ENTER CODE -->
-      <div class="sec-lbl" id="enter-code-sec-lbl">Add someone to my safety circle</div>
-      <div class="enter-code-card">
-        <div class="invite-title" data-en="Enter the 6-digit code" data-nl="Voer de 6-cijferige code in">Enter the 6-digit code</div>
-        <div class="invite-sub" data-en="Ask your family member to open their DigiMaat app and generate a code. Enter it below." data-nl="Vraag uw familielid hun DigiMaat-app te openen en een code te genereren. Voer deze hieronder in.">Ask your family member to open their DigiMaat app and generate a code. Enter it below.</div>
-        <div class="code-inputs" id="code-inputs">
-          <input class="code-inp" type="number" maxlength="1" id="ci0" oninput="codeInput(0,this)" onkeydown="codeKey(0,event)"/>
-          <input class="code-inp" type="number" maxlength="1" id="ci1" oninput="codeInput(1,this)" onkeydown="codeKey(1,event)"/>
-          <input class="code-inp" type="number" maxlength="1" id="ci2" oninput="codeInput(2,this)" onkeydown="codeKey(2,event)"/>
-          <input class="code-inp" type="number" maxlength="1" id="ci3" oninput="codeInput(3,this)" onkeydown="codeKey(3,event)"/>
-          <input class="code-inp" type="number" maxlength="1" id="ci4" oninput="codeInput(4,this)" onkeydown="codeKey(4,event)"/>
-          <input class="code-inp" type="number" maxlength="1" id="ci5" oninput="codeInput(5,this)" onkeydown="codeKey(5,event)"/>
+      <!-- GENERATE INVITE CODE (elderly generates to share with guardian) -->
+      <div class="sec-lbl" id="invite-sec-lbl">Invite someone to your circle</div>
+      <div class="invite-card">
+        <div class="invite-title" data-en="Add a family member to watch over you" data-nl="Voeg een familielid toe om over u te waken">Add a family member to watch over you</div>
+        <div class="invite-sub" data-en="Share this code with your family member. They enter it on their DigiMaat app to start watching over you." data-nl="Deel deze code met uw familielid. Zij voeren het in op hun DigiMaat app om over u te waken.">Share this code with your family member. They enter it on their DigiMaat app to start watching over you.</div>
+        <div id="code-section">
+          <button class="btn-verify" onclick="generateCode()" id="gen-code-btn" style="margin-bottom:0" data-en="Generate invite code" data-nl="Uitnodigingscode genereren">Generate invite code</button>
         </div>
-        <div id="code-error" style="font-size:12px;color:var(--r);font-weight:700;margin-bottom:10px;display:none"></div>
-        <button class="btn-verify" id="verify-btn" onclick="verifyCode()" disabled data-en="Connect" data-nl="Verbinden">Connect</button>
       </div>
 
     </div><!-- /member view -->
@@ -460,9 +460,9 @@ function setLang(l){
   // Update section labels
   document.getElementById('guardian-sec-lbl').textContent=l==='nl'?'Personen op wie ik let':'People I look after';
   document.getElementById('notif-sec-lbl').textContent=l==='nl'?'Meldingsinstelling':'Alert notifications';
-  document.getElementById('invite-sec-lbl').textContent=l==='nl'?'Iemand uitnodigen voor mijn kring':'Invite someone to your circle';
-  document.getElementById('member-sec-lbl').textContent=l==='nl'?'Personen die op mij letten':'People looking after me';
   document.getElementById('enter-code-sec-lbl').textContent=l==='nl'?'Iemand toevoegen aan mijn veiligheidskring':'Add someone to my safety circle';
+  document.getElementById('member-sec-lbl').textContent=l==='nl'?'Personen die op mij letten':'People looking after me';
+  document.getElementById('invite-sec-lbl').textContent=l==='nl'?'Iemand uitnodigen voor mijn kring':'Invite someone to your circle';
   renderStatusGrid();
   renderGuardiansList();
 }
@@ -750,7 +750,7 @@ function generateCode(){
       +'</div>';
     document.getElementById('code-section').innerHTML=html;
     showToast(lang==='nl'?'Nieuwe code aangemaakt':'New code generated');
-    if(currentRole!=='guardian')switchRole('guardian');
+    if(currentRole!=='member')switchRole('member');
     setTimeout(function(){
       var ic=document.querySelector('.invite-card');
       if(ic)ic.scrollIntoView({behavior:'smooth',block:'center'});
