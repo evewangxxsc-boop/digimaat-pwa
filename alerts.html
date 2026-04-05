@@ -173,8 +173,20 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 /* Mobile performance */
 button,a{touch-action:manipulation}
 /* Large text */
-html.large-text{font-size:118%}
-html.xl-text{font-size:135%}
+html.large-text .app{font-size:17px}
+html.large-text .slide-title,html.large-text .page-title{font-size:20px}
+html.large-text .slide-sub,html.large-text .intro-text,html.large-text .result-text,html.large-text .step-text,html.large-text .feat-sub,html.large-text .strt,html.large-text .strs,html.large-text .breach-name,html.large-text .faq-q-text,html.large-text .faq-answer-text,html.large-text .nr-title,html.large-text .gc-name,html.large-text .invite-sub,html.large-text p,html.large-text .fi{font-size:17px}
+html.large-text .btn,html.large-text .social-btn,html.large-text .next-btn{font-size:18px}
+html.large-text .feat-title,html.large-text .intro-title,html.large-text .field-label,html.large-text .dc-title,html.large-text .wtd-title,html.large-text .sec-lbl{font-size:15px}
+html.large-text .nb span{font-size:11px}
+html.large-text .btag,html.large-text .vh,html.large-text .ferr,html.large-text .powered-badge{font-size:13px}
+html.xl-text .app{font-size:19px}
+html.xl-text .slide-title,html.xl-text .page-title{font-size:23px}
+html.xl-text .slide-sub,html.xl-text .intro-text,html.xl-text .result-text,html.xl-text .step-text,html.xl-text .feat-sub,html.xl-text .strt,html.xl-text .strs,html.xl-text .breach-name,html.xl-text .faq-q-text,html.xl-text .faq-answer-text,html.xl-text .nr-title,html.xl-text .gc-name,html.xl-text .invite-sub,html.xl-text p,html.xl-text .fi{font-size:19px}
+html.xl-text .btn,html.xl-text .social-btn,html.xl-text .next-btn{font-size:21px}
+html.xl-text .feat-title,html.xl-text .intro-title,html.xl-text .field-label,html.xl-text .dc-title,html.xl-text .wtd-title,html.xl-text .sec-lbl{font-size:17px}
+html.xl-text .nb span{font-size:12px}
+html.xl-text .btag,html.xl-text .vh,html.xl-text .ferr,html.xl-text .powered-badge{font-size:15px}
 </style>
 </head>
 <body>
@@ -285,8 +297,8 @@ auth.onAuthStateChanged(function(user){
   document.getElementById('page-loader').style.display='none';
   document.getElementById('app').style.display='flex';
   var prefs=JSON.parse(localStorage.getItem('dm_prefs')||'{}');
-  if(prefs.large_text)document.documentElement.classList.add('large-text');
-  if(prefs.text_scale==='xl')document.documentElement.classList.add('xl-text');
+  if(prefs.text_scale==='xl'){document.documentElement.classList.add('xl-text');}
+  else if(prefs.large_text){document.documentElement.classList.add('large-text');}
   setLang(localStorage.getItem('dm_lang')||'en');
 });
 
