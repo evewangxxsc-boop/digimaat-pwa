@@ -161,7 +161,7 @@ button,a{touch-action:manipulation}
       <div class="intro-text" data-en="Enter your email address. We search known data breach databases to see if your information was compromised. Your email is never stored by us." data-nl="Voer uw e-mailadres in. Wij doorzoeken bekende datalek-databases. Uw e-mailadres wordt nooit door ons opgeslagen.">Enter your email address. We search known data breach databases to see if your information was compromised. Your email is never stored by us.</div>
       <div class="powered-badge">
         <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
-        Powered by BreachDirectory
+        Powered by XposedOrNot
       </div>
     </div>
 
@@ -312,7 +312,7 @@ function runCheck(){
   document.getElementById('result-area').innerHTML='';
 
   // XposedOrNot API — no key required
-  fetch('https://api.xposedornot.com/v1/check-email/'+encodeURIComponent(email))
+  fetch('https://api.xposedornot.com/v1/breach-analytics?email='+encodeURIComponent(email))
   .then(function(res){
     if(res.status===404){renderSafe(email);return null;}
     if(!res.ok){throw new Error('api_error');}
@@ -320,10 +320,11 @@ function runCheck(){
   })
   .then(function(data){
     if(!data)return;
-    if(!data.breaches||data.breaches.length===0){
+    var details=data.ExposedBreaches&&data.ExposedBreaches.breaches_details;
+    if(!details||details.length===0){
       renderSafe(email);
     }else{
-      renderBreaches(data.breaches, email, data.breaches.length);
+      renderBreaches(details, email, details.length);
     }
   })
   .catch(function(err){
@@ -378,8 +379,8 @@ function renderBreaches(sources, email, totalFound){
     var name=b.breach||b.domain||'Unknown';
     var domain=b.domain?'<span style="font-size:11px;color:var(--mu)">'+b.domain+'</span>':'';
     var date=b.xposed_date?'<span style="font-size:11px;color:var(--mu)"> · '+b.xposed_date+'</span>':'';
-    var types=Array.isArray(b.xposed_data)&&b.xposed_data.length
-      ?b.xposed_data
+    var types=(typeof b.xposed_data==='string'&&b.xposed_data.length)
+      ?b.xposed_data.split(';')
       :['Email'];
     html+='<div class="breach-item">'
       +'<div class="breach-ico"><svg viewBox="0 0 24 24"><path d="M12 3L4 7v5c0 4.418 3.582 8 8 8s8-3.582 8-8V7L12 3z"/>'
