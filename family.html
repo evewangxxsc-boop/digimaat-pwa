@@ -13,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Literata:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -411,6 +412,17 @@ html.xl-text .btag,html.xl-text .vh,html.xl-text .ferr,html.xl-text .powered-bad
 var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
+var db=firebase.firestore();
+
+// TOAST
+function showToast(msg,type){
+  var el=document.getElementById('fam-toast');
+  if(!el){el=document.createElement('div');el.id='fam-toast';el.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:700;padding:10px 20px;border-radius:20px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;z-index:999;font-family:Nunito,sans-serif;color:#fff';document.body.appendChild(el);}
+  el.textContent=msg;
+  el.style.background=type==='warn'?'#A32D2D':'#0F6E56';
+  el.style.opacity='1';
+  clearTimeout(el._t);el._t=setTimeout(function(){el.style.opacity='0';},3000);
+}
 
 // PER-USER STORAGE KEY
 var currentUID='';
@@ -425,6 +437,8 @@ auth.onAuthStateChanged(function(user){
   if(prefs.text_scale==='xl'){document.documentElement.classList.add('xl-text');}
   else if(prefs.large_text){document.documentElement.classList.add('large-text');}
   initPage();
+  if(currentRole==='guardian')loadGuardianMembers();
+  else loadMyGuardians();
 });
 
 // ── LANGUAGE ─────────────────────────────────────────────
@@ -725,41 +739,40 @@ function closeDetailModal(e){
 }
 
 // ── INVITE CODE GENERATION ────────────────────────────────
-var activeCode=null;
-var codeExpiry=null;
-
 function generateCode(){
-  // Generate 6-digit code
-  var code=Math.floor(100000+Math.random()*900000).toString();
-  var expiry=Date.now()+24*60*60*1000; // 24 hours
-  activeCode=code;
-  codeExpiry=expiry;
-  // Store so member can look it up
-  var codes=JSON.parse(localStorage.getItem(storageKey('dm_invite_codes'))||'[]');
-  codes.push({code:code,expiry:expiry,used:false});
-  localStorage.setItem(storageKey('dm_invite_codes'),JSON.stringify(codes));
-
-  var expiryStr=lang==='nl'?'Verloopt over 24 uur':'Expires in 24 hours';
-  var html='<div class="code-display">'
-    +'<div class="code-digits">'+code+'</div>'
-    +'<div class="code-expiry">'+expiryStr+'</div>'
-    +'</div>'
-    +'<div class="code-actions">'
-    +'<button class="btn-share" onclick="shareCode(\''+code+'\')">'
-    +'<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>'
-    +(lang==='nl'?'Delen via WhatsApp':'Share via WhatsApp')
-    +'</button>'
-    +'<button class="btn-new-code" onclick="generateCode()">'+(lang==='nl'?'Nieuwe code':'New code')+'</button>'
-    +'</div>';
-
-  document.getElementById('code-section').innerHTML=html;
-
-  // Switch to guardian view if on member tab
-  if(currentRole!=='guardian')switchRole('guardian');
-  // Scroll to invite card
-  setTimeout(function(){
-    document.querySelector('.invite-card').scrollIntoView({behavior:'smooth',block:'center'});
-  },200);
+  var code='';
+  for(var i=0;i<6;i++) code+=Math.floor(Math.random()*10);
+  db.collection('invites').doc(code).set({
+    createdBy: currentUID,
+    createdByEmail: auth.currentUser.email,
+    createdByName: auth.currentUser.displayName||'',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    expiresAt: new Date(Date.now()+24*60*60*1000),
+    used: false
+  }).then(function(){
+    var expiryStr=lang==='nl'?'Verloopt over 24 uur':'Expires in 24 hours';
+    var html='<div class="code-display">'
+      +'<div class="code-digits" id="invite-code">'+code+'</div>'
+      +'<div class="code-expiry" id="code-expiry">'+expiryStr+'</div>'
+      +'</div>'
+      +'<div class="code-actions">'
+      +'<button class="btn-share" onclick="shareCode(\''+code+'\')">'
+      +'<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>'
+      +(lang==='nl'?'Delen via WhatsApp':'Share via WhatsApp')
+      +'</button>'
+      +'<button class="btn-new-code" onclick="generateCode()">'+(lang==='nl'?'Nieuwe code':'New code')+'</button>'
+      +'</div>';
+    document.getElementById('code-section').innerHTML=html;
+    showToast(lang==='nl'?'Nieuwe code aangemaakt':'New code generated');
+    if(currentRole!=='guardian')switchRole('guardian');
+    setTimeout(function(){
+      var ic=document.querySelector('.invite-card');
+      if(ic)ic.scrollIntoView({behavior:'smooth',block:'center'});
+    },200);
+  }).catch(function(err){
+    console.error('Invite error:',err);
+    showToast(lang==='nl'?'Fout bij aanmaken code':'Error creating code','warn');
+  });
 }
 
 function shareCode(code){
@@ -809,37 +822,74 @@ function getEnteredCode(){
 }
 
 function verifyCode(){
-  var entered=getEnteredCode();
-  var codes=JSON.parse(localStorage.getItem(storageKey('dm_invite_codes'))||'[]');
-  var match=codes.find(function(c){
-    return c.code===entered&&!c.used&&c.expiry>Date.now();
-  });
-
-  var errEl=document.getElementById('code-error');
-  if(!match){
-    // Check if code exists but expired
-    var expired=codes.find(function(c){return c.code===entered&&c.expiry<=Date.now();});
-    errEl.textContent=expired
-      ?(lang==='nl'?'Deze code is verlopen. Vraag een nieuwe code aan.':'This code has expired. Please ask for a new code.')
-      :(lang==='nl'?'Ongeldige code. Controleer de cijfers en probeer opnieuw.':'Invalid code. Check the digits and try again.');
-    errEl.style.display='block';
+  var code='';
+  document.querySelectorAll('.code-inp').forEach(function(inp){code+=inp.value;});
+  code=code.trim();
+  if(code.length!==6){
+    showToast(lang==='nl'?'Voer alle 6 cijfers in':'Enter all 6 digits','warn');
     return;
   }
-
-  errEl.style.display='none';
-
-  // Mark code as used
-  match.used=true;
-  localStorage.setItem(storageKey('dm_invite_codes'),JSON.stringify(codes));
-
-  // Clear inputs
-  for(var i=0;i<6;i++){document.getElementById('ci'+i).value='';}
   document.getElementById('verify-btn').disabled=true;
 
-  // Show modal to name the guardian
-  document.getElementById('add-guardian-title').textContent=
-    lang==='nl'?'Verbinding geslaagd! 🎉':'Connection successful! 🎉';
-  document.getElementById('add-guardian-modal').classList.add('show');
+  db.collection('invites').doc(code).get().then(function(doc){
+    if(!doc.exists){
+      showToast(lang==='nl'?'Code niet gevonden':'Code not found','warn');
+      document.getElementById('verify-btn').disabled=false;
+      return;
+    }
+    var invite=doc.data();
+    if(invite.used){
+      showToast(lang==='nl'?'Code is al gebruikt':'Code already used','warn');
+      document.getElementById('verify-btn').disabled=false;
+      return;
+    }
+    if(invite.expiresAt&&invite.expiresAt.toDate&&invite.expiresAt.toDate()<new Date()){
+      showToast(lang==='nl'?'Code is verlopen':'Code has expired','warn');
+      document.getElementById('verify-btn').disabled=false;
+      return;
+    }
+    if(invite.createdBy===currentUID){
+      showToast(lang==='nl'?'U kunt uw eigen code niet gebruiken':'You cannot use your own code','warn');
+      document.getElementById('verify-btn').disabled=false;
+      return;
+    }
+    return db.collection('familyLinks').add({
+      elderlyUid: invite.createdBy,
+      elderlyEmail: invite.createdByEmail,
+      elderlyName: invite.createdByName,
+      guardianUid: currentUID,
+      guardianEmail: auth.currentUser.email,
+      guardianName: auth.currentUser.displayName||'',
+      permissions: {breach:true,scam:true,inbox:false},
+      linkedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      status: 'active'
+    }).then(function(){
+      return db.collection('invites').doc(code).update({used:true,usedBy:currentUID});
+    }).then(function(){
+      showToast(lang==='nl'?'Verbinding geslaagd!':'Connection successful!');
+      var guardians=JSON.parse(localStorage.getItem(storageKey('dm_my_guardians'))||'[]');
+      guardians.push({
+        id:'g_'+Date.now(),
+        name:invite.createdByName||invite.createdByEmail,
+        rel:'Family',
+        phone:'',
+        perms:{breach:true,scam:true,inbox:false},
+        isPrimary:guardians.length===0,
+        addedAt:Date.now(),
+        firestoreUid:invite.createdBy
+      });
+      localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(guardians));
+      document.querySelectorAll('.code-inp').forEach(function(inp){inp.value='';});
+      document.getElementById('verify-btn').disabled=false;
+      document.getElementById('add-guardian-title').textContent=
+        lang==='nl'?'Verbinding geslaagd! 🎉':'Connection successful! 🎉';
+      document.getElementById('add-guardian-modal').classList.add('show');
+    });
+  }).catch(function(err){
+    console.error('Verify error:',err);
+    showToast(lang==='nl'?'Fout bij verificatie':'Verification error','warn');
+    document.getElementById('verify-btn').disabled=false;
+  });
 }
 
 function closeAddGuardianModal(e){
@@ -955,9 +1005,106 @@ function removeGuardian(idx){
   var ok=confirm(lang==='nl'?'Weet u zeker dat u deze persoon wilt verwijderen?':'Are you sure you want to remove this person?');
   if(!ok)return;
   var guardians=getGuardians();
+  var removed=guardians[idx];
   guardians.splice(idx,1);
   localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(guardians));
+  if(removed&&removed.id&&db){
+    db.collection('familyLinks').doc(removed.id).update({status:'removed'}).catch(function(e){console.warn(e);});
+  }
   renderGuardiansList();
+}
+
+// ── FIRESTORE: LOAD GUARDIAN MEMBERS ─────────────────────
+function loadGuardianMembers(){
+  db.collection('familyLinks')
+    .where('guardianUid','==',currentUID)
+    .where('status','==','active')
+    .get().then(function(snapshot){
+      if(snapshot.empty){renderGuardianView([]);return;}
+      var members=[];
+      snapshot.forEach(function(doc){var d=doc.data();d._docId=doc.id;members.push(d);});
+      var promises=members.map(function(m){
+        return db.collection('safetyEvents')
+          .where('uid','==',m.elderlyUid)
+          .orderBy('timestamp','desc')
+          .limit(5)
+          .get().then(function(evSnap){
+            m.recentEvents=[];
+            evSnap.forEach(function(e){m.recentEvents.push(e.data());});
+            return m;
+          });
+      });
+      return Promise.all(promises);
+    }).then(function(members){
+      if(members)renderGuardianView(members);
+    }).catch(function(err){console.error('Load members error:',err);});
+}
+
+function renderGuardianView(members){
+  var el=document.getElementById('status-grid');
+  if(!el)return;
+  if(!members||members.length===0)return;
+  var html='';
+  members.forEach(function(m){
+    var initials=(m.elderlyName||m.elderlyEmail||'?').split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+    var lastEvent=m.recentEvents&&m.recentEvents[0];
+    var statusClass='sc-safe',statusText=lang==='nl'?'Veilig':'Safe',statusColor='var(--gd)';
+    if(lastEvent&&lastEvent.severity==='r'){statusClass='sc-alert';statusText=lang==='nl'?'Waarschuwing':'Warning';statusColor='var(--r)';}
+    var lastTime=lastEvent&&lastEvent.timestamp?timeAgo(lastEvent.timestamp.toDate()):'—';
+    html+='<div class="sc-swipe-wrap"><div class="status-card '+statusClass+'">'
+      +'<div class="sc-top">'
+      +'<div class="sc-ava" style="background:var(--gd)">'+initials+'</div>'
+      +'<div class="sc-badge" style="background:'+statusColor+'"></div>'
+      +'</div>'
+      +'<div class="sc-name">'+((m.elderlyName||m.elderlyEmail)||'?')+'</div>'
+      +'<div class="sc-rel">Family</div>'
+      +'<div class="sc-status" style="color:'+statusColor+'">'
+      +'<svg viewBox="0 0 24 24" style="stroke:'+statusColor+'"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>'
+      +statusText+'</div>'
+      +'<div class="sc-last">'+lastTime+'</div>'
+      +'</div></div>';
+  });
+  html+='<div class="add-card" onclick="generateCode()">'
+    +'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
+    +'<span>'+(lang==='nl'?'Familielid\ntoevoegen':'Add family\nmember')+'</span>'
+    +'</div>';
+  el.innerHTML=html;
+  initSeniorSwipe();
+}
+
+function timeAgo(date){
+  var diff=Math.floor((Date.now()-date.getTime())/60000);
+  if(diff<1)return lang==='nl'?'Zojuist':'Just now';
+  if(diff<60)return diff+' min '+(lang==='nl'?'geleden':'ago');
+  var hrs=Math.floor(diff/60);
+  if(hrs<24)return hrs+(lang==='nl'?' uur geleden':' hr ago');
+  return Math.floor(hrs/24)+(lang==='nl'?' dagen geleden':' days ago');
+}
+
+// ── FIRESTORE: LOAD MY GUARDIANS (MEMBER VIEW) ───────────
+function loadMyGuardians(){
+  db.collection('familyLinks')
+    .where('elderlyUid','==',currentUID)
+    .where('status','==','active')
+    .get().then(function(snapshot){
+      if(snapshot.empty)return;
+      var guardians=[];
+      snapshot.forEach(function(doc){var d=doc.data();d._docId=doc.id;guardians.push(d);});
+      var localGuardians=guardians.map(function(g){
+        return {
+          id:g._docId,
+          name:g.guardianName||g.guardianEmail,
+          rel:'Family',
+          phone:'',
+          perms:g.permissions||{breach:true,scam:true,inbox:false},
+          isPrimary:false,
+          addedAt:g.linkedAt?g.linkedAt.toDate().getTime():Date.now(),
+          firestoreUid:g.guardianUid
+        };
+      });
+      localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(localGuardians));
+      renderGuardiansList();
+    }).catch(function(err){console.error('Load guardians error:',err);});
 }
 </script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(function(){});}</script>
