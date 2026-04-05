@@ -514,8 +514,8 @@ function switchRole(role,silent){
   document.getElementById('role-member').classList.toggle('active',role==='member');
   document.getElementById('view-guardian').classList.toggle('active',role==='guardian');
   document.getElementById('view-member').classList.toggle('active',role==='member');
-  if(role==='guardian'){renderStatusGrid();}
-  else{renderGuardiansList();}
+  if(role==='guardian'){renderStatusGrid();loadGuardianMembers();}
+  else{renderGuardiansList();loadMyGuardians();}
 }
 
 // ── NOTIFICATION TOGGLES ──────────────────────────────────
@@ -852,24 +852,24 @@ function verifyCode(){
     }).then(function(){
       return db.collection('invites').doc(code).update({used:true,usedBy:currentUID});
     }).then(function(){
-      showToast(lang==='nl'?'Verbinding geslaagd!':'Connection successful!');
-      var guardians=JSON.parse(localStorage.getItem(storageKey('dm_my_guardians'))||'[]');
-      guardians.push({
+      var seniors=JSON.parse(localStorage.getItem(storageKey('dm_seniors'))||'[]');
+      seniors.push({
         id:'g_'+Date.now(),
         name:invite.createdByName||invite.createdByEmail,
         rel:'Family',
-        phone:'',
+        status:'safe',
+        lastActive:Date.now(),
+        activity:[],
         perms:{breach:true,scam:true,inbox:false},
-        isPrimary:guardians.length===0,
-        addedAt:Date.now(),
         firestoreUid:invite.createdBy
       });
-      localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(guardians));
+      localStorage.setItem(storageKey('dm_seniors'),JSON.stringify(seniors));
       document.querySelectorAll('.code-inp').forEach(function(inp){inp.value='';});
       document.getElementById('verify-btn').disabled=false;
-      document.getElementById('add-guardian-title').textContent=
-        lang==='nl'?'Verbinding geslaagd! 🎉':'Connection successful! 🎉';
-      document.getElementById('add-guardian-modal').classList.add('show');
+      showToast(lang==='nl'?'Verbinding geslaagd!':'Connection successful!');
+      renderStatusGrid();
+      renderRoleLabels();
+      loadGuardianMembers();
     });
   }).catch(function(err){
     console.error('Verify error:',err);
@@ -985,6 +985,12 @@ function togglePerm(idx,key,btn){
   var guardians=getGuardians();
   guardians[idx].perms[key]=!btn.classList.contains('off');
   localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(guardians));
+  var g=guardians[idx];
+  if(g.id&&db){
+    db.collection('familyLinks').doc(g.id).update({
+      permissions:g.perms
+    }).catch(function(err){console.warn('Perm sync failed:',err);});
+  }
 }
 
 function removeGuardian(idx){
@@ -1017,6 +1023,10 @@ function loadGuardianMembers(){
           .get().then(function(evSnap){
             m.recentEvents=[];
             evSnap.forEach(function(e){m.recentEvents.push(e.data());});
+            return m;
+          }).catch(function(err){
+            console.warn('safetyEvents query failed (index may be needed):',err);
+            m.recentEvents=[];
             return m;
           });
       });
