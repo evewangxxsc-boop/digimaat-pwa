@@ -627,6 +627,27 @@ auth.onAuthStateChanged(function(user){
   updateFamilySub();
   updateEmergencyBtn();
 
+  // Load primary guardian info from Firestore and update emergency button
+  db.collection('familyLinks')
+    .where('elderlyUid','==',currentUID)
+    .where('status','==','active')
+    .limit(1)
+    .get().then(function(snap){
+      if(snap.empty)return;
+      var link=snap.docs[0].data();
+      var name=link.guardianName||link.guardianEmail||'Guardian';
+      var phone=link.guardianPhone||'';
+      // Sync into dm_my_guardians so emergencyCall() can dial the number
+      var guardians=[];
+      try{guardians=JSON.parse(localStorage.getItem(storageKey('dm_my_guardians'))||'[]');}catch(e){}
+      var existing=guardians.find(function(g){return g.firestoreUid===link.guardianUid;});
+      if(existing){existing.name=name;existing.phone=phone;}
+      else{guardians.unshift({id:'fl_'+snap.docs[0].id,name:name,phone:phone,rel:'Family',isPrimary:true,firestoreUid:link.guardianUid});}
+      guardians.forEach(function(g,i){g.isPrimary=(i===0);});
+      localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(guardians));
+      updateEmergencyBtn();
+    }).catch(function(err){console.warn('Guardian load error:',err);});
+
   // Demo recent items if empty (first-time user experience)
   if(getRecent().length===0){
     addRecent('breach','LinkedIn breach detected','LinkedIn-lek gedetecteerd','r');

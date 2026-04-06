@@ -406,6 +406,24 @@ html.xl-text .btag,html.xl-text .vh,html.xl-text .ferr,html.xl-text .powered-bad
   </div>
 </div>
 
+<div class="modal-ov" id="guardian-phone-modal" onclick="closePhoneModal(event)">
+  <div class="add-modal-sheet">
+    <div class="add-modal-handle"></div>
+    <div class="add-modal-title" data-en="Connection successful! 🎉" data-nl="Verbinding geslaagd! 🎉">Connection successful! 🎉</div>
+    <p style="font-size:13px;color:var(--mu);line-height:1.5;margin-bottom:14px">
+      <span data-en="You are now watching over" data-nl="U waakt nu over">You are now watching over</span>
+      <strong id="guardian-phone-modal-name"></strong>.
+      <span data-en="Add your phone number so they can reach you easily in case of emergency." data-nl="Voeg uw telefoonnummer toe zodat zij u makkelijk kunnen bereiken in geval van nood.">Add your phone number so they can reach you easily in case of emergency.</span>
+    </p>
+    <label class="field-label" data-en="Your phone number" data-nl="Uw telefoonnummer">Your phone number</label>
+    <input class="field-inp" type="tel" id="guardian-phone-inp-new" placeholder="+31 6 12345678"/>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closePhoneModal()" data-en="Skip" data-nl="Overslaan">Skip</button>
+      <button class="modal-save" onclick="saveGuardianPhone()" data-en="Save" data-nl="Opslaan">Save</button>
+    </div>
+  </div>
+</div>
+
 <div class="page-loader" id="page-loader"><div class="pl-spin"></div></div>
 
 <script>
@@ -867,15 +885,47 @@ function verifyCode(){
       document.querySelectorAll('.code-inp').forEach(function(inp){inp.value='';});
       document.getElementById('verify-btn').disabled=false;
       showToast(lang==='nl'?'Verbinding geslaagd!':'Connection successful!');
-      renderStatusGrid();
-      renderRoleLabels();
-      loadGuardianMembers();
+      // Show modal for guardian to enter their phone number
+      document.getElementById('guardian-phone-modal-name').textContent=
+        invite.createdByName||invite.createdByEmail||'';
+      document.getElementById('guardian-phone-modal').classList.add('show');
+      window._pendingLinkElderlyUid=invite.createdBy;
     });
   }).catch(function(err){
     console.error('Verify error:',err);
     showToast(lang==='nl'?'Fout bij verificatie':'Verification error','warn');
     document.getElementById('verify-btn').disabled=false;
   });
+}
+
+function closePhoneModal(e){
+  if(e&&e.target!==document.getElementById('guardian-phone-modal'))return;
+  document.getElementById('guardian-phone-modal').classList.remove('show');
+  document.getElementById('guardian-phone-inp-new').value='';
+  renderStatusGrid();
+  renderRoleLabels();
+  loadGuardianMembers();
+}
+
+function saveGuardianPhone(){
+  var phone=document.getElementById('guardian-phone-inp-new').value.trim();
+  if(!phone){closePhoneModal();return;}
+  db.collection('familyLinks')
+    .where('guardianUid','==',currentUID)
+    .where('elderlyUid','==',window._pendingLinkElderlyUid)
+    .where('status','==','active')
+    .limit(1)
+    .get().then(function(snap){
+      if(!snap.empty){
+        return snap.docs[0].ref.update({guardianPhone:phone});
+      }
+    }).then(function(){
+      showToast(lang==='nl'?'Telefoonnummer opgeslagen':'Phone number saved');
+      closePhoneModal();
+    }).catch(function(err){
+      console.warn('Phone save error:',err);
+      closePhoneModal();
+    });
 }
 
 function closeAddGuardianModal(e){
