@@ -189,8 +189,8 @@ html.xl-text .btag,html.xl-text .vh,html.xl-text .ferr,html.xl-text .powered-bad
       <div class="slide-sub" data-en="Choose what feels most comfortable. You can change this any time in Settings." data-nl="Kies wat het prettigst leest. U kunt dit altijd wijzigen via Instellingen.">Choose what feels most comfortable. You can change this any time in Settings.</div>
       <div style="display:flex;flex-direction:column;gap:10px;width:100%;margin-top:8px">
         <div id="fs-normal" onclick="selectFontSize('normal')" style="background:#fff;border:2px solid var(--br);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:3px;touch-action:manipulation">
-          <div style="font-size:14px;font-weight:800" data-en="Normal" data-nl="Normaal">Normal</div>
-          <div style="font-size:12px;color:var(--mu)" data-en="Standard text size" data-nl="Standaard tekstgrootte">Standard text size</div>
+          <div style="font-size:12px;font-weight:800" data-en="Normal" data-nl="Normaal">Normal</div>
+          <div style="font-size:10px;color:var(--mu)" data-en="Standard text size" data-nl="Standaard tekstgrootte">Standard text size</div>
         </div>
         <div id="fs-large" onclick="selectFontSize('large')" style="background:#fff;border:2px solid var(--gd);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:3px;touch-action:manipulation">
           <div style="display:flex;align-items:center;gap:8px">
@@ -230,11 +230,11 @@ html.xl-text .btag,html.xl-text .vh,html.xl-text .ferr,html.xl-text .powered-bad
         <div class="form-card-title" data-en="Their details" data-nl="Hun gegevens">Their details</div>
         <div class="field">
           <label data-en="Full name" data-nl="Volledige naam">Full name</label>
-          <input type="text" id="ob-name" data-ph-en="e.g. Anna de Boer" data-ph-nl="bijv. Anna de Boer" placeholder="e.g. Anna de Boer"/>
+          <input type="text" id="ob-name" oninput="updateNav()" data-ph-en="e.g. Anna de Boer" data-ph-nl="bijv. Anna de Boer" placeholder="e.g. Anna de Boer"/>
         </div>
         <div class="field">
           <label data-en="Phone number" data-nl="Telefoonnummer">Phone number</label>
-          <input type="tel" id="ob-phone" placeholder="+31 6 12345678"/>
+          <input type="tel" id="ob-phone" oninput="updateNav()" placeholder="+31 6 12345678"/>
         </div>
         <div class="field">
           <label data-en="Relationship" data-nl="Relatie">Relationship</label>
