@@ -96,6 +96,10 @@ html.large-text .btn,html.large-text .social-btn,html.large-text .next-btn{font-
 html.large-text .feat-title,html.large-text .intro-title,html.large-text .field-label,html.large-text .dc-title,html.large-text .wtd-title,html.large-text .sec-lbl{font-size:15px}
 html.large-text .nb span{font-size:11px}
 html.large-text .btag,html.large-text .vh,html.large-text .ferr,html.large-text .powered-badge{font-size:13px}
+html.large-text #fs-normal div,html.xl-text #fs-normal div,
+html.large-text #fs-large div,html.xl-text #fs-large div,
+html.large-text #fs-large span,html.xl-text #fs-large span,
+html.large-text #fs-xl div,html.xl-text #fs-xl div{font-size:inherit!important}
 html.xl-text .app{font-size:19px}
 html.xl-text .slide-title,html.xl-text .page-title{font-size:23px}
 html.xl-text .slide-sub,html.xl-text .intro-text,html.xl-text .result-text,html.xl-text .step-text,html.xl-text .feat-sub,html.xl-text .strt,html.xl-text .strs,html.xl-text .breach-name,html.xl-text .faq-q-text,html.xl-text .faq-answer-text,html.xl-text .nr-title,html.xl-text .gc-name,html.xl-text .invite-sub,html.xl-text p,html.xl-text .fi{font-size:19px}
@@ -189,19 +193,19 @@ html.xl-text .btag,html.xl-text .vh,html.xl-text .ferr,html.xl-text .powered-bad
       <div class="slide-sub" data-en="Choose what feels most comfortable. You can change this any time in Settings." data-nl="Kies wat het prettigst leest. U kunt dit altijd wijzigen via Instellingen.">Choose what feels most comfortable. You can change this any time in Settings.</div>
       <div style="display:flex;flex-direction:column;gap:10px;width:100%;margin-top:8px">
         <div id="fs-normal" onclick="selectFontSize('normal')" style="background:#fff;border:2px solid var(--br);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:3px;touch-action:manipulation">
-          <div style="font-size:12px;font-weight:800" data-en="Normal" data-nl="Normaal">Normal</div>
-          <div style="font-size:10px;color:var(--mu)" data-en="Standard text size" data-nl="Standaard tekstgrootte">Standard text size</div>
+          <div style="font-size:11px;font-weight:800" data-en="Normal" data-nl="Normaal">Normal</div>
+          <div style="font-size:9px;color:var(--mu)" data-en="Standard text size" data-nl="Standaard tekstgrootte">Standard text size</div>
         </div>
         <div id="fs-large" onclick="selectFontSize('large')" style="background:#fff;border:2px solid var(--gd);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:3px;touch-action:manipulation">
           <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:18px;font-weight:800" data-en="Large" data-nl="Groot">Large</span>
+            <span style="font-size:20px;font-weight:800" data-en="Large" data-nl="Groot">Large</span>
             <span style="background:var(--gd);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px" data-en="Recommended" data-nl="Aanbevolen">Recommended</span>
           </div>
-          <div style="font-size:15px;color:var(--mu)" data-en="Comfortable for most people" data-nl="Prettig voor de meeste mensen">Comfortable for most people</div>
+          <div style="font-size:16px;color:var(--mu)" data-en="Comfortable for most people" data-nl="Prettig voor de meeste mensen">Comfortable for most people</div>
         </div>
         <div id="fs-xl" onclick="selectFontSize('xl')" style="background:#fff;border:2px solid var(--br);border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:3px;touch-action:manipulation">
-          <div style="font-size:22px;font-weight:800" data-en="Extra Large" data-nl="Extra groot">Extra Large</div>
-          <div style="font-size:17px;color:var(--mu)" data-en="For the easiest reading" data-nl="Voor het gemakkelijkste lezen">For the easiest reading</div>
+          <div style="font-size:26px;font-weight:800" data-en="Extra Large" data-nl="Extra groot">Extra Large</div>
+          <div style="font-size:20px;color:var(--mu)" data-en="For the easiest reading" data-nl="Voor het gemakkelijkste lezen">For the easiest reading</div>
         </div>
       </div>
     </div>
@@ -412,10 +416,7 @@ function updateNav(){
     nextLabel.textContent=lang==='nl'?'Volgende':'Next';
     document.getElementById('next-btn').style.display='flex';
   }else if(currentSlide===2){
-    var name=document.getElementById('ob-name')?document.getElementById('ob-name').value.trim():'';
-    nextLabel.textContent=name
-      ?(lang==='nl'?'Opslaan & doorgaan':'Save & continue')
-      :(lang==='nl'?'Overslaan':'Skip');
+    nextLabel.textContent=lang==='nl'?'Opslaan & doorgaan':'Save & continue';
     document.getElementById('next-btn').style.display='flex';
   }else{
     // Screen 4 — show two action buttons instead of next
