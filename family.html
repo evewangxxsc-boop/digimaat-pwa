@@ -1005,6 +1005,13 @@ function renderGuardiansList(){
       +'</div>'
       +'<button class="gc-remove" onclick="removeGuardian('+i+')">'+(lang==='nl'?'Verwijderen':'Remove')+'</button>'
       +'</div>'
+      +'<div style="padding:8px 14px;border-top:1px solid var(--br);display:flex;align-items:center;gap:8px">'
+      +'<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--mu);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>'
+      +'<input type="tel" placeholder="'+(lang==='nl'?'+31 6 ...':'+31 6 ...')+'" value="'+(g.phone||'')+'" '
+      +'oninput="updateGuardianPhone('+i+',this.value)" '
+      +'style="flex:1;border:1.5px solid var(--br);border-radius:8px;padding:8px 10px;font-size:13px;font-family:Nunito,sans-serif;outline:none;background:var(--bg)"'
+      +'/>'
+      +'</div>'
       +'<div class="gc-perms">'
       +'<div style="font-size:11px;font-weight:800;color:var(--mu);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">'+(lang==='nl'?'Wat zij mogen zien':'What they can see')+'</div>'
       +permRow(i,'breach',g.perms.breach,lang==='nl'?'Datalekken':'Breach alerts')
@@ -1021,6 +1028,23 @@ function permRow(guardianIdx,key,val,label){
     +'<div class="gc-perm-label">'+label+'</div>'
     +'<button class="tog'+(val?'':' off')+'" onclick="togglePerm('+guardianIdx+',\''+key+'\',this)"><div class="tok"></div></button>'
     +'</div>';
+}
+
+function updateGuardianPhone(idx,phone){
+  var guardians=getGuardians();
+  guardians[idx].phone=phone;
+  localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(guardians));
+  if(guardians[idx].isPrimary){
+    var family=JSON.parse(localStorage.getItem(storageKey('dm_family'))||'{}');
+    family.phone=phone;
+    family.name=guardians[idx].name;
+    localStorage.setItem(storageKey('dm_family'),JSON.stringify(family));
+  }
+  if(guardians[idx].id&&db){
+    db.collection('familyLinks').doc(guardians[idx].id).update({
+      guardianPhone:phone
+    }).catch(function(err){console.warn('Phone sync failed:',err);});
+  }
 }
 
 function setPrimaryGuardian(idx){
