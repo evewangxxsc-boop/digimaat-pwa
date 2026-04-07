@@ -13,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Literata:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -349,6 +350,7 @@ html.xl-text .btag,html.xl-text .vh,html.xl-text .ferr,html.xl-text .powered-bad
 var firebaseConfig={apiKey:"AIzaSyBZ83BoCVrUdnM_PGuvkl_j-DP3f-3XIIw",authDomain:"digimaat-e2885.firebaseapp.com",projectId:"digimaat-e2885",storageBucket:"digimaat-e2885.firebasestorage.app",messagingSenderId:"32711322292",appId:"1:32711322292:web:6cb53495a8b3eabfd845e1"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
+var db=firebase.firestore();
 
 // PER-USER STORAGE KEY
 var currentUID='';
@@ -453,8 +455,24 @@ function nextSlide(){
     var name=document.getElementById('ob-name').value.trim();
     var phone=document.getElementById('ob-phone').value.trim();
     var rel=document.getElementById('ob-rel').value.trim();
-    if(name&&phone){
-      localStorage.setItem(storageKey('dm_family'),JSON.stringify({name:name,phone:phone,rel:rel,city:''}));
+    if(name){
+      var familyData={name:name,phone:phone||'',rel:rel||'Family',city:''};
+      localStorage.setItem(storageKey('dm_family'),JSON.stringify(familyData));
+      // Also save to dm_my_guardians so family.html member view shows it
+      var guardians=JSON.parse(localStorage.getItem(storageKey('dm_my_guardians'))||'[]');
+      var exists=guardians.some(function(g){return g.name===name;});
+      if(!exists){
+        guardians.push({
+          id:'ob_'+Date.now(),
+          name:name,
+          rel:rel||'Family',
+          phone:phone||'',
+          perms:{breach:true,scam:true,inbox:false},
+          isPrimary:true,
+          addedAt:Date.now()
+        });
+        localStorage.setItem(storageKey('dm_my_guardians'),JSON.stringify(guardians));
+      }
     }
   }
   if(currentSlide<TOTAL-1){
