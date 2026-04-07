@@ -1,0 +1,9 @@
+{
+  "name": "DigiMaat",
+  "short_name": "DigiMaat",
+  "start_url": "/register.html",
+  "display": "standalone",
+  "background_color": "#F5F3EE",
+  "theme_color": "#0F6E56",
+  "icons": []
+}

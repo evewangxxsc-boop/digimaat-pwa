@@ -609,7 +609,7 @@ auth.onAuthStateChanged(function(user){
   var stored=JSON.parse(localStorage.getItem('dm_user')||'{}');
   if(!stored.name||stored.uid!==user.uid){
     stored={name:user.displayName||user.email.split('@')[0],email:user.email,photo:user.photoURL||'',uid:user.uid};
-    localStorage.setItem('dm_user',stored);
+    localStorage.setItem('dm_user',JSON.stringify(stored));
   }
   // Record last visit
   localStorage.setItem('dm_last_check',Date.now().toString());
