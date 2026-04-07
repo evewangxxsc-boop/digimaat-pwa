@@ -406,6 +406,23 @@ html.xl-text .btag,html.xl-text .vh,html.xl-text .ferr,html.xl-text .powered-bad
 
 </div><!-- /app -->
 
+<!-- CALL/WHATSAPP MODAL -->
+<div id="call-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:flex-end;justify-content:center" onclick="closeCallModal(event)">
+<style>#call-modal.show{display:flex!important}</style>
+  <div style="background:#fff;width:100%;max-width:390px;border-radius:20px 20px 0 0;padding:20px 20px calc(env(safe-area-inset-bottom,0px)+20px);display:flex;flex-direction:column;gap:10px">
+    <div style="width:36px;height:4px;background:#E0DDD6;border-radius:2px;margin:0 auto 8px"></div>
+    <button id="call-modal-name-call" onclick="callGuardian()" style="background:var(--g);color:#fff;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:10px">
+      <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.1 6.73a2 2 0 012-2.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.91 12a16 16 0 006.29 6.29l.62-.62a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      Call
+    </button>
+    <button id="call-modal-name-wa" onclick="whatsappGuardian()" style="background:#fff;color:var(--gd);border:2px solid var(--g);border-radius:14px;padding:16px;font-size:17px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:10px">
+      <svg viewBox="0 0 24 24" style="width:20px;height:20px;flex-shrink:0" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="var(--gd)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      WhatsApp
+    </button>
+    <button onclick="closeCallModal()" style="background:none;border:none;color:var(--mu);font-size:15px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;padding:8px;text-align:center" data-en="Cancel" data-nl="Annuleren">Cancel</button>
+  </div>
+</div>
+
 <!-- PAGE LOADER shown until Firebase confirms auth -->
 <div class="page-loader" id="page-loader">
   <div class="spin"></div>
@@ -545,8 +562,19 @@ function getPrimaryGuardian(){
 }
 
 // EMERGENCY BUTTON
-function updateEmergencyBtn(){
+function getEmergencyContact(){
   var g=getPrimaryGuardian();
+  if(g&&g.name)return g;
+  // Fallback to dm_family from onboarding
+  try{
+    var f=JSON.parse(localStorage.getItem(storageKey('dm_family'))||'null');
+    if(f&&f.name)return {name:f.name,phone:f.phone||''};
+  }catch(e){}
+  return null;
+}
+
+function updateEmergencyBtn(){
+  var g=getEmergencyContact();
   var btn=document.getElementById('emergency-btn');
   var nameEl=document.getElementById('eb-name');
   var hintEl=document.getElementById('eb-hint');
@@ -554,7 +582,6 @@ function updateEmergencyBtn(){
     btn.classList.remove('no-contact');
     nameEl.textContent=g.name;
     hintEl.textContent=g.phone?(lang==='nl'?'Tik om hulp te bellen':'Tap to call for help'):(lang==='nl'?'Geen nummer opgegeven':'No phone number added');
-    if(g.phone)btn.title=g.phone;
   }else{
     btn.classList.add('no-contact');
     nameEl.textContent=lang==='nl'?'Noodcontact instellen':'Set up emergency contact';
@@ -563,12 +590,34 @@ function updateEmergencyBtn(){
 }
 
 function emergencyCall(){
-  var g=getPrimaryGuardian();
+  var g=getEmergencyContact();
   if(g&&g.phone){
-    window.location.href='tel:'+g.phone.replace(/\s/g,'');
+    document.getElementById('call-modal-name-call').textContent=(lang==='nl'?'Bel ':'Call ')+g.name;
+    document.getElementById('call-modal-name-wa').textContent='WhatsApp '+g.name;
+    document.getElementById('call-modal').classList.add('show');
   }else{
     window.location.href='family.html';
   }
+}
+
+function callGuardian(){
+  var g=getEmergencyContact();
+  if(g&&g.phone)window.location.href='tel:'+g.phone.replace(/[^\d+]/g,'');
+  document.getElementById('call-modal').classList.remove('show');
+}
+
+function whatsappGuardian(){
+  var g=getEmergencyContact();
+  if(g&&g.phone){
+    var num=g.phone.replace(/[^\d+]/g,'').replace(/^\+/,'');
+    window.open('https://wa.me/'+num,'_blank');
+  }
+  document.getElementById('call-modal').classList.remove('show');
+}
+
+function closeCallModal(e){
+  if(!e||e.target===document.getElementById('call-modal'))
+    document.getElementById('call-modal').classList.remove('show');
 }
 function addRecent(type,title_en,title_nl,severity){
   var items=getRecent();
@@ -637,6 +686,7 @@ auth.onAuthStateChanged(function(user){
       var link=snap.docs[0].data();
       var name=link.guardianName||link.guardianEmail||'Guardian';
       var phone=link.guardianPhone||'';
+      if(!phone){try{var f=JSON.parse(localStorage.getItem(storageKey('dm_family'))||'null');if(f&&f.phone)phone=f.phone;}catch(e){}}
       // Sync into dm_my_guardians so emergencyCall() can dial the number
       var guardians=[];
       try{guardians=JSON.parse(localStorage.getItem(storageKey('dm_my_guardians'))||'[]');}catch(e){}
