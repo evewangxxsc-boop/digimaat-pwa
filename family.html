@@ -1014,9 +1014,7 @@ function renderGuardiansList(){
       +'</div>'
       +'<div class="gc-perms">'
       +'<div style="font-size:11px;font-weight:800;color:var(--mu);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px">'+(lang==='nl'?'Wat zij mogen zien':'What they can see')+'</div>'
-      +permRow(i,'breach',g.perms.breach,lang==='nl'?'Datalekken':'Breach alerts')
-      +permRow(i,'scam',g.perms.scam,lang==='nl'?'Scam checks':'Scam checks')
-      +permRow(i,'inbox',g.perms.inbox,lang==='nl'?'Inbox scans':'Inbox scans')
+      +function(){var perms=g.perms||g.permissions||{breach:true,scam:true,inbox:false};return permRow(i,'breach',perms.breach,lang==='nl'?'Datalekken':'Breach alerts')+permRow(i,'scam',perms.scam,lang==='nl'?'Scam checks':'Scam checks')+permRow(i,'inbox',perms.inbox,lang==='nl'?'Inbox scans':'Inbox scans');}()
       +'</div></div>';
   }).join('');
 
